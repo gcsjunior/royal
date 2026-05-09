@@ -85,7 +85,7 @@ tr:last-child td{border-bottom:none;}
 /* Desktop bracket - horizontal */
 .bwrap{background:#0d0d18;border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:28px 16px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .binner{display:inline-flex;align-items:stretch;min-width:900px;}
-.rnd{display:flex;flex-direction:column;justify-content:space-around;min-width:150px;padding:0 4px;}
+.rnd{display:flex;flex-direction:column;justify-content:space-around;min-width:150px;padding:0 4px;height:360px;}
 .rt{font-size:0.62rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.3);text-align:center;margin-bottom:12px;}
 .mt{display:flex;flex-direction:column;margin:4px 0;}
 .tm{padding:7px 11px;font-size:0.75rem;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px;}
@@ -613,7 +613,7 @@ function buildBracket(seeds,jogos){
   var c1R=svg([{d:'M20,44 L10,44 L10,88 L0,88',c:pc},{d:'M20,132 L10,132 L10,88 L0,88',c:pc},{d:'M20,220 L10,220 L10,264 L0,264',c:pc},{d:'M20,308 L10,308 L10,264 L0,264',c:pc}],H);
 
   var fin_html='<div class="fcol"><div class="rt">Grande Final</div><div class="fbox"><div style="font-size:1.4rem;margin-bottom:8px;">🏆</div>';
-  if(champ)fin_html+='<div style="font-size:0.84rem;font-weight:700;color:#fff;margin-bottom:4px;">'+champ+'</div><div style="font-size:0.68rem;color:rgba(255,255,255,0.4);">Campeão</div>';
+  if(champ)fin_html+='<div style="font-size:1.6rem;margin-bottom:4px;">'+flag(champ)+'</div><div style="font-size:1rem;font-weight:700;color:#fff;margin-bottom:4px;">'+pais(champ)+'</div><div style="font-size:0.68rem;color:rgba(255,255,255,0.4);">🏆 Campeão</div>';
   else fin_html+='<div style="font-size:0.72rem;color:rgba(255,255,255,0.3);">'+(fin[0]||'Semi 1')+'<br/><span style="opacity:0.4;">vs</span><br/>'+(fin[1]||'Semi 2')+'</div>';
   fin_html+='</div></div>';
 
