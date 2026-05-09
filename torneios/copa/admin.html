@@ -178,6 +178,38 @@ tr:last-child td{border-bottom:none;}
         <div style="font-size:0.7rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--tl);margin-bottom:6px;">Grupos após sorteio</div>
         <div class="grp-grid" id="grp-list"></div>
       </div>
+    <!-- FOTOS -->
+    <div id="tc-fotos" class="tc">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+        <div>
+          <div class="stitle">Pastas de Fotos</div>
+          <div style="font-size:0.84rem;color:var(--tl);margin-top:4px;">Links das pastas do Google Drive que aparecem na galeria</div>
+        </div>
+        <button class="btn bp" id="btnAddPasta">+ Adicionar Pasta</button>
+      </div>
+      <div id="lista-pastas"></div>
+      <div style="background:rgba(123,94,167,0.06);border:1px solid rgba(123,94,167,0.15);border-radius:12px;padding:14px 18px;margin-top:16px;font-size:0.82rem;color:var(--tl);">
+        💡 Adicione múltiplas pastas do Google Drive. As fotos de todas as pastas são combinadas automaticamente na galeria pública.
+      </div>
+    </div>
+
+    <!-- INTERESSE -->
+    <div id="tc-interesse" class="tc">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+        <div>
+          <div class="stitle">Interesse no Torneio</div>
+          <div style="font-size:0.84rem;color:var(--tl);margin-top:4px;" id="interesse-count">Carregando...</div>
+        </div>
+        <button class="btn bp" onclick="exportInteresse()">⬇ Exportar Excel</button>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;overflow-x:auto;">
+        <table>
+          <thead><tr><th>#</th><th>Nome</th><th>Sobrenome</th><th>WhatsApp</th><th>E-mail</th><th>Data</th></tr></thead>
+          <tbody id="tb-interesse"></tbody>
+        </table>
+      </div>
+    </div>
+
     </div>
 
   </div>
@@ -256,6 +288,25 @@ tr:last-child td{border-bottom:none;}
     </div>
   </div>
 </div>
+
+<!-- MODAL: Pasta de Fotos -->
+<div id="modal-pasta" class="modal"><div class="mc">
+  <div class="mt" id="modal-pasta-title">Pasta de Fotos</div>
+  <input type="hidden" id="pasta-idx"/>
+  <div class="fr">
+    <label>Nome da pasta</label>
+    <input type="text" id="pasta-nome" placeholder="Nome descritivo..."/>
+  </div>
+  <div class="fr">
+    <label>Link da pasta do Google Drive</label>
+    <input type="text" id="pasta-url" placeholder="https://drive.google.com/drive/folders/..."/>
+    <div style="font-size:0.74rem;color:var(--tl);margin-top:4px;">A pasta deve estar pública</div>
+  </div>
+  <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px;">
+    <button class="btn bg" onclick="closeM('modal-pasta')">Cancelar</button>
+    <button class="btn bp" id="btnSalvarPasta">Salvar</button>
+  </div>
+</div></div>
 
 <script>
 var SB = "https://vfrjqkwdxjvggzkfxfen.supabase.co";
@@ -892,7 +943,7 @@ async function loadPastas(){
     var r=await fetch(SB+"/rest/v1/fotos_pastas?select=*&order=created_at.asc",{headers:{"apikey":K,"Authorization":"Bearer "+(TOK||K)}});
     PASTAS_DB=await r.json();
     if(!Array.isArray(PASTAS_DB)||!PASTAS_DB.length){
-      el.innerHTML='<div style="text-align:center;padding:40px;color:var(--tl);">Nenhuma pasta cadastrada. Clique em "+ Adicionar Pasta".</div>';
+      el.innerHTML='<div style="text-align:center;padding:40px;color:var(--tl);">Nenhuma pasta cadastrada. Clique em &quot;+ Adicionar Pasta&quot;.</div>';
       return;
     }
     var html='';
@@ -912,7 +963,6 @@ async function loadPastas(){
     el.innerHTML='<div style="color:#dc2626;padding:20px;">Erro: '+e.message+'</div>';
   }
 }
-
 function editPastaBtn(btn){editPasta(btn.dataset.id,btn.dataset.nome,btn.dataset.fid);}
 function delPastaBtn(btn){delPasta(btn.dataset.id);}
 function editPasta(id,nome,folderId){
@@ -987,66 +1037,12 @@ function exportInteresse(){
     rows.push([i+1,p.nome,p.sobrenome,p.telefone,p.email,new Date(p.created_at).toLocaleString("pt-BR")]);
   });
   var csv=rows.map(function(r){return r.map(function(v){return '"'+String(v).replace(/"/g,'""')+'"';}).join(",");}).join("\n");
-  var blob=new Blob(["﻿"+csv],{type:"text/csv;charset=utf-8;"});
+  var blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"});
   var a=document.createElement("a");
   a.href=URL.createObjectURL(blob);
   a.download="interesse_torneio_"+(new Date().toLocaleDateString("pt-BR").replace(/\//g,"-"))+".csv";
   a.click();
 }
-
 </script>
 </body>
 </html>
-
-    <!-- FOTOS -->
-    <div id="tc-fotos" class="tc">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
-        <div>
-          <div class="stitle">Pastas de Fotos</div>
-          <div style="font-size:0.84rem;color:var(--tl);margin-top:4px;">Links das pastas do Google Drive que aparecem na galeria</div>
-        </div>
-        <button class="btn bp" id="btnAddPasta">+ Adicionar Pasta</button>
-      </div>
-      <div id="lista-pastas"></div>
-      <div style="background:rgba(123,94,167,0.06);border:1px solid rgba(123,94,167,0.15);border-radius:12px;padding:14px 18px;margin-top:16px;font-size:0.82rem;color:var(--tl);">
-        💡 Adicione múltiplas pastas do Google Drive. As fotos de todas as pastas são combinadas automaticamente na galeria pública.
-      </div>
-    </div>
-
-    <!-- INTERESSE -->
-    <div id="tc-interesse" class="tc">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
-        <div>
-          <div class="stitle">Interesse no Torneio</div>
-          <div style="font-size:0.84rem;color:var(--tl);margin-top:4px;" id="interesse-count">Carregando...</div>
-        </div>
-        <button class="btn bp" onclick="exportInteresse()">⬇ Exportar Excel</button>
-      </div>
-      <div class="card" style="padding:0;overflow:hidden;overflow-x:auto;">
-        <table>
-          <thead><tr><th>#</th><th>Nome</th><th>Sobrenome</th><th>WhatsApp</th><th>E-mail</th><th>Data</th></tr></thead>
-          <tbody id="tb-interesse"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- MODAL: Pasta de Fotos -->
-    <div id="modal-pasta" class="modal"><div class="mc">
-      <div class="mt" id="modal-pasta-title">Pasta de Fotos</div>
-      <input type="hidden" id="pasta-idx"/>
-      <div class="fr">
-        <label>Nome da pasta</label>
-        <input type="text" id="pasta-nome" placeholder="Nome descritivo..."/>
-      </div>
-      <div class="fr">
-        <label>Link da pasta do Google Drive</label>
-        <input type="text" id="pasta-url" placeholder="https://drive.google.com/drive/folders/..."/>
-        <div style="font-size:0.74rem;color:var(--tl);margin-top:4px;">A pasta deve estar pública</div>
-      </div>
-      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px;">
-        <button class="btn bg" onclick="closeM('modal-pasta')">Cancelar</button>
-        <button class="btn bp" id="btnSalvarPasta">Salvar</button>
-      </div>
-    </div></div>
-
-
