@@ -399,8 +399,8 @@ function renderGrupos(equipes,jogos,stats){
       var s=stats[n]||{j:0,v:0,d:0,gf:0,gc:0};
       return{nome:n,j:s.j,v:s.v,d:s.d,gf:s.gf,gc:s.gc,saldo:s.gf-s.gc,gm:s.gm||0,gs:s.gs||0};
     });
-    rows=sortRows(rows,gj);
     var gj=jogos.filter(function(j){return j.fase==='Grupo '+g;});
+    rows=sortRows(rows,gj);
 
     var card=document.createElement('div');
     card.className='gc';
