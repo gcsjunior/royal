@@ -1,0 +1,40 @@
+{
+  "rewrites": [
+    {
+      "source": "/torneios",
+      "destination": "/torneios/index.html"
+    },
+    {
+      "source": "/torneios/copa-das-nacoes",
+      "destination": "/torneios/copa-das-nacoes.html"
+    },
+    {
+      "source": "/torneios/copa/calendario",
+      "destination": "/torneios/copa/calendario.html"
+    },
+    {
+      "source": "/torneios/copa/resultados",
+      "destination": "/torneios/copa/resultados.html"
+    },
+    {
+      "source": "/torneios/copa/atletas",
+      "destination": "/torneios/copa/atletas.html"
+    },
+    {
+      "source": "/torneios/copa/patrocinadores",
+      "destination": "/torneios/copa/patrocinadores.html"
+    },
+    {
+      "source": "/torneios/copa/fotos",
+      "destination": "/torneios/copa/fotos.html"
+    },
+    {
+      "source": "/torneios/copa/admin",
+      "destination": "/torneios/copa/admin.html"
+    },
+    {
+      "source": "/torneios/copa/grupos",
+      "destination": "/torneios/copa/grupos.html"
+    }
+  ]
+}

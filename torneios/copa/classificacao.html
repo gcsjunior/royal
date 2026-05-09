@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Classificação — Copa das Nações 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{--r:#7B5EA7;--rd:#5a4080;--rl:#a886d8;--g:#2EBD9A;--o:#F26522;--dk:#1a1220;--tx:#2d2040;--tl:#8a7fa0;--cr:#FAF7F2;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:var(--cr);color:var(--tx);}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:16px 48px;background:rgba(10,10,20,0.96);backdrop-filter:blur(12px);border-bottom:1px solid rgba(123,94,167,0.15);}
+.nlt{font-family:'Nunito',sans-serif;font-size:0.9rem;font-weight:700;color:#fff;line-height:1.1;}
+.nlt span{display:block;font-size:0.6rem;color:rgba(255,255,255,0.4);letter-spacing:0.1em;text-transform:uppercase;}
+.nav-links{display:flex;gap:4px;}
+.nl2{text-decoration:none;color:rgba(255,255,255,0.5);font-size:0.78rem;padding:6px 12px;border-radius:100px;transition:all 0.2s;}
+.nl2:hover,.nl2.on{color:#fff;background:rgba(255,255,255,0.08);}
+.nl2.on{color:var(--rl);}
+.hero{padding:100px 48px 40px;background:#0a0a14;}
+.htag{font-size:0.68rem;text-transform:uppercase;letter-spacing:0.15em;color:rgba(255,255,255,0.35);margin-bottom:8px;}
+.htitle{font-family:'Nunito',sans-serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:900;color:#fff;}
+.hsub{font-size:0.88rem;color:rgba(255,255,255,0.4);margin-top:8px;}
+.content{padding:40px 48px 80px;}
+.card{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.06);}
+.gtab{padding:7px 16px;border-radius:100px;font-size:0.82rem;font-weight:500;cursor:pointer;border:none;background:rgba(123,94,167,0.1);color:var(--r);transition:all 0.2s;}
+.gtab.on{background:var(--r);color:#fff;}
+footer{background:var(--dk);color:rgba(255,255,255,0.3);padding:24px 48px;display:flex;align-items:center;justify-content:space-between;font-size:0.76rem;}
+table{width:100%;border-collapse:collapse;}
+th{padding:11px 14px;text-align:center;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--tl);border-bottom:2px solid rgba(0,0,0,0.07);background:rgba(123,94,167,0.03);}
+th:nth-child(2){text-align:left;}
+td{padding:11px 14px;text-align:center;border-bottom:1px solid rgba(0,0,0,0.04);font-size:0.88rem;}
+td:nth-child(2){text-align:left;font-weight:600;}
+tr:last-child td{border-bottom:none;}
+tr.classifica td{background:rgba(46,189,154,0.04);}
+tr.possivel td{background:rgba(242,101,34,0.03);}
+.badge-pos{width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;}
+@media(max-width:900px){nav{padding:14px 20px;}.nav-links{display:none;}.hero,.content{padding-left:20px;padding-right:20px;}footer{flex-direction:column;gap:10px;padding:20px;}}
+
+@media(max-width:768px){
+  nav{padding:12px 16px !important;}
+  .navlinks,.nav-links{display:none !important;}
+  .hero,.page-hero{padding:80px 16px 28px !important;}
+  .content{padding:24px 16px 60px !important;}
+  footer{flex-direction:column !important;gap:10px !important;padding:20px !important;text-align:center !important;}
+  .g2,.g3{grid-template-columns:1fr !important;}
+  .card{padding:16px !important;}
+  table{font-size:0.8rem;}
+  th,td{padding:8px 10px !important;}
+}
+</style>
+</head>
+<body>
+<nav>
+  <a href="../copa-das-nacoes.html" style="text-decoration:none;">
+    <div class="nlt">Copa das Nações<span>2026 · Royal Tênis Clube</span></div>
+  </a>
+  <div class="nav-links">
+    <a href="calendario.html" class="nl2">📅 Calendário</a>
+    <a href="resultados.html" class="nl2">🏆 Resultados</a>
+    <a href="classificacao.html" class="nl2 on">📊 Classificação</a>
+    <a href="atletas.html" class="nl2">👥 Atletas</a>
+    <a href="patrocinadores.html" class="nl2">🤝 Patroc.</a>
+  </div>
+  <a href="admin.html" style="background:var(--r);color:#fff;padding:7px 18px;border-radius:100px;text-decoration:none;font-size:0.78rem;font-weight:500;">⚙️ Admin</a>
+</nav>
+
+<div class="hero">
+  <div class="htag">Copa das Nações 2026</div>
+  <h1 class="htitle">📊 Classificação Geral</h1>
+  <p class="hsub">Ranking em tempo real · atualização automática a cada 60s</p>
+</div>
+
+<div class="content">
+  <!-- Critérios -->
+  <div style="background:rgba(123,94,167,0.06);border:1px solid rgba(123,94,167,0.15);border-radius:12px;padding:18px 20px;margin-bottom:28px;">
+    <div style="font-size:0.7rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--r);margin-bottom:10px;">Critérios de classificação</div>
+    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;">
+      <span style="background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:8px;padding:5px 12px;font-size:0.79rem;"><strong>1º</strong> Vitórias</span>
+      <span style="color:var(--tl);font-size:0.9rem;">›</span>
+      <span style="background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:8px;padding:5px 12px;font-size:0.79rem;"><strong>2º</strong> Saldo de gols</span>
+      <span style="color:var(--tl);font-size:0.9rem;">›</span>
+      <span style="background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:8px;padding:5px 12px;font-size:0.79rem;"><strong>3º</strong> Gols marcados</span>
+      <span style="color:var(--tl);font-size:0.9rem;">›</span>
+      <span style="background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:8px;padding:5px 12px;font-size:0.79rem;"><strong>4º</strong> Confronto direto</span>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;" id="tabs">
+    <button class="gtab on" data-g="geral">🌐 Geral (1º–24º)</button>
+    <button class="gtab" data-g="A">Grupo A</button>
+    <button class="gtab" data-g="B">Grupo B</button>
+    <button class="gtab" data-g="C">Grupo C</button>
+    <button class="gtab" data-g="D">Grupo D</button>
+    <button class="gtab" data-g="E">Grupo E</button>
+    <button class="gtab" data-g="F">Grupo F</button>
+  </div>
+
+  <div id="ct"><div style="text-align:center;padding:60px;color:var(--tl);">⏳ Carregando...</div></div>
+
+  <!-- Legenda -->
+  <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:16px;" id="legenda"></div>
+</div>
+
+<footer>
+  <div>Royal Tênis Clube · Copa das Nações 2026</div>
+  <div id="upd" style="font-size:0.72rem;opacity:0.6;"></div>
+  <a href="../copa-das-nacoes.html" style="color:rgba(255,255,255,0.3);text-decoration:none;">← Voltar</a>
+</footer>
+
+<script>
+var SB="https://vfrjqkwdxjvggzkfxfen.supabase.co";
+var K="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZmcmpxa3dkeGp2Z2d6a2Z4ZmVuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxODcyNDcsImV4cCI6MjA5Mzc2MzI0N30.PaHe7kQL8DUs8gmt9Wk47qaz6CX5PLfbeuhv3OIdigU";
+var GRP="geral", ALL_STATS={}, ALL_JOGOS=[];
+
+function h(){return{"apikey":K,"Authorization":"Bearer "+K};}
+
+document.querySelectorAll(".gtab").forEach(function(b){
+  b.addEventListener("click",function(){
+    GRP=b.dataset.g;
+    document.querySelectorAll(".gtab").forEach(function(x){x.classList.remove("on");});
+    b.classList.add("on");
+    render();
+  });
+});
+
+function calcStats(jogos){
+  var s={};
+  jogos.forEach(function(jogo){
+    var r=jogo.resultados&&jogo.resultados[0];
+    if(!r||(r.total_a===0&&r.total_b===0)) return;
+    var fase=jogo.fase;
+    if(!["Grupo A","Grupo B","Grupo C","Grupo D","Grupo E","Grupo F"].includes(fase)) return;
+    var grp=fase.replace("Grupo ","");
+    function ensure(nm){if(!s[nm])s[nm]={nome:nm,grupo:grp,j:0,v:0,d:0,gf:0,gc:0};}
+    ensure(jogo.equipe_a); ensure(jogo.equipe_b);
+    s[jogo.equipe_a].j++; s[jogo.equipe_b].j++;
+    // SF/SC = sets (games do set) marcados/contra
+    s[jogo.equipe_a].gf+=r.games_a||0; s[jogo.equipe_a].gc+=r.games_b||0;
+    s[jogo.equipe_b].gf+=r.games_b||0; s[jogo.equipe_b].gc+=r.games_a||0;
+    // Vitória = quem venceu o set (total_a=1 ou total_b=1)
+    if(r.total_a>r.total_b){s[jogo.equipe_a].v++;s[jogo.equipe_b].d++;}
+    else if(r.total_b>r.total_a){s[jogo.equipe_b].v++;s[jogo.equipe_a].d++;}
+  });
+  return s;
+}
+
+function sortTeams(list,jogos){
+  return list.sort(function(a,b){
+    if(b.v!==a.v) return b.v-a.v;
+    var sa=a.gf-a.gc, sb=b.gf-b.gc;
+    if(sb!==sa) return sb-sa;
+    if(b.gf!==a.gf) return b.gf-a.gf;
+    // confronto direto
+    var jogo=jogos.find(function(j){return(j.equipe_a===a.nome&&j.equipe_b===b.nome)||(j.equipe_a===b.nome&&j.equipe_b===a.nome);});
+    if(jogo&&jogo.resultados&&jogo.resultados[0]){
+      var r=jogo.resultados[0];
+      var ga=jogo.equipe_a===a.nome?r.total_a:r.total_b;
+      var gb=jogo.equipe_a===b.nome?r.total_a:r.total_b;
+      if(ga!==gb) return gb-ga;
+    }
+    return 0;
+  });
+}
+
+function render(){
+  var ct=document.getElementById("ct");
+  var stats=ALL_STATS;
+  if(Object.keys(stats).length===0){
+    ct.innerHTML="<div style='text-align:center;padding:60px;color:var(--tl);'><div style='font-size:2.5rem;margin-bottom:12px;'>🏆</div>Nenhuma partida com resultado ainda.<br><small style='opacity:0.6;'>Os rankings aparecem assim que os jogos começarem.</small></div>";
+    document.getElementById("legenda").innerHTML="";
+    return;
+  }
+  var list=GRP==="geral"?Object.values(stats):Object.values(stats).filter(function(t){return t.grupo===GRP;});
+  var sorted=sortTeams(list.slice(),ALL_JOGOS);
+  var isGeral=GRP==="geral";
+
+  var html="<div class='card'><table><thead><tr>"+
+    "<th style='width:40px;text-align:center;'>#</th>"+
+    "<th style='text-align:left;'>Equipe</th>"+
+    (isGeral?"<th>Grupo</th>":"")+
+    "<th title='Jogos'>J</th><th title='Vitórias' style='color:#1a9b7c;'>V</th><th title='Derrotas' style='color:#dc2626;'>D</th>"+
+    "<th title='Sets Feitos'>SF</th><th title='Sets Contra'>SC</th><th title='Saldo de Sets'>Saldo</th><th>Situação</th>"+
+    "</tr></thead><tbody>";
+
+  sorted.forEach(function(t,i){
+    var pos=i+1;
+    var saldo=t.gf-t.gc;
+    var pb="";
+    if(pos===1) pb="<span class='badge-pos' style='background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#fff;'>1</span>";
+    else if(pos===2) pb="<span class='badge-pos' style='background:linear-gradient(135deg,#9ca3af,#6b7280);color:#fff;'>2</span>";
+    else if(pos===3) pb="<span class='badge-pos' style='background:linear-gradient(135deg,#cd7c2c,#b45309);color:#fff;'>3</span>";
+    else pb="<span style='font-size:0.82rem;color:var(--tl);font-weight:500;'>"+pos+"</span>";
+
+    var sit="",rowcls="";
+    if(isGeral){
+      if(pos<=12){sit="<span style='background:rgba(46,189,154,0.15);color:#1a9b7c;padding:3px 8px;border-radius:6px;font-size:0.7rem;font-weight:600;'>✓ Oitavas</span>";rowcls="classifica";}
+      else{sit="<span style='background:rgba(220,38,38,0.1);color:#dc2626;padding:3px 8px;border-radius:6px;font-size:0.7rem;'>✗ Eliminado</span>";}
+    } else {
+      if(pos<=2){sit="<span style='background:rgba(46,189,154,0.15);color:#1a9b7c;padding:3px 8px;border-radius:6px;font-size:0.7rem;font-weight:600;'>✓ Classifica</span>";rowcls="classifica";}
+      else if(pos===3){sit="<span style='background:rgba(242,101,34,0.12);color:#c44e18;padding:3px 8px;border-radius:6px;font-size:0.7rem;'>🔶 Disputa vaga</span>";rowcls="possivel";}
+      else{sit="<span style='background:rgba(220,38,38,0.1);color:#dc2626;padding:3px 8px;border-radius:6px;font-size:0.7rem;'>✗ Eliminado</span>";}
+    }
+
+    html+="<tr class='"+rowcls+"'>"+
+      "<td>"+pb+"</td>"+
+      "<td>"+t.nome+"</td>"+
+      (isGeral?"<td><span style='background:rgba(123,94,167,0.1);color:var(--r);padding:2px 8px;border-radius:5px;font-size:0.74rem;font-weight:600;'>G"+t.grupo+"</span></td>":"")+
+      "<td style='color:var(--tl);'>"+t.j+"</td>"+
+      "<td style='font-weight:700;color:#1a9b7c;'>"+t.v+"</td>"+
+      "<td style='color:#dc2626;'>"+t.d+"</td>"+
+      "<td>"+t.gf+"</td><td>"+t.gc+"</td>"+
+      "<td style='font-weight:700;color:"+(saldo>0?"#1a9b7c":saldo<0?"#dc2626":"var(--tx)")+"'>"+(saldo>0?"+":"")+saldo+"</td>"+
+      "<td>"+sit+"</td>"+
+      "</tr>";
+  });
+
+  html+="</tbody></table></div>";
+  ct.innerHTML=html;
+
+  document.getElementById("legenda").innerHTML=
+    "<div style='display:flex;align-items:center;gap:6px;font-size:0.76rem;color:var(--tl);'><div style='width:12px;height:4px;background:#2EBD9A;border-radius:2px;'></div>"+(isGeral?"Top 12 avançam para oitavas":"Top 2 classificam diretamente")+"</div>"+
+    (!isGeral?"<div style='display:flex;align-items:center;gap:6px;font-size:0.76rem;color:var(--tl);'><div style='width:12px;height:4px;background:#F26522;border-radius:2px;'></div>3º disputa vaga como melhor terceiro</div>":"");
+
+  document.getElementById("upd").textContent="Atualizado às "+new Date().toLocaleTimeString("pt-BR");
+}
+
+async function load(){
+  try{
+    var r=await fetch(SB+"/rest/v1/jogos?select=*,resultados(*)&order=data_hora.asc",{headers:h()});
+    ALL_JOGOS=await r.json();
+    if(!Array.isArray(ALL_JOGOS)) ALL_JOGOS=[];
+    ALL_STATS=calcStats(ALL_JOGOS);
+    render();
+  }catch(e){
+    document.getElementById("ct").innerHTML="<div style='text-align:center;padding:60px;color:var(--tl);'>Erro: "+e.message+"</div>";
+  }
+}
+load();
+setInterval(load,60000);
+</script>
+</body>
+</html>

@@ -6,7 +6,7 @@
   <title>Torneios — Royal Tênis Clube</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
   <style>
     :root{--royal:#7B5EA7;--royal-dark:#5a4080;--royal-light:#a886d8;--green:#2EBD9A;--orange:#F26522;--cream:#FAF7F2;--dark:#1a1220;--mid:#3d2f52;--text:#2d2040;--text-light:#8a7fa0;}
     *{margin:0;padding:0;box-sizing:border-box;}
@@ -14,16 +14,16 @@
     nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:20px 60px;background:rgba(250,247,242,0.92);backdrop-filter:blur(12px);border-bottom:1px solid rgba(123,94,167,0.1);}
     .nav-logo{display:flex;align-items:center;gap:12px;text-decoration:none;}
     .nav-logo-icon{width:44px;height:44px;}
-    .nav-logo-text{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;color:var(--royal);line-height:1.1;}
+    .nav-logo-text{font-family:'Nunito',sans-serif;font-size:1.05rem;font-weight:700;color:var(--royal);line-height:1.1;}
     .nav-logo-text span{display:block;font-size:0.68rem;font-weight:400;color:var(--text-light);font-family:'DM Sans',sans-serif;letter-spacing:0.1em;text-transform:uppercase;}
     .nav-back{display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--text);font-size:0.88rem;font-weight:500;transition:color 0.2s;}
     .nav-back:hover{color:var(--royal);}
-    .nav-cta{background:var(--royal);color:#fff;padding:10px 24px;border-radius:100px;text-decoration:none;font-size:0.85rem;font-weight:500;transition:background 0.2s;}
+    .nav-cta{background:var(--royal);color:#fff;padding:9px 22px;border-radius:100px;text-decoration:none;font-size:0.82rem;font-weight:500;transition:background 0.2s;}
     .nav-cta:hover{background:var(--royal-dark);}
 
     .hero{padding:140px 60px 80px;background:linear-gradient(135deg,var(--cream) 0%,#ede5f7 60%,var(--cream) 100%);}
     .hero-tag{display:inline-block;font-size:0.75rem;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--royal);margin-bottom:14px;}
-    .hero-title{font-family:'Playfair Display',serif;font-size:clamp(2.5rem,5vw,4rem);font-weight:900;color:var(--dark);line-height:1;margin-bottom:16px;}
+    .hero-title{font-family:'Nunito',sans-serif;font-size:clamp(2.5rem,5vw,4rem);font-weight:900;color:var(--dark);line-height:1;margin-bottom:16px;}
     .hero-sub{font-size:1rem;color:var(--text-light);font-weight:300;max-width:500px;}
 
     .torneios-grid{padding:60px 60px 100px;display:grid;grid-template-columns:repeat(3,1fr);gap:28px;}
@@ -36,17 +36,29 @@
     .card-body{padding:28px;flex:1;display:flex;flex-direction:column;gap:8px;}
     .card-badge{display:inline-block;padding:4px 12px;border-radius:100px;font-size:0.72rem;font-weight:500;background:rgba(123,94,167,0.1);color:var(--royal);text-transform:uppercase;letter-spacing:0.08em;width:fit-content;}
     .card-badge.active{background:rgba(46,189,154,0.15);color:#1a9b7c;}
-    .card-title{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--dark);}
+    .card-title{font-family:'Nunito',sans-serif;font-size:1.3rem;font-weight:700;color:var(--dark);}
     .card-desc{font-size:0.86rem;color:var(--text-light);line-height:1.6;}
     .card-link{margin-top:auto;padding-top:16px;display:flex;align-items:center;gap:6px;font-size:0.85rem;font-weight:500;color:var(--royal);}
 
     footer{background:var(--dark);color:rgba(255,255,255,0.35);padding:36px 60px;display:flex;align-items:center;justify-content:space-between;font-size:0.8rem;}
     .fl{display:flex;align-items:center;gap:12px;}
-    .fbrand{font-family:'Playfair Display',serif;color:rgba(255,255,255,0.55);font-size:0.92rem;}
+    .fbrand{font-family:'Nunito',sans-serif;color:rgba(255,255,255,0.55);font-size:0.92rem;}
 
     @media(max-width:1024px){nav{padding:18px 24px;}.torneios-grid{grid-template-columns:1fr 1fr;padding:40px 28px 80px;}.hero{padding:120px 28px 60px;}footer{flex-direction:column;gap:16px;padding:28px;}}
     @media(max-width:600px){.torneios-grid{grid-template-columns:1fr;}}
-  </style>
+  
+@media(max-width:768px){
+  nav{padding:12px 16px !important;}
+  .navlinks,.nav-links{display:none !important;}
+  .hero,.page-hero{padding:80px 16px 28px !important;}
+  .content{padding:24px 16px 60px !important;}
+  footer{flex-direction:column !important;gap:10px !important;padding:20px !important;text-align:center !important;}
+  .g2,.g3{grid-template-columns:1fr !important;}
+  .card{padding:16px !important;}
+  table{font-size:0.8rem;}
+  th,td{padding:8px 10px !important;}
+}
+</style>
 </head>
 <body>
 
