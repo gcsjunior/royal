@@ -250,10 +250,24 @@ async function load(){
   try{
     var r1=await fetch(SB+'/rest/v1/equipes?select=*&order=grupo.asc,created_at.asc',{headers:h()});
     var r2=await fetch(SB+'/rest/v1/jogos?select=*,resultados(*),sorteio_duplas(*)&order=data_hora.asc',{headers:h()});
+    var r3=await fetch(SB+'/rest/v1/resultados?select=*',{headers:h()});
     var equipes=await r1.json();
     var jogos=await r2.json();
+    var todosResultados=await r3.json();
     if(!Array.isArray(equipes))equipes=[];
     if(!Array.isArray(jogos))jogos=[];
+    if(!Array.isArray(todosResultados))todosResultados=[];
+    // Merge: garantir que todos os jogos tenham resultados corretos do banco
+    var resMap={};
+    todosResultados.forEach(function(r){
+      if(!resMap[r.jogo_id])resMap[r.jogo_id]=[];
+      resMap[r.jogo_id].push(r);
+    });
+    jogos.forEach(function(j){
+      if(resMap[j.id]&&resMap[j.id].length>0){
+        j.resultados=resMap[j.id];
+      }
+    });
 
     var sorted=equipes.some(function(e){return e.grupo;});
     ALL_JOGOS=jogos;
