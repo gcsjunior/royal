@@ -178,6 +178,8 @@ tr:last-child td{border-bottom:none;}
         <div style="font-size:0.7rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--tl);margin-bottom:6px;">Grupos após sorteio</div>
         <div class="grp-grid" id="grp-list"></div>
       </div>
+    </div>
+
     <!-- FOTOS -->
     <div id="tc-fotos" class="tc">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
@@ -293,15 +295,9 @@ tr:last-child td{border-bottom:none;}
 <div id="modal-pasta" class="modal"><div class="mc">
   <div class="mt" id="modal-pasta-title">Pasta de Fotos</div>
   <input type="hidden" id="pasta-idx"/>
-  <div class="fr">
-    <label>Nome da pasta</label>
-    <input type="text" id="pasta-nome" placeholder="Nome descritivo..."/>
-  </div>
-  <div class="fr">
-    <label>Link da pasta do Google Drive</label>
-    <input type="text" id="pasta-url" placeholder="https://drive.google.com/drive/folders/..."/>
-    <div style="font-size:0.74rem;color:var(--tl);margin-top:4px;">A pasta deve estar pública</div>
-  </div>
+  <div class="fr"><label>Nome da pasta</label><input type="text" id="pasta-nome" placeholder="Nome descritivo..."/></div>
+  <div class="fr"><label>Link da pasta do Google Drive</label><input type="text" id="pasta-url" placeholder="https://drive.google.com/drive/folders/..."/>
+    <div style="font-size:0.74rem;color:var(--tl);margin-top:4px;">A pasta deve estar pública</div></div>
   <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px;">
     <button class="btn bg" onclick="closeM('modal-pasta')">Cancelar</button>
     <button class="btn bp" id="btnSalvarPasta">Salvar</button>
@@ -930,24 +926,19 @@ document.getElementById("btnSortearDuplas").addEventListener("click",async funct
 });
 
 
-// ── FOTOS PASTAS ──────────────────────────────────────
+// ── FOTOS & INTERESSE ─────────────────────────────────
 document.getElementById("tab-fotos").addEventListener("click",function(){ showTab("fotos"); });
 document.getElementById("tab-interesse").addEventListener("click",function(){ showTab("interesse"); });
-var PASTAS_DB=[];
+var PASTAS_DB=[], INTERESSE_DATA=[];
 
 async function loadPastas(){
-  var el=document.getElementById("lista-pastas");
-  if(!el)return;
+  var el=document.getElementById("lista-pastas"); if(!el)return;
   el.innerHTML='<div style="text-align:center;padding:20px;color:var(--tl);">⏳ Carregando...</div>';
   try{
     var r=await fetch(SB+"/rest/v1/fotos_pastas?select=*&order=created_at.asc",{headers:{"apikey":K,"Authorization":"Bearer "+(TOK||K)}});
     PASTAS_DB=await r.json();
-    if(!Array.isArray(PASTAS_DB)||!PASTAS_DB.length){
-      el.innerHTML='<div style="text-align:center;padding:40px;color:var(--tl);">Nenhuma pasta cadastrada. Clique em &quot;+ Adicionar Pasta&quot;.</div>';
-      return;
-    }
-    var html='';
-    PASTAS_DB.forEach(function(p){
+    if(!Array.isArray(PASTAS_DB)||!PASTAS_DB.length){ el.innerHTML='<div style="text-align:center;padding:40px;color:var(--tl);">Nenhuma pasta. Clique em &quot;+ Adicionar Pasta&quot;.</div>'; return; }
+    var html=''; PASTAS_DB.forEach(function(p){
       var link='https://drive.google.com/drive/folders/'+p.folder_id;
       html+='<div class="card" style="margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">'+
         '<div style="flex:1;min-width:0;"><div style="font-weight:600;">'+p.nome+'</div>'+
@@ -957,91 +948,53 @@ async function loadPastas(){
         '<button class="btn bg" style="padding:5px 12px;font-size:0.76rem;" data-id="'+p.id+'" data-nome="'+p.nome+'" data-fid="'+p.folder_id+'" onclick="editPastaBtn(this)">✏</button>'+
         '<button class="btn bd" style="padding:5px 12px;font-size:0.76rem;" data-id="'+p.id+'" onclick="delPastaBtn(this)">✕</button>'+
         '</div></div>';
-    });
-    el.innerHTML=html;
-  }catch(e){
-    el.innerHTML='<div style="color:#dc2626;padding:20px;">Erro: '+e.message+'</div>';
-  }
+    }); el.innerHTML=html;
+  }catch(e){ el.innerHTML='<div style="color:#dc2626;padding:20px;">Erro: '+e.message+'</div>'; }
 }
-function editPastaBtn(btn){editPasta(btn.dataset.id,btn.dataset.nome,btn.dataset.fid);}
-function delPastaBtn(btn){delPasta(btn.dataset.id);}
-function editPasta(id,nome,folderId){
+function editPastaBtn(b){editPasta(b.dataset.id,b.dataset.nome,b.dataset.fid);}
+function delPastaBtn(b){delPasta(b.dataset.id);}
+function editPasta(id,nome,fid){
   document.getElementById("pasta-idx").value=id;
   document.getElementById("pasta-nome").value=nome;
-  document.getElementById("pasta-url").value='https://drive.google.com/drive/folders/'+folderId;
+  document.getElementById("pasta-url").value='https://drive.google.com/drive/folders/'+fid;
   document.getElementById("modal-pasta-title").textContent="Editar Pasta";
   openM("modal-pasta");
 }
-async function delPasta(id){
-  if(!confirm("Remover esta pasta?"))return;
-  await fetch(SB+"/rest/v1/fotos_pastas?id=eq."+id,{method:"DELETE",headers:h()});
-  loadPastas();
-}
+async function delPasta(id){ if(!confirm("Remover?"))return; await fetch(SB+"/rest/v1/fotos_pastas?id=eq."+id,{method:"DELETE",headers:h()}); loadPastas(); }
 document.addEventListener("click",function(e){
-  if(e.target&&e.target.id==="btnAddPasta"){
-    document.getElementById("pasta-idx").value="";
-    document.getElementById("pasta-nome").value="";
-    document.getElementById("pasta-url").value="";
-    document.getElementById("modal-pasta-title").textContent="Adicionar Pasta";
-    openM("modal-pasta");
-  }
+  if(e.target&&e.target.id==="btnAddPasta"){ document.getElementById("pasta-idx").value=""; document.getElementById("pasta-nome").value=""; document.getElementById("pasta-url").value=""; document.getElementById("modal-pasta-title").textContent="Adicionar Pasta"; openM("modal-pasta"); }
   if(e.target&&e.target.id==="btnSalvarPasta"){
-    var nome=document.getElementById("pasta-nome").value.trim();
-    var url=document.getElementById("pasta-url").value.trim();
+    var nome=document.getElementById("pasta-nome").value.trim(), url=document.getElementById("pasta-url").value.trim();
     if(!nome||!url){alert("Preencha nome e URL.");return;}
-    var m=url.match(/folders\/([^?/]+)/);
-    var fid=m?m[1]:url;
-    var idx=document.getElementById("pasta-idx").value;
+    var m=url.match(/folders\/([^?/]+)/), fid=m?m[1]:url, idx=document.getElementById("pasta-idx").value;
     var body={nome:nome,folder_id:fid};
-    var req=idx?
-      fetch(SB+"/rest/v1/fotos_pastas?id=eq."+idx,{method:"PATCH",headers:h(),body:JSON.stringify(body)}):
-      fetch(SB+"/rest/v1/fotos_pastas",{method:"POST",headers:h(),body:JSON.stringify(body)});
-    req.then(function(){closeM("modal-pasta");loadPastas();});
+    (idx?fetch(SB+"/rest/v1/fotos_pastas?id=eq."+idx,{method:"PATCH",headers:h(),body:JSON.stringify(body)}):fetch(SB+"/rest/v1/fotos_pastas",{method:"POST",headers:h(),body:JSON.stringify(body)})).then(function(){closeM("modal-pasta");loadPastas();});
   }
 });
 
-// ── INTERESSE ─────────────────────────────────────────
-var INTERESSE_DATA=[];
 async function loadInteresse(){
-  var tb=document.getElementById("tb-interesse");
-  var ct=document.getElementById("interesse-count");
-  if(!tb)return;
+  var tb=document.getElementById("tb-interesse"), ct=document.getElementById("interesse-count"); if(!tb)return;
   try{
     var r=await fetch(SB+"/rest/v1/interesse_torneio?select=*&order=created_at.desc",{headers:{"apikey":K,"Authorization":"Bearer "+(TOK||K)}});
     INTERESSE_DATA=await r.json();
-    if(!Array.isArray(INTERESSE_DATA)||!INTERESSE_DATA.length){
-      tb.innerHTML="<tr><td colspan='6' style='text-align:center;padding:30px;color:var(--tl);'>Nenhum interesse registrado ainda.</td></tr>";
-      if(ct)ct.textContent="0 registros";
-      return;
-    }
+    if(!Array.isArray(INTERESSE_DATA)||!INTERESSE_DATA.length){ tb.innerHTML="<tr><td colspan='6' style='text-align:center;padding:30px;color:var(--tl);'>Nenhum registro.</td></tr>"; if(ct)ct.textContent="0 registros"; return; }
     if(ct)ct.textContent=INTERESSE_DATA.length+" registro"+(INTERESSE_DATA.length!==1?"s":"");
     tb.innerHTML=INTERESSE_DATA.map(function(p,i){
       var dt=new Date(p.created_at).toLocaleString("pt-BR");
-      return "<tr>"+
-        "<td style='color:var(--tl);'>"+(i+1)+"</td>"+
-        "<td style='font-weight:500;'>"+p.nome+"</td>"+
-        "<td>"+p.sobrenome+"</td>"+
+      return "<tr><td style='color:var(--tl);'>"+(i+1)+"</td><td style='font-weight:500;'>"+p.nome+"</td><td>"+p.sobrenome+"</td>"+
         "<td><a href='https://wa.me/55"+p.telefone.replace(/\D/g,"")+"' target='_blank' style='color:var(--g);text-decoration:none;'>"+p.telefone+"</a></td>"+
         "<td><a href='mailto:"+p.email+"' style='color:var(--r);text-decoration:none;'>"+p.email+"</a></td>"+
-        "<td style='color:var(--tl);font-size:0.8rem;'>"+dt+"</td>"+
-      "</tr>";
+        "<td style='color:var(--tl);font-size:0.8rem;'>"+dt+"</td></tr>";
     }).join("");
-  }catch(e){
-    if(tb)tb.innerHTML="<tr><td colspan='6' style='color:#dc2626;padding:20px;'>Erro: "+e.message+"</td></tr>";
-  }
+  }catch(e){ if(tb)tb.innerHTML="<tr><td colspan='6' style='color:#dc2626;padding:20px;'>Erro: "+e.message+"</td></tr>"; }
 }
 function exportInteresse(){
-  if(!INTERESSE_DATA.length){alert("Nenhum dado para exportar.");return;}
+  if(!INTERESSE_DATA.length){alert("Sem dados.");return;}
   var rows=[["#","Nome","Sobrenome","WhatsApp","E-mail","Data"]];
-  INTERESSE_DATA.forEach(function(p,i){
-    rows.push([i+1,p.nome,p.sobrenome,p.telefone,p.email,new Date(p.created_at).toLocaleString("pt-BR")]);
-  });
+  INTERESSE_DATA.forEach(function(p,i){rows.push([i+1,p.nome,p.sobrenome,p.telefone,p.email,new Date(p.created_at).toLocaleString("pt-BR")]);});
   var csv=rows.map(function(r){return r.map(function(v){return '"'+String(v).replace(/"/g,'""')+'"';}).join(",");}).join("\n");
-  var blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"});
-  var a=document.createElement("a");
-  a.href=URL.createObjectURL(blob);
-  a.download="interesse_torneio_"+(new Date().toLocaleDateString("pt-BR").replace(/\//g,"-"))+".csv";
-  a.click();
+  var a=document.createElement("a"); a.href=URL.createObjectURL(new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"}));
+  a.download="interesse_"+(new Date().toLocaleDateString("pt-BR").replace(/\//g,"-"))+".csv"; a.click();
 }
 </script>
 </body>
