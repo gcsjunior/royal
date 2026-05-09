@@ -1144,21 +1144,6 @@ async function loadMata(){
   }
 }
 
-function calcSeedsAdmin(jogos){
-  // Uses getSeeds from seeds.js - identical algorithm to grupos.html
-  var stats = calcStats(jogos);
-  // Build equipes list from jogos
-  var nomes = {};
-  jogos.filter(function(j){return j.fase&&j.fase.startsWith('Grupo');}).forEach(function(j){
-    if(j.equipe_a) nomes[j.equipe_a]={nome:j.equipe_a, grupo:j.fase.replace('Grupo ','')};
-    if(j.equipe_b) nomes[j.equipe_b]={nome:j.equipe_b, grupo:j.fase.replace('Grupo ','')};
-  });
-  var equipes = Object.values(nomes);
-  var ranking = getRankingGeral(stats, jogos, equipes);
-  if(!ranking || ranking.filter(function(t){return t.j>=3;}).length < 16) return null;
-  return getSeeds(stats, jogos, equipes);
-}
-
 
 // Modal para lançar resultado de mata-mata
 var MATA_MODAL_DATA={};
