@@ -324,7 +324,6 @@ tr:last-child td{border-bottom:none;}
   </div>
 </div></div>
 
-<script src="seeds.js"></script>
 <script>
 var SB = "https://vfrjqkwdxjvggzkfxfen.supabase.co";
 var K  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZmcmpxa3dkeGp2Z2d6a2Z4ZmVuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxODcyNDcsImV4cCI6MjA5Mzc2MzI0N30.PaHe7kQL8DUs8gmt9Wk47qaz6CX5PLfbeuhv3OIdigU";
@@ -1033,7 +1032,7 @@ var FASES_ORDEM = ['Oitavas','Quartas','Semi','Final'];
 var FASES_LABEL = {Oitavas:'Oitavas de Final', Quartas:'Quartas de Final', Semi:'Semifinais', Final:'Grande Final'};
 var SEEDS_CACHE = null;
 
-function sumP(partidas){ return sumPartidas(partidas); }
+function sumP(partidas){var ta=0,tb=0;(partidas||[]).forEach(function(p){ta+=p.total_a||0;tb+=p.total_b||0;});return{ta:ta,tb:tb};}
 function winnerOf(jogosAll, t1, t2){
   if(!t1||!t2) return null;
   var j=(jogosAll||[]).find(function(x){
