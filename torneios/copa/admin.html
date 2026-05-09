@@ -136,6 +136,12 @@ tr:last-child td{border-bottom:none;}
         <div style="background:rgba(123,94,167,0.06);border:1px solid rgba(123,94,167,0.15);border-radius:12px;padding:14px 18px;margin-bottom:20px;font-size:0.84rem;color:var(--tl);">
           💡 Os confrontos são calculados automaticamente a partir dos vencedores de cada fase. Selecione a fase e lance o resultado do jogo que acabou de acontecer.
         </div>
+        <div id="gerar-oitavas-wrap" style="display:none;margin-bottom:16px;">
+          <button class="btn bp" id="btnGerarOitavas" style="background:linear-gradient(135deg,#2EBD9A,#0369a1);width:100%;justify-content:center;font-size:0.9rem;padding:12px 20px;">
+            ⚡ Gerar Oitavas Automaticamente
+          </button>
+          <div style="font-size:0.76rem;color:var(--tl);margin-top:6px;text-align:center;">Cria os 8 confrontos das oitavas no banco com base no ranking final dos grupos</div>
+        </div>
         <div id="mata-lista"><div style="text-align:center;padding:40px;color:var(--tl);">Carregando...</div></div>
       </div>
     </div>
@@ -1141,11 +1147,138 @@ async function loadMata(){
       html+='</div>';
     });
 
+    // Mostrar/esconder botão Gerar Oitavas
+    var btnWrap = document.getElementById('gerar-oitavas-wrap');
+    if(btnWrap){
+      // Mostrar apenas se grupos finalizados e não há oitavas ainda
+      var gruposOk = rj.filter(function(j){return j.fase&&j.fase.startsWith('Grupo');})
+        .every(function(j){return j.resultados&&j.resultados.length>0;});
+      var temOitavas = oitavasBD.length > 0;
+      btnWrap.style.display = (gruposOk && !temOitavas) ? '' : 'none';
+    }
+
     el.innerHTML = html || '<div style="text-align:center;padding:40px;color:var(--tl);">Aguardando oitavas para calcular próximas fases...</div>';
   }catch(e){
     el.innerHTML='<div style="color:#dc2626;padding:20px;">Erro: '+e.message+'</div>';
   }
 }
+
+async function gerarOitavas(){
+  var btn=document.getElementById('btnGerarOitavas');
+  btn.disabled=true; btn.textContent='⏳ Gerando...';
+  try{
+    // Buscar todos os jogos + resultados
+    var [rj, rr] = await Promise.all([
+      fetch(SB+'/rest/v1/jogos?select=*&order=data_hora.asc',{headers:h()}).then(r=>r.json()),
+      fetch(SB+'/rest/v1/resultados?select=*',{headers:h()}).then(r=>r.json())
+    ]);
+    var resMap={};
+    rr.forEach(function(r){if(!resMap[r.jogo_id])resMap[r.jogo_id]=[];resMap[r.jogo_id].push(r);});
+    rj.forEach(function(j){j.resultados=resMap[j.id]||[];});
+
+    // Calcular ranking e seeds — mesmo algoritmo do grupos.html
+    var s={};
+    var jogosGrupos=rj.filter(function(j){return j.fase&&j.fase.startsWith('Grupo');});
+    jogosGrupos.forEach(function(j){
+      var sp=sumP(j.resultados);
+      if(!sp.ta&&!sp.tb) return;
+      var g=j.fase.replace('Grupo ','');
+      function en(n){if(!s[n])s[n]={grupo:g,j:0,v:0,gf:0,gc:0,gm:0,gs:0};}
+      en(j.equipe_a); en(j.equipe_b);
+      s[j.equipe_a].j++; s[j.equipe_b].j++;
+      s[j.equipe_a].gf+=sp.ta; s[j.equipe_a].gc+=sp.tb;
+      s[j.equipe_b].gf+=sp.tb; s[j.equipe_b].gc+=sp.ta;
+      s[j.equipe_a].gm+=(j.resultados||[]).reduce(function(acc,p){return acc+(p.games_a||0);},0);
+      s[j.equipe_a].gs+=(j.resultados||[]).reduce(function(acc,p){return acc+(p.games_b||0);},0);
+      s[j.equipe_b].gm+=(j.resultados||[]).reduce(function(acc,p){return acc+(p.games_b||0);},0);
+      s[j.equipe_b].gs+=(j.resultados||[]).reduce(function(acc,p){return acc+(p.games_a||0);},0);
+      if(sp.ta>sp.tb){s[j.equipe_a].v++;}
+      else if(sp.tb>sp.ta){s[j.equipe_b].v++;}
+    });
+
+    function getDR(t1,t2){
+      var j=jogosGrupos.find(function(x){return(x.equipe_a===t1&&x.equipe_b===t2)||(x.equipe_a===t2&&x.equipe_b===t1);});
+      if(!j||!j.resultados||!j.resultados.length) return null;
+      var sp=sumP(j.resultados); if(!sp.ta&&!sp.tb) return null;
+      return j.equipe_a===t1?{v:sp.ta}:{v:sp.tb};
+    }
+
+    var list=Object.keys(s).map(function(nome){
+      var e=s[nome];
+      return{nome:nome,v:e.v,gf:e.gf,gc:e.gc,gm:e.gm,gs:e.gs};
+    }).filter(function(t){return t.j>=3||s[t.nome].j>=3;});
+
+    // Remontar com j correto
+    list=Object.keys(s).filter(function(n){return s[n].j>=3;}).map(function(n){
+      return{nome:n,v:s[n].v,gf:s[n].gf,gc:s[n].gc,gm:s[n].gm,gs:s[n].gs,j:s[n].j};
+    });
+
+    if(list.length<16){
+      alert('Fase de grupos não concluída. Faltam resultados de alguns jogos.');
+      btn.disabled=false; btn.textContent='⚡ Gerar Oitavas Automaticamente';
+      return;
+    }
+
+    list.sort(function(a,b){
+      if(b.v!==a.v) return b.v-a.v;
+      var sdA=a.gf-a.gc, sdB=b.gf-b.gc;
+      if(sdB!==sdA) return sdB-sdA;
+      if(b.gm!==a.gm) return b.gm-a.gm;
+      if(a.gs!==b.gs) return a.gs-b.gs;
+      var da=getDR(a.nome,b.nome), db=getDR(b.nome,a.nome);
+      if(da&&db&&da.v!==db.v) return db.v-da.v;
+      return 0;
+    });
+
+    var all16=list.slice(0,16);
+    function nm(i){return all16[i]?all16[i].nome:null;}
+
+    // Chaveamento: L=[0×15, 7×8, 4×11, 3×12] R=[2×13, 5×10, 6×9, 1×14]
+    var oitavasParas=[
+      {a:nm(0), b:nm(15), q:'1', h:'2026-06-20T18:30:00-03:00'},
+      {a:nm(7), b:nm(8),  q:'2', h:'2026-06-20T18:30:00-03:00'},
+      {a:nm(4), b:nm(11), q:'3', h:'2026-06-20T18:30:00-03:00'},
+      {a:nm(3), b:nm(12), q:'4', h:'2026-06-20T18:30:00-03:00'},
+      {a:nm(2), b:nm(13), q:'5', h:'2026-06-20T18:30:00-03:00'},
+      {a:nm(5), b:nm(10), q:'1', h:'2026-06-20T20:35:00-03:00'},
+      {a:nm(6), b:nm(9),  q:'2', h:'2026-06-20T20:35:00-03:00'},
+      {a:nm(1), b:nm(14), q:'3', h:'2026-06-20T20:35:00-03:00'},
+    ];
+
+    // Confirmar com o usuário
+    var msg='Gerar as seguintes oitavas?
+
+';
+    oitavasParas.forEach(function(p,i){
+      msg+=(i+1)+'. '+p.a.replace('Equipe ','')+' × '+p.b.replace('Equipe ','')+'
+';
+    });
+    if(!confirm(msg)) {
+      btn.disabled=false; btn.textContent='⚡ Gerar Oitavas Automaticamente';
+      return;
+    }
+
+    // Criar os 8 jogos
+    var jogosParaCriar=oitavasParas.map(function(p){
+      return{fase:'Oitavas',equipe_a:p.a,equipe_b:p.b,quadra:p.q,data_hora:p.h};
+    });
+    var resp=await fetch(SB+'/rest/v1/jogos',{method:'POST',headers:h(),body:JSON.stringify(jogosParaCriar)});
+    if(!resp.ok){var err=await resp.text();alert('Erro: '+err);return;}
+
+    alert('✅ 8 oitavas geradas com sucesso!');
+    loadMata();
+  }catch(e){
+    alert('Erro: '+e.message);
+    console.error(e);
+  }finally{
+    btn.disabled=false; btn.textContent='⚡ Gerar Oitavas Automaticamente';
+  }
+}
+
+document.addEventListener('DOMContentLoaded',function(){
+  var btn=document.getElementById('btnGerarOitavas');
+  if(btn) btn.addEventListener('click', gerarOitavas);
+});
 
 
 // Modal para lançar resultado de mata-mata
