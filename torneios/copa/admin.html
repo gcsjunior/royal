@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Admin — Copa das Nações 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{--r:#7B5EA7;--rd:#5a4080;--g:#2EBD9A;--o:#F26522;--dk:#1a1220;--tx:#2d2040;--tl:#8a7fa0;--cr:#FAF7F2;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:"DM Sans",sans-serif;background:#0a0a14;color:var(--tx);}
+.lw{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+.lc{background:#fff;border-radius:18px;padding:44px;width:100%;max-width:400px;}
+.msg{border-radius:9px;padding:10px 14px;font-size:0.84rem;margin-bottom:14px;display:none;}
+.anav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:rgba(10,10,20,0.97);border-bottom:1px solid rgba(123,94,167,0.15);}
+.abody{padding:88px 48px 60px;max-width:980px;margin:0 auto;background:var(--cr);min-height:100vh;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 20px;border-radius:100px;font-size:0.82rem;font-weight:500;cursor:pointer;border:none;transition:all 0.2s;}
+.bp{background:var(--r);color:#fff;}.bp:hover{background:var(--rd);}
+.bd{background:#dc2626;color:#fff;}
+.bg{background:rgba(123,94,167,0.1);color:var(--r);}
+input,select{width:100%;padding:9px 13px;border:1px solid rgba(0,0,0,0.12);border-radius:9px;font-family:"DM Sans",sans-serif;font-size:0.86rem;outline:none;}
+input:focus,select:focus{border-color:var(--r);}
+label{font-size:0.78rem;font-weight:500;color:var(--tl);display:block;margin-bottom:4px;}
+.fr{margin-bottom:14px;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.card{background:#fff;border-radius:14px;padding:24px;box-shadow:0 2px 12px rgba(0,0,0,0.06);}
+.stitle{font-family:"Nunito",sans-serif;font-size:1.5rem;font-weight:700;color:var(--dk);}
+.tabs{display:flex;border-bottom:2px solid rgba(0,0,0,0.08);margin-bottom:28px;}
+.tab{padding:8px 14px;font-size:0.78rem;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;color:var(--tl);background:none;border-top:none;border-left:none;border-right:none;white-space:nowrap;}
+.tabs-bar{display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;border-bottom:2px solid rgba(0,0,0,0.07);}
+.tabs-bar::-webkit-scrollbar{display:none;}
+.tab.on{color:var(--r);border-bottom-color:var(--r);}
+.tc{display:none;}
+.tc.on{display:block;}
+table{width:100%;border-collapse:collapse;}
+th{text-align:left;padding:9px 12px;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--tl);border-bottom:1px solid rgba(0,0,0,0.08);}
+td{padding:10px 12px;font-size:0.86rem;border-bottom:1px solid rgba(0,0,0,0.05);}
+tr:last-child td{border-bottom:none;}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:200;align-items:center;justify-content:center;padding:20px;}
+.modal.open{display:flex;}
+.mc{background:#fff;border-radius:14px;padding:32px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;}
+.mt{font-family:"Nunito",sans-serif;font-size:1.2rem;font-weight:700;margin-bottom:20px;}
+.eq-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin-top:8px;}
+.eq-item{background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:10px;padding:9px 12px;display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:0.85rem;font-weight:500;}
+.grp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px;}
+.grp-card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.06);}
+.grp-hd{color:#fff;padding:8px 14px;font-size:0.7rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;}
+.grp-item{padding:7px 14px;font-size:0.84rem;border-bottom:1px solid rgba(0,0,0,0.04);}
+.draw-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.93);z-index:500;flex-direction:column;align-items:center;justify-content:center;}
+.draw-overlay.on{display:flex;}
+
+@media(max-width:768px){
+  .anav{padding:10px 14px !important;}
+  .nav-info{display:none!important;}
+  .abody{padding:80px 12px 40px !important;}
+  .g2,.g3{grid-template-columns:1fr !important;}
+  .card{padding:14px !important;}
+  table{font-size:0.72rem;}
+  th{padding:7px 6px !important;font-size:0.65rem;}
+  td{padding:7px 6px !important;}
+  .stitle{font-size:1.1rem;}
+  .mc{padding:20px !important;}
+  .grp-grid{grid-template-columns:repeat(2,1fr) !important;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="lw" class="lw">
+  <div class="lc">
+    <div style="text-align:center;margin-bottom:28px;">
+      <div style="font-family:'Nunito',sans-serif;font-size:1.3rem;font-weight:700;color:var(--dk);">Admin · Copa das Nações 2026</div>
+    </div>
+    <div id="msg" class="msg"></div>
+    <div class="fr"><label>E-mail</label><input type="email" id="em" placeholder="seu@email.com"/></div>
+    <div class="fr"><label>Senha</label><input type="password" id="pw" placeholder="••••••••"/></div>
+    <button class="btn bp" id="lbtn" style="width:100%;justify-content:center;margin-top:6px;">Entrar</button>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div id="aw" style="display:none;">
+  <div class="anav">
+    <span style="font-family:'Nunito',sans-serif;font-size:0.9rem;font-weight:700;color:#fff;">Copa Admin</span>
+    <div style="display:flex;gap:12px;align-items:center;">
+      <span id="uemail" class="nav-info" style="font-size:0.76rem;color:rgba(255,255,255,0.35);"></span>
+      <a href="../../index.html" class="nav-info" style="font-size:0.76rem;color:rgba(255,255,255,0.35);text-decoration:none;">← Clube</a><a href="../copa-das-nacoes.html" class="nav-info" style="font-size:0.76rem;color:rgba(255,255,255,0.35);text-decoration:none;margin-left:8px;">↗ Ver torneio</a>
+      <button class="btn bg" id="btnSair" style="font-size:0.76rem;padding:5px 12px;">Sair</button>
+    </div>
+  </div>
+  <div class="abody">
+    <div class="tabs-bar" id="tabs">
+      <button class="tab on" id="tab-jogos">📅 Jogos</button>
+      <button class="tab" id="tab-resultados">🏆 Resultados</button>
+      <button class="tab" id="tab-atletas">👥 Atletas</button>
+      <button class="tab" id="tab-pat">🤝 Patrocinadores</button>
+      <button class="tab" id="tab-sorteio">🎲 Sorteio Grupos</button>
+      <button class="tab" id="tab-sorteio-duplas">🎯 Sorteio Duplas</button>
+      <button class="tab" id="tab-fotos">📸 Fotos</button>
+      <button class="tab" id="tab-interesse">📋 Interesse</button>
+    </div>
+
+    <!-- JOGOS -->
+    <div id="tc-jogos" class="tc on">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div class="stitle">Jogos</div>
+        <button class="btn bp" id="btnNewJogo">+ Novo Jogo</button>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <table><thead><tr><th>Fase</th><th>Equipe A</th><th>Equipe B</th><th>Data/Hora</th><th>Quadra</th><th></th></tr></thead>
+        <tbody id="tbj"></tbody></table>
+      </div>
+    </div>
+
+    <!-- RESULTADOS -->
+    <div id="tc-resultados" class="tc">
+      <div class="stitle" style="margin-bottom:16px;">Lançar Resultados</div>
+      <div id="lres"><div style="text-align:center;padding:40px;color:var(--tl);">Carregando...</div></div>
+    </div>
+
+    <!-- ATLETAS -->
+    <div id="tc-atletas" class="tc">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div class="stitle">Atletas</div>
+        <button class="btn bp" id="btnNewAtleta">+ Novo Atleta</button>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <table><thead><tr><th>Nome</th><th>Equipe</th><th>Classe</th><th>Dupla</th><th></th></tr></thead>
+        <tbody id="tba"></tbody></table>
+      </div>
+    </div>
+
+    <!-- PATROCINADORES -->
+    <div id="tc-pat" class="tc">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div class="stitle">Patrocinadores</div>
+        <button class="btn bp" id="btnNewPat">+ Novo Patrocinador</button>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <table><thead><tr><th>Nome</th><th>Categoria</th><th>Ordem</th><th></th></tr></thead>
+        <tbody id="tbp"></tbody></table>
+      </div>
+    </div>
+
+    <!-- SORTEIO DUPLAS -->
+    <div id="tc-sorteio-duplas" class="tc">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+        <div>
+          <div class="stitle">Sorteio de Duplas</div>
+          <div style="font-size:0.84rem;color:var(--tl);margin-top:4px;">Define quais 2 categorias jogam em cada confronto</div>
+        </div>
+        <button class="btn bp" id="btnSortearDuplas" style="background:linear-gradient(135deg,#F26522,#7B5EA7);">🎯 Sortear Todas</button>
+      </div>
+      <div id="sorteio-duplas-info" style="background:rgba(123,94,167,0.06);border:1px solid rgba(123,94,167,0.15);border-radius:12px;padding:14px 18px;margin-bottom:20px;font-size:0.84rem;color:var(--tl);">
+        <strong style="color:var(--r);">Como funciona:</strong> Cada confronto tem 3 duplas por equipe (Dupla 1, 2 e 3). O sistema sorteia 2 das 3 para jogar, garantindo que ao longo dos 3 confrontos da fase de grupos cada dupla jogue 2 vezes. Em caso de empate (1×1), a 3ª dupla entra como desempate.
+      </div>
+      <div id="sd-list"><div style="text-align:center;padding:40px;color:var(--tl);">⏳ Carregando...</div></div>
+    </div>
+
+    <!-- SORTEIO -->
+    <div id="tc-sorteio" class="tc">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+        <div>
+          <div class="stitle">Sorteio dos Grupos</div>
+          <div style="font-size:0.84rem;color:var(--tl);margin-top:4px;" id="eq-count-label">0 equipes cadastradas</div>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button class="btn bg" id="btnAddEq">+ Equipe</button>
+          <button class="btn bp" id="btnSortear" style="background:linear-gradient(135deg,#7B5EA7,#F26522);">🎲 Realizar Sorteio</button>
+        </div>
+      </div>
+      <div id="sorteio-ok" style="display:none;background:rgba(46,189,154,0.1);border:1px solid rgba(46,189,154,0.25);border-radius:12px;padding:14px 18px;margin-bottom:20px;font-size:0.88rem;color:#1a9b7c;font-weight:500;">✓ Sorteio realizado</div>
+      <div style="font-size:0.7rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--tl);margin-bottom:6px;">Equipes cadastradas</div>
+      <div class="eq-grid" id="eq-list"><div style="color:var(--tl);font-size:0.85rem;padding:8px;">Carregando...</div></div>
+      <div id="grp-section" style="margin-top:28px;display:none;">
+        <div style="font-size:0.7rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--tl);margin-bottom:6px;">Grupos após sorteio</div>
+        <div class="grp-grid" id="grp-list"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAIS -->
+<div id="mj" class="modal"><div class="mc">
+  <div class="mt">Jogo</div><input type="hidden" id="jid"/>
+  <div class="g2"><div class="fr"><label>Equipe A</label><input id="jea"/></div><div class="fr"><label>Equipe B</label><input id="jeb"/></div></div>
+  <div class="g2"><div class="fr"><label>Fase</label><select id="jfase"><option>Grupo A</option><option>Grupo B</option><option>Grupo C</option><option>Grupo D</option><option>Grupo E</option><option>Grupo F</option><option>Oitavas</option><option>Quartas</option><option>Semi</option><option>Final</option></select></div><div class="fr"><label>Quadra</label><input id="jq"/></div></div>
+  <div class="fr"><label>Data/Hora</label><input type="datetime-local" id="jdt"/></div>
+  <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px;"><button class="btn bg" id="btnCancJogo">Cancelar</button><button class="btn bp" id="btnSaveJogo">Salvar</button></div>
+</div></div>
+
+<div id="mr" class="modal"><div class="mc" style="max-width:560px;">
+  <div class="mt" id="rtitle">Resultado</div>
+  <input type="hidden" id="rjid"/>
+  <!-- Placar total -->
+  <div style="display:grid;grid-template-columns:1fr 60px 1fr;gap:8px;align-items:center;margin-bottom:20px;padding:14px;background:rgba(46,189,154,0.06);border-radius:10px;">
+    <div style="text-align:right;">
+      <div style="font-weight:700;font-size:0.9rem;" id="rea">—</div>
+      <div style="font-size:2rem;font-weight:900;color:var(--g);" id="rtotal_a">0</div>
+    </div>
+    <div style="text-align:center;font-size:0.72rem;color:var(--tl);">sets</div>
+    <div style="text-align:left;">
+      <div style="font-weight:700;font-size:0.9rem;" id="reb">—</div>
+      <div style="font-size:2rem;font-weight:900;color:var(--g);" id="rtotal_b">0</div>
+    </div>
+  </div>
+  <!-- Partidas -->
+  <div id="rpartidas-container"></div>
+  <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px;">
+    <button class="btn bg" id="btnCancRes">Cancelar</button>
+    <button class="btn bp" id="btnSaveRes">Salvar Resultado</button>
+  </div>
+</div></div>
+
+<div id="ma" class="modal"><div class="mc">
+  <div class="mt">Atleta</div><input type="hidden" id="aid"/>
+  <div class="fr"><label>Nome</label><input id="ano" placeholder="Nome completo"/></div>
+  <div class="g2"><div class="fr"><label>Equipe</label><input id="aeq"/></div><div class="fr"><label>Classe</label><select id="acl"><option value="3ª">3ª</option><option value="4ª">4ª</option><option value="5ª">5ª</option><option value="6ª">6ª</option></select></div></div>
+  <div class="fr"><label>Dupla</label><input id="adu" placeholder="Ex: Soma 7, Soma 9 ou Soma 11"/></div>
+  <div class="fr"><label>URL Foto (opcional)</label><input id="afo" placeholder="https://..."/></div>
+  <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px;"><button class="btn bg" id="btnCancAtleta">Cancelar</button><button class="btn bp" id="btnSaveAtleta">Salvar</button></div>
+</div></div>
+
+<div id="mp" class="modal"><div class="mc">
+  <div class="mt">Patrocinador</div><input type="hidden" id="pid"/>
+  <div class="fr"><label>Nome</label><input id="pno"/></div>
+  <div class="g2"><div class="fr"><label>Categoria</label><select id="pcat"><option>Ouro</option><option>Prata</option><option>Bronze</option><option>Apoiador</option></select></div><div class="fr"><label>Ordem</label><input type="number" id="pord" value="0"/></div></div>
+  <div class="fr"><label>URL Logo</label><input id="plo" placeholder="https://..."/></div>
+  <div class="fr"><label>Site</label><input id="psi" placeholder="https://..."/></div>
+  <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px;"><button class="btn bg" id="btnCancPat">Cancelar</button><button class="btn bp" id="btnSavePat">Salvar</button></div>
+</div></div>
+
+<div id="meq" class="modal"><div class="mc">
+  <div class="mt">Nova Equipe</div>
+  <div class="fr"><label>Nome da Equipe</label><input id="enome" placeholder="Ex: Equipe Brasil"/></div>
+  <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px;"><button class="btn bg" id="btnCancEq">Cancelar</button><button class="btn bp" id="btnSaveEq">Salvar</button></div>
+</div></div>
+
+<!-- OVERLAY SORTEIO -->
+<div id="draw-overlay" class="draw-overlay">
+  <div style="text-align:center;max-width:700px;width:100%;padding:40px;">
+    <div style="font-family:'Nunito',sans-serif;font-size:2rem;font-weight:900;color:#fff;margin-bottom:8px;">🎲 Sorteio ao Vivo</div>
+    <div style="font-size:0.9rem;color:rgba(255,255,255,0.4);margin-bottom:40px;">Copa das Nações 2026</div>
+    <div id="draw-ball" style="font-size:4rem;margin-bottom:20px;display:inline-block;">🎾</div>
+    <div id="draw-team" style="font-family:'Nunito',sans-serif;font-size:1.6rem;font-weight:700;color:#fff;min-height:48px;margin-bottom:6px;"></div>
+    <div id="draw-grp" style="font-size:1rem;min-height:28px;margin-bottom:28px;"></div>
+    <div id="draw-grps" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:left;"></div>
+    <div style="margin-top:28px;">
+      <div style="height:4px;background:rgba(255,255,255,0.1);border-radius:2px;overflow:hidden;">
+        <div id="draw-prog" style="height:100%;background:linear-gradient(90deg,#7B5EA7,#2EBD9A);width:0%;transition:width 0.4s;"></div>
+      </div>
+      <div id="draw-info" style="font-size:0.78rem;color:rgba(255,255,255,0.35);margin-top:8px;"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+var SB = "https://vfrjqkwdxjvggzkfxfen.supabase.co";
+var K  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZmcmpxa3dkeGp2Z2d6a2Z4ZmVuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxODcyNDcsImV4cCI6MjA5Mzc2MzI0N30.PaHe7kQL8DUs8gmt9Wk47qaz6CX5PLfbeuhv3OIdigU";
+var TOK = "";
+var JOGOS={}, ATLETAS={}, PATS={}, EQUIPES={}, RES_DATA={};
+var GC = {A:"#7B5EA7",B:"#1a9b7c",C:"#c44e18",D:"#b45309",E:"#0369a1",F:"#7c2d12"};
+
+function h(){ return {"apikey":K,"Authorization":"Bearer "+(TOK||K),"Content-Type":"application/json","Prefer":"return=representation"}; }
+function openM(id){ document.getElementById(id).classList.add("open"); }
+function closeM(id){ document.getElementById(id).classList.remove("open"); }
+window.addEventListener("click",function(e){ if(e.target.classList.contains("modal")) e.target.classList.remove("open"); });
+
+// TABS - use IDs not class
+var TAB_MAP = {jogos:"mj",resultados:"mr",atletas:"ma",pat:"mp",sorteio:"meq"};
+function showTab(name){
+  ["jogos","resultados","atletas","pat","sorteio","sorteio-duplas","fotos","interesse"].forEach(function(t){
+    document.getElementById("tab-"+t).classList.toggle("on", t===name);
+    document.getElementById("tc-"+t).classList.toggle("on", t===name);
+  });
+  if(name==="sorteio") loadEquipes();
+  if(name==="sorteio-duplas") loadSorteioDuplas();
+  if(name==="resultados") loadR();
+  if(name==="fotos") loadPastas();
+  if(name==="interesse") loadInteresse();
+}
+
+function showMsg(txt,ok){
+  var m=document.getElementById("msg");
+  m.style.display="block";
+  m.style.background=ok?"#f0fdf4":"#fef2f2";
+  m.style.color=ok?"#166534":"#dc2626";
+  m.style.border="1px solid "+(ok?"#bbf7d0":"#fecaca");
+  m.textContent=txt;
+}
+
+// LOGIN
+document.getElementById("lbtn").addEventListener("click",function(){
+  var em=document.getElementById("em").value.trim();
+  var pw=document.getElementById("pw").value;
+  var btn=document.getElementById("lbtn");
+  if(!em||!pw){showMsg("Preencha e-mail e senha.");return;}
+  btn.textContent="Entrando..."; btn.disabled=true;
+  fetch(SB+"/auth/v1/token?grant_type=password",{
+    method:"POST",headers:{"Content-Type":"application/json","apikey":K},
+    body:JSON.stringify({email:em,password:pw})
+  }).then(function(r){return r.json();}).then(function(d){
+    if(d.access_token){
+      TOK=d.access_token;
+      document.getElementById("lw").style.display="none";
+      document.getElementById("aw").style.display="block";
+      document.getElementById("uemail").textContent=em;
+      loadJ(); loadA(); loadP();
+      showTab("jogos");
+    } else {
+      showMsg(d.error_description||d.msg||JSON.stringify(d));
+      btn.textContent="Entrar"; btn.disabled=false;
+    }
+  }).catch(function(e){ showMsg("Erro: "+e.message); btn.textContent="Entrar"; btn.disabled=false; });
+});
+document.getElementById("pw").addEventListener("keydown",function(e){ if(e.key==="Enter") document.getElementById("lbtn").click(); });
+document.getElementById("btnSair").addEventListener("click",function(){ TOK=""; location.reload(); });
+
+// TAB CLICKS
+document.getElementById("tab-jogos").addEventListener("click",function(){ showTab("jogos"); });
+document.getElementById("tab-resultados").addEventListener("click",function(){ showTab("resultados"); });
+document.getElementById("tab-atletas").addEventListener("click",function(){ showTab("atletas"); });
+document.getElementById("tab-pat").addEventListener("click",function(){ showTab("pat"); });
+document.getElementById("tab-sorteio").addEventListener("click",function(){ showTab("sorteio"); });
+document.getElementById("tab-sorteio-duplas").addEventListener("click",function(){ showTab("sorteio-duplas"); });
+
+// MODAL CANCEL BUTTONS
+document.getElementById("btnCancJogo").addEventListener("click",function(){ closeM("mj"); });
+document.getElementById("btnCancRes").addEventListener("click",function(){ closeM("mr"); });
+document.getElementById("btnCancAtleta").addEventListener("click",function(){ closeM("ma"); });
+document.getElementById("btnCancPat").addEventListener("click",function(){ closeM("mp"); });
+document.getElementById("btnCancEq").addEventListener("click",function(){ closeM("meq"); });
+
+// ── JOGOS ────────────────────────────────────────────
+function loadJ(){
+  fetch(SB+"/rest/v1/jogos?select=*&order=data_hora.asc",{headers:h()})
+  .then(function(r){return r.json();})
+  .then(function(list){
+    JOGOS={};
+    var tb=document.getElementById("tbj");
+    if(!Array.isArray(list)||!list.length){ tb.innerHTML="<tr><td colspan='6' style='text-align:center;padding:20px;color:var(--tl)'>Nenhum jogo</td></tr>"; return; }
+    list.forEach(function(j){JOGOS[j.id]=j;});
+    tb.innerHTML=list.map(function(j){
+      var dt=j.data_hora?new Date(j.data_hora).toLocaleString("pt-BR"):"—";
+      return "<tr><td><span style='background:rgba(123,94,167,0.1);color:var(--r);padding:2px 7px;border-radius:5px;font-size:0.72rem;'>"+j.fase+"</span></td><td>"+j.equipe_a+"</td><td>"+j.equipe_b+"</td><td style='font-size:0.8rem;color:var(--tl)'>"+dt+"</td><td>"+(j.quadra||"—")+"</td><td><button class='btn bg' style='padding:3px 9px;font-size:0.72rem;' data-id='"+j.id+"' data-act='ej'>✏</button> <button class='btn bd' style='padding:3px 9px;font-size:0.72rem;' data-id='"+j.id+"' data-act='dj'>✕</button></td></tr>";
+    }).join("");
+  });
+}
+document.getElementById("btnNewJogo").addEventListener("click",function(){
+  document.getElementById("jid").value="";
+  ["jea","jeb","jq","jdt"].forEach(function(i){document.getElementById(i).value="";});
+  openM("mj");
+});
+document.getElementById("tbj").addEventListener("click",function(e){
+  var btn=e.target.closest("button[data-act]"); if(!btn) return;
+  var id=btn.dataset.id, j=JOGOS[id];
+  if(btn.dataset.act==="ej"){
+    document.getElementById("jid").value=j.id;
+    document.getElementById("jea").value=j.equipe_a;
+    document.getElementById("jeb").value=j.equipe_b;
+    document.getElementById("jfase").value=j.fase;
+    document.getElementById("jq").value=j.quadra||"";
+    if(j.data_hora) document.getElementById("jdt").value=j.data_hora.slice(0,16);
+    openM("mj");
+  } else if(btn.dataset.act==="dj"){
+    if(!confirm("Excluir jogo?")) return;
+    fetch(SB+"/rest/v1/jogos?id=eq."+id,{method:"DELETE",headers:h()}).then(function(){loadJ();loadR();});
+  }
+});
+document.getElementById("btnSaveJogo").addEventListener("click",function(){
+  var id=document.getElementById("jid").value;
+  var b={equipe_a:document.getElementById("jea").value,equipe_b:document.getElementById("jeb").value,fase:document.getElementById("jfase").value,quadra:document.getElementById("jq").value||null,data_hora:document.getElementById("jdt").value||null};
+  fetch(id?SB+"/rest/v1/jogos?id=eq."+id:SB+"/rest/v1/jogos",{method:id?"PATCH":"POST",headers:h(),body:JSON.stringify(b)}).then(function(){closeM("mj");loadJ();loadR();});
+});
+
+// ── RESULTADOS ───────────────────────────────────────
+function loadR(){
+  fetch(SB+"/rest/v1/jogos?select=*,resultados(*),sorteio_duplas(*)&order=data_hora.asc",{headers:h()})
+  .then(function(r){return r.json();})
+  .then(function(list){
+    RES_DATA={};
+    var el=document.getElementById("lres");
+    if(!Array.isArray(list)||!list.length){el.innerHTML="<div style='text-align:center;padding:40px;color:var(--tl)'>Nenhum jogo</div>";return;}
+    list.forEach(function(j){RES_DATA[j.id]=j;});
+    el.innerHTML=list.map(function(j){
+      var partidas=j.resultados||[];
+      partidas.sort(function(a,b){return a.numero_partida-b.numero_partida;});
+      var sd=j.sorteio_duplas&&j.sorteio_duplas[0];
+      var totalA=partidas.reduce(function(s,p){return s+(p.total_a||0);},0);
+      var totalB=partidas.reduce(function(s,p){return s+(p.total_b||0);},0);
+      var hasRes=partidas.length>0;
+      var placarBadge=hasRes?"<span style='font-size:1rem;font-weight:900;color:var(--g)'>"+totalA+" × "+totalB+"</span>":"<span style='font-size:0.76rem;color:var(--tl)'>Sem resultado</span>";
+      var sorteioInfo=sd?"<div style='font-size:0.72rem;color:var(--r);margin-top:2px;'>🎯 "+sd.categoria_1+" e "+sd.categoria_2+" sorteadas</div>":"<div style='font-size:0.72rem;color:var(--tl);margin-top:2px;'>Duplas não sorteadas</div>";
+      var partidasHtml=partidas.map(function(p){
+        var pw=p.total_a>p.total_b?"var(--g)":p.total_b>p.total_a?"#dc2626":"var(--tl)";
+        return "<span style='font-size:0.72rem;background:rgba(0,0,0,0.04);padding:2px 7px;border-radius:5px;margin-left:4px;'>"+(p.categoria||"P"+p.numero_partida)+": "+p.games_a+"×"+p.games_b+(p.tiebreak?" TB":"")+"</span>";
+      }).join("");
+      return "<div class='card' style='margin-bottom:10px;'>"+
+        "<div style='display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;'>"+
+        "<div><div style='font-weight:600;'>"+j.equipe_a+" vs "+j.equipe_b+"</div>"+
+        "<div style='font-size:0.76rem;color:var(--tl)'>"+j.fase+"</div>"+sorteioInfo+
+        (hasRes?"<div style='margin-top:4px;'>"+partidasHtml+"</div>":"")+
+        "</div>"+
+        "<div style='display:flex;align-items:center;gap:10px;'>"+placarBadge+
+        "<button class='btn bp' style='padding:5px 12px;font-size:0.76rem;' data-jid='"+j.id+"'>"+(hasRes?"✏ Editar":"+ Lançar")+"</button></div></div></div>";
+    }).join("");
+  });
+}
+
+// ── RESULTADOS — modal multi-partida ─────────────────
+var CATS = ["Soma 7","Soma 9","Soma 11"];
+
+function buildPartidasUI(jogo, partidasExist, sorteio){
+  var cont = document.getElementById("rpartidas-container");
+  var sd = sorteio; // {categoria_1, categoria_2} ou null
+  // categorias que jogam nas partidas 1 e 2
+  var cat1 = sd ? sd.categoria_1 : "Soma 7";
+  var cat2 = sd ? sd.categoria_2 : "Soma 9";
+  var cat3 = CATS.filter(function(c){ return c!==cat1 && c!==cat2; })[0];
+  // p1, p2 existentes
+  var p1 = partidasExist.find(function(p){ return p.numero_partida===1; })||null;
+  var p2 = partidasExist.find(function(p){ return p.numero_partida===2; })||null;
+  var p3 = partidasExist.find(function(p){ return p.numero_partida===3; })||null;
+  // calcular se desempate necessário
+  var ta1=p1?p1.total_a:0, tb1=p1?p1.total_b:0;
+  var ta2=p2?p2.total_a:0, tb2=p2?p2.total_b:0;
+  var totalA=(ta1+ta2), totalB=(tb1+tb2);
+  var needsTiebreak = (totalA===1 && totalB===1);
+  document.getElementById("rtotal_a").textContent=totalA+(p3?"+"+p3.total_a:"");
+  document.getElementById("rtotal_b").textContent=totalB+(p3?"+"+p3.total_b:"");
+
+  function partidaBlock(num, cat, p, required){
+    var title = "Partida "+num+" — "+cat;
+    if(num===3) title = "🏆 Desempate — "+cat;
+    var show = required || needsTiebreak || p;
+    if(!show) return '<div id="p3-toggle" style="margin-top:8px;"><button type="button" class="btn bg" style="font-size:0.78rem;width:100%;" onclick="showDesempate()">+ Adicionar Desempate (1×1)</button></div>';
+    return '<div style="background:rgba(0,0,0,0.03);border-radius:10px;padding:14px;margin-bottom:10px;" id="bloco-p'+num+'">' +
+      '<div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--r);margin-bottom:10px;">'+title+'</div>'+
+      '<input type="hidden" id="rid'+num+'" value="'+(p?p.id:"")+'"/>'+
+      '<div style="display:grid;grid-template-columns:1fr 80px 1fr;gap:8px;align-items:center;margin-bottom:8px;">'+
+        '<input type="number" id="ga'+num+'" min="0" max="9" value="'+(p?p.games_a:0)+'" style="text-align:center;font-size:1.2rem;font-weight:700;" oninput="updateTotal()"/>'+
+        '<div style="text-align:center;font-size:0.72rem;color:var(--tl);">games</div>'+
+        '<input type="number" id="gb'+num+'" min="0" max="9" value="'+(p?p.games_b:0)+'" style="text-align:center;font-size:1.2rem;font-weight:700;" oninput="updateTotal()"/>'+
+      '</div>'+
+      '<div style="display:flex;align-items:center;gap:8px;">'+
+        '<input type="checkbox" id="tb'+num+'" '+(p&&p.tiebreak?"checked":"")+' style="accent-color:var(--o);"/>'+
+        '<label for="tb'+num+'" style="font-size:0.8rem;cursor:pointer;margin:0;">Tiebreak (4×4→5×4)</label>'+
+      '</div>'+
+    '</div>';
+  }
+
+  cont.innerHTML =
+    partidaBlock(1, cat1, p1, true) +
+    partidaBlock(2, cat2, p2, true) +
+    partidaBlock(3, cat3, p3, false);
+}
+
+function showDesempate(){
+  var jid = document.getElementById("rjid").value;
+  var j = RES_DATA[jid];
+  var sd = j.sorteio_duplas&&j.sorteio_duplas[0];
+  var cat1 = sd?sd.categoria_1:"Soma 7";
+  var cat2 = sd?sd.categoria_2:"Soma 9";
+  var cat3 = CATS.filter(function(c){return c!==cat1&&c!==cat2;})[0];
+  var tog = document.getElementById("p3-toggle");
+  if(tog) tog.outerHTML =
+    '<div style="background:rgba(242,101,34,0.06);border:1px solid rgba(242,101,34,0.2);border-radius:10px;padding:14px;margin-bottom:10px;" id="bloco-p3">'+
+    '<div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--o);margin-bottom:10px;">🏆 Desempate — '+cat3+'</div>'+
+    '<input type="hidden" id="rid3" value=""/>'+
+    '<div style="display:grid;grid-template-columns:1fr 80px 1fr;gap:8px;align-items:center;margin-bottom:8px;">'+
+      '<input type="number" id="ga3" min="0" max="9" value="0" style="text-align:center;font-size:1.2rem;font-weight:700;" oninput="updateTotal()"/>'+
+      '<div style="text-align:center;font-size:0.72rem;color:var(--tl);">games</div>'+
+      '<input type="number" id="gb3" min="0" max="9" value="0" style="text-align:center;font-size:1.2rem;font-weight:700;" oninput="updateTotal()"/>'+
+    '</div>'+
+    '<div style="display:flex;align-items:center;gap:8px;">'+
+      '<input type="checkbox" id="tb3" style="accent-color:var(--o);"/>'+
+      '<label for="tb3" style="font-size:0.8rem;cursor:pointer;margin:0;">Tiebreak (4×4→5×4)</label>'+
+    '</div></div>';
+}
+
+function updateTotal(){
+  var ga1=+((document.getElementById("ga1")||{}).value||0);
+  var gb1=+((document.getElementById("gb1")||{}).value||0);
+  var ga2=+((document.getElementById("ga2")||{}).value||0);
+  var gb2=+((document.getElementById("gb2")||{}).value||0);
+  var ta=(ga1>gb1?1:0)+(ga2>gb2?1:0);
+  var tb=(gb1>ga1?1:0)+(gb2>ga2?1:0);
+  document.getElementById("rtotal_a").textContent=ta;
+  document.getElementById("rtotal_b").textContent=tb;
+}
+
+document.getElementById("lres").addEventListener("click",function(e){
+  var btn=e.target.closest("button[data-jid]"); if(!btn) return;
+  var j=RES_DATA[btn.dataset.jid];
+  var partidas=(j.resultados||[]).slice().sort(function(a,b){return a.numero_partida-b.numero_partida;});
+  var sd=j.sorteio_duplas&&j.sorteio_duplas[0];
+  document.getElementById("rjid").value=j.id;
+  document.getElementById("rtitle").textContent=j.equipe_a+" vs "+j.equipe_b;
+  document.getElementById("rea").textContent=j.equipe_a;
+  document.getElementById("reb").textContent=j.equipe_b;
+  buildPartidasUI(j, partidas, sd);
+  openM("mr");
+});
+
+document.getElementById("btnSaveRes").addEventListener("click",async function(){
+  var jid=document.getElementById("rjid").value;
+  var j=RES_DATA[jid];
+  var sd=j.sorteio_duplas&&j.sorteio_duplas[0];
+  var cat1=sd?sd.categoria_1:"Soma 7";
+  var cat2=sd?sd.categoria_2:"Soma 9";
+  var cat3=CATS.filter(function(c){return c!==cat1&&c!==cat2;})[0];
+  var cats=[cat1,cat2,cat3];
+  var saves=[];
+  for(var i=1;i<=3;i++){
+    var gaEl=document.getElementById("ga"+i);
+    if(!gaEl) continue;
+    var ga=+gaEl.value||0;
+    var gb=+document.getElementById("gb"+i).value||0;
+    var tb=document.getElementById("tb"+i).checked;
+    var rid=document.getElementById("rid"+i).value;
+    var ta=ga>gb?1:0, tb2=gb>ga?1:0;
+    var b={jogo_id:jid,numero_partida:i,categoria:cats[i-1],
+      dupla_sorteada_a:cats[i-1],dupla_sorteada_b:cats[i-1],
+      games_a:ga,games_b:gb,tiebreak:tb,total_a:ta,total_b:tb2,
+      updated_at:new Date().toISOString()};
+    saves.push(
+      rid
+        ? fetch(SB+"/rest/v1/resultados?id=eq."+rid,{method:"PATCH",headers:h(),body:JSON.stringify(b)})
+        : fetch(SB+"/rest/v1/resultados",{method:"POST",headers:h(),body:JSON.stringify(b)})
+    );
+  }
+  await Promise.all(saves);
+  closeM("mr");
+  loadR();
+});
+
+// ── ATLETAS ──────────────────────────────────────────
+function loadA(){
+  fetch(SB+"/rest/v1/atletas?select=*&order=equipe.asc,nome.asc",{headers:h()})
+  .then(function(r){return r.json();})
+  .then(function(list){
+    ATLETAS={};
+    var tb=document.getElementById("tba");
+    if(!Array.isArray(list)||!list.length){tb.innerHTML="<tr><td colspan='5' style='text-align:center;padding:20px;color:var(--tl)'>Nenhum atleta</td></tr>";return;}
+    list.forEach(function(a){ATLETAS[a.id]=a;});
+    tb.innerHTML=list.map(function(a){
+      return "<tr><td>"+a.nome+"</td><td>"+a.equipe+"</td><td>"+a.classe+"</td><td>"+(a.dupla||"—")+"</td><td><button class='btn bg' style='padding:3px 9px;font-size:0.72rem;' data-id='"+a.id+"' data-act='ea'>✏</button> <button class='btn bd' style='padding:3px 9px;font-size:0.72rem;' data-id='"+a.id+"' data-act='da'>✕</button></td></tr>";
+    }).join("");
+  });
+}
+document.getElementById("btnNewAtleta").addEventListener("click",function(){
+  document.getElementById("aid").value=""; ["ano","aeq","adu","afo"].forEach(function(i){document.getElementById(i).value="";});
+  openM("ma");
+});
+document.getElementById("tba").addEventListener("click",function(e){
+  var btn=e.target.closest("button[data-act]"); if(!btn) return;
+  var id=btn.dataset.id, a=ATLETAS[id];
+  if(btn.dataset.act==="ea"){ document.getElementById("aid").value=a.id; document.getElementById("ano").value=a.nome; document.getElementById("aeq").value=a.equipe; document.getElementById("acl").value=a.classe; document.getElementById("adu").value=a.dupla||""; document.getElementById("afo").value=a.foto_url||""; openM("ma"); }
+  else if(btn.dataset.act==="da"){ if(!confirm("Excluir atleta?")) return; fetch(SB+"/rest/v1/atletas?id=eq."+id,{method:"DELETE",headers:h()}).then(function(){loadA();}); }
+});
+document.getElementById("btnSaveAtleta").addEventListener("click",function(){
+  var id=document.getElementById("aid").value;
+  var b={nome:document.getElementById("ano").value,equipe:document.getElementById("aeq").value,classe:document.getElementById("acl").value,dupla:document.getElementById("adu").value||null,foto_url:document.getElementById("afo").value||null};
+  fetch(id?SB+"/rest/v1/atletas?id=eq."+id:SB+"/rest/v1/atletas",{method:id?"PATCH":"POST",headers:h(),body:JSON.stringify(b)}).then(function(){closeM("ma");loadA();});
+});
+
+// ── PATROCINADORES ───────────────────────────────────
+function loadP(){
+  fetch(SB+"/rest/v1/patrocinadores?select=*&order=ordem.asc",{headers:h()})
+  .then(function(r){return r.json();})
+  .then(function(list){
+    PATS={};
+    var tb=document.getElementById("tbp");
+    if(!Array.isArray(list)||!list.length){tb.innerHTML="<tr><td colspan='4' style='text-align:center;padding:20px;color:var(--tl)'>Nenhum patrocinador</td></tr>";return;}
+    list.forEach(function(p){PATS[p.id]=p;});
+    tb.innerHTML=list.map(function(p){
+      return "<tr><td>"+p.nome+"</td><td>"+p.categoria+"</td><td>"+p.ordem+"</td><td><button class='btn bg' style='padding:3px 9px;font-size:0.72rem;' data-id='"+p.id+"' data-act='ep'>✏</button> <button class='btn bd' style='padding:3px 9px;font-size:0.72rem;' data-id='"+p.id+"' data-act='dp'>✕</button></td></tr>";
+    }).join("");
+  });
+}
+document.getElementById("btnNewPat").addEventListener("click",function(){
+  document.getElementById("pid").value=""; ["pno","plo","psi"].forEach(function(i){document.getElementById(i).value=""}); document.getElementById("pord").value=0; openM("mp");
+});
+document.getElementById("tbp").addEventListener("click",function(e){
+  var btn=e.target.closest("button[data-act]"); if(!btn) return;
+  var id=btn.dataset.id, p=PATS[id];
+  if(btn.dataset.act==="ep"){ document.getElementById("pid").value=p.id; document.getElementById("pno").value=p.nome; document.getElementById("pcat").value=p.categoria; document.getElementById("plo").value=p.logo_url||""; document.getElementById("psi").value=p.site_url||""; document.getElementById("pord").value=p.ordem||0; openM("mp"); }
+  else if(btn.dataset.act==="dp"){ if(!confirm("Excluir?")) return; fetch(SB+"/rest/v1/patrocinadores?id=eq."+id,{method:"DELETE",headers:h()}).then(function(){loadP();}); }
+});
+document.getElementById("btnSavePat").addEventListener("click",function(){
+  var id=document.getElementById("pid").value;
+  var b={nome:document.getElementById("pno").value,categoria:document.getElementById("pcat").value,logo_url:document.getElementById("plo").value||null,site_url:document.getElementById("psi").value||null,ordem:+document.getElementById("pord").value||0};
+  fetch(id?SB+"/rest/v1/patrocinadores?id=eq."+id:SB+"/rest/v1/patrocinadores",{method:id?"PATCH":"POST",headers:h(),body:JSON.stringify(b)}).then(function(){closeM("mp");loadP();});
+});
+
+// ── SORTEIO ──────────────────────────────────────────
+function loadEquipes(){
+  var el=document.getElementById("eq-list");
+  el.innerHTML="<div style='color:var(--tl);font-size:0.85rem;padding:8px;'>Carregando equipes...</div>";
+  fetch(SB+"/rest/v1/equipes?select=*&order=created_at.asc",{headers:h()})
+  .then(function(r){return r.json();})
+  .then(function(list){
+    EQUIPES={};
+    if(!Array.isArray(list)) list=[];
+    list.forEach(function(e){EQUIPES[e.id]=e;});
+    document.getElementById("eq-count-label").textContent=list.length+" equipes cadastradas";
+    if(!list.length){
+      el.innerHTML="<div style='color:var(--tl);font-size:0.85rem;padding:8px;'>Nenhuma equipe. Clique em + Equipe para adicionar.</div>";
+      document.getElementById("sorteio-ok").style.display="none";
+      document.getElementById("grp-section").style.display="none";
+      return;
+    }
+    el.innerHTML=list.map(function(e){
+      var gb=e.grupo?"<span style='background:"+GC[e.grupo]+";color:#fff;font-size:0.65rem;font-weight:700;padding:1px 6px;border-radius:4px;margin-left:6px;'>G"+e.grupo+"</span>":"";
+      return "<div class='eq-item'>"+e.nome+gb+"<button class='btn bd' style='padding:2px 7px;font-size:0.7rem;' data-id='"+e.id+"' data-act='deq'>✕</button></div>";
+    }).join("");
+    var comGrp=list.filter(function(e){return e.grupo;});
+    document.getElementById("sorteio-ok").style.display=comGrp.length?"block":"none";
+    if(comGrp.length) renderGrupos(list);
+    else document.getElementById("grp-section").style.display="none";
+  }).catch(function(err){
+    el.innerHTML="<div style='color:#dc2626;font-size:0.85rem;padding:8px;'>Erro: "+err.message+"</div>";
+  });
+}
+
+function renderGrupos(list){
+  var gs={A:[],B:[],C:[],D:[],E:[],F:[]};
+  list.forEach(function(e){if(e.grupo&&gs[e.grupo])gs[e.grupo].push(e.nome);});
+  var html="";
+  ["A","B","C","D","E","F"].forEach(function(g){
+    html+="<div class='grp-card'><div class='grp-hd' style='background:"+GC[g]+";'>Grupo "+g+"</div><div style='padding:4px 0;'>";
+    if(gs[g].length) gs[g].forEach(function(n){html+="<div class='grp-item'>"+n+"</div>";});
+    else html+="<div class='grp-item' style='color:var(--tl);font-style:italic;'>Vazio</div>";
+    html+="</div></div>";
+  });
+  document.getElementById("grp-list").innerHTML=html;
+  document.getElementById("grp-section").style.display="block";
+}
+
+document.getElementById("eq-list").addEventListener("click",function(e){
+  var btn=e.target.closest("button[data-act='deq']"); if(!btn) return;
+  if(!confirm("Remover equipe?")) return;
+  fetch(SB+"/rest/v1/equipes?id=eq."+btn.dataset.id,{method:"DELETE",headers:h()}).then(function(){loadEquipes();});
+});
+document.getElementById("btnAddEq").addEventListener("click",function(){
+  document.getElementById("enome").value=""; openM("meq");
+});
+document.getElementById("btnSaveEq").addEventListener("click",function(){
+  var nome=document.getElementById("enome").value.trim(); if(!nome) return;
+  fetch(SB+"/rest/v1/equipes",{method:"POST",headers:h(),body:JSON.stringify({nome:nome})})
+  .then(function(){closeM("meq");loadEquipes();});
+});
+
+// SORTEIO COM ANIMAÇÃO
+document.getElementById("btnSortear").addEventListener("click",function(){
+  var list=Object.values(EQUIPES);
+  if(list.length<4){alert("Cadastre pelo menos 4 equipes.");return;}
+  if(!confirm("Sortear "+list.length+" equipes nos grupos agora?")) return;
+  realizarSorteio(list);
+});
+
+async function realizarSorteio(equipes){
+  var arr=equipes.slice();
+  for(var i=arr.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=arr[i];arr[i]=arr[j];arr[j]=t;}
+  var keys=["A","B","C","D","E","F"];
+  var overlay=document.getElementById("draw-overlay");
+  overlay.classList.add("on");
+  var ball=document.getElementById("draw-ball");
+  var teamEl=document.getElementById("draw-team");
+  var grpEl=document.getElementById("draw-grp");
+  var prog=document.getElementById("draw-prog");
+  var info=document.getElementById("draw-info");
+  var grpsEl=document.getElementById("draw-grps");
+  var drawState={A:[],B:[],C:[],D:[],E:[],F:[]};
+  function updateDrawGroups(){
+    grpsEl.innerHTML=keys.map(function(g){
+      return "<div style='background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:8px;overflow:hidden;'>"+
+        "<div style='background:"+GC[g]+";padding:4px 10px;font-size:0.62rem;font-weight:700;letter-spacing:0.08em;color:#fff;text-transform:uppercase;'>Grupo "+g+"</div>"+
+        "<div style='padding:2px 0;'>"+
+        (drawState[g].length?drawState[g].map(function(n){return "<div style='padding:3px 10px;font-size:0.74rem;color:rgba(255,255,255,0.7);'>"+n+"</div>";}).join(""):"<div style='padding:4px 10px;font-size:0.72rem;color:rgba(255,255,255,0.25);'>—</div>")+
+        "</div></div>";
+    }).join("");
+  }
+  updateDrawGroups();
+  for(var i=0;i<arr.length;i++){
+    var eq=arr[i], g=keys[i%6];
+    ball.style.transform="rotate("+Math.random()*360+"deg) scale(1.2)";
+    teamEl.textContent="...";
+    grpEl.textContent="";
+    info.textContent="Sorteando "+(i+1)+" de "+arr.length+"...";
+    await new Promise(function(r){setTimeout(r,350);});
+    ball.style.transform="rotate(0) scale(1)";
+    teamEl.textContent=eq.nome;
+    grpEl.textContent="→ Grupo "+g;
+    grpEl.style.color=GC[g];
+    drawState[g].push(eq.nome);
+    updateDrawGroups();
+    prog.style.width=((i+1)/arr.length*100)+"%";
+    await new Promise(function(r){setTimeout(r,600);});
+  }
+  teamEl.textContent="Sorteio concluído!";
+  grpEl.textContent="Salvando...";
+  grpEl.style.color="#2EBD9A";
+  var saves=arr.map(function(e,i){
+    return fetch(SB+"/rest/v1/equipes?id=eq."+e.id,{method:"PATCH",headers:h(),body:JSON.stringify({grupo:keys[i%6],sorteada_em:new Date().toISOString()})});
+  });
+  await Promise.all(saves);
+  grpEl.textContent="✓ Grupos salvos!";
+  await new Promise(function(r){setTimeout(r,1500);});
+  overlay.classList.remove("on");
+  loadEquipes();
+}
+
+// ── SORTEIO DE DUPLAS ─────────────────────────────────
+// Combinações possíveis de 2 das 3 categorias
+var COMBOS = [
+  ["Soma 7","Soma 9"], // Dupla 3 descansa
+  ["Soma 7","Soma 11"], // Dupla 2 descansa
+  ["Soma 9","Soma 11"]  // Dupla 1 descansa
+];
+
+async function loadSorteioDuplas(){
+  var el=document.getElementById("sd-list");
+  el.innerHTML="<div style='text-align:center;padding:30px;color:var(--tl);'>⏳ Carregando...</div>";
+  try{
+    // Busca jogos + sorteio_duplas já salvos
+    var [rj, rs] = await Promise.all([
+      fetch(SB+"/rest/v1/jogos?select=*&order=fase.asc,data_hora.asc",{headers:h()}).then(r=>r.json()),
+      fetch(SB+"/rest/v1/sorteio_duplas?select=*",{headers:h()}).then(r=>r.json())
+    ]);
+    if(!Array.isArray(rj)||!rj.length){
+      el.innerHTML="<div style='text-align:center;padding:30px;color:var(--tl);'>Nenhum jogo cadastrado. Cadastre os jogos primeiro.</div>";
+      return;
+    }
+    var sdMap={};
+    if(Array.isArray(rs)) rs.forEach(function(s){sdMap[s.jogo_id]=s;});
+
+    // Agrupa jogos por equipe para calcular quantas vezes cada dupla jogou
+    var duplaCount={}; // chave: "equipe:categoria" → count
+
+    // Renderiza grupos de jogos
+    var grupos={};
+    rj.forEach(function(j){
+      var fase=j.fase||"Sem fase";
+      if(!grupos[fase]) grupos[fase]=[];
+      grupos[fase].push(j);
+    });
+
+    var html="";
+    Object.keys(grupos).forEach(function(fase){
+      html+="<div style='margin-bottom:24px;'>";
+      html+="<div style='font-size:0.7rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--tl);margin-bottom:8px;'>"+fase+"</div>";
+      grupos[fase].forEach(function(j){
+        var sd=sdMap[j.id];
+        var cat1=sd?sd.categoria_1:"";
+        var cat2=sd?sd.categoria_2:"";
+        var cat3=sd?CATS.filter(function(c){return c!==cat1&&c!==cat2;})[0]:"";
+        var dt=j.data_hora?new Date(j.data_hora).toLocaleString("pt-BR"):"";
+        html+="<div class='card' style='margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;'>";
+        html+="<div><div style='font-weight:600;'>"+j.equipe_a+" vs "+j.equipe_b+"</div>";
+        if(dt) html+="<div style='font-size:0.76rem;color:var(--tl);'>"+dt+"</div>";
+        if(sd){
+          html+="<div style='margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;'>";
+          html+="<span style='background:rgba(46,189,154,0.12);color:#1a9b7c;padding:3px 9px;border-radius:6px;font-size:0.75rem;font-weight:600;'>✓ "+cat1+"</span>";
+          html+="<span style='background:rgba(46,189,154,0.12);color:#1a9b7c;padding:3px 9px;border-radius:6px;font-size:0.75rem;font-weight:600;'>✓ "+cat2+"</span>";
+          html+="<span style='background:rgba(0,0,0,0.05);color:var(--tl);padding:3px 9px;border-radius:6px;font-size:0.75rem;'>😴 "+cat3+"</span>";
+          html+="</div>";
+        } else {
+          html+="<div style='font-size:0.76rem;color:var(--tl);margin-top:4px;'>Duplas não sorteadas</div>";
+        }
+        html+="</div>";
+        html+="<button class='btn "+(sd?"bg":"bp")+"' style='padding:5px 12px;font-size:0.76rem;' data-jid='"+j.id+"' data-act='sortdup'>"+(sd?"🔄 Ressortear":"🎯 Sortear")+"</button>";
+        html+="</div>";
+      });
+      html+="</div>";
+    });
+    el.innerHTML=html;
+    el.addEventListener("click", onSdClick);
+  } catch(e){
+    el.innerHTML="<div style='color:#dc2626;padding:20px;'>Erro: "+e.message+"</div>";
+  }
+}
+
+function onSdClick(e){
+  var btn=e.target.closest("button[data-act='sortdup']"); if(!btn) return;
+  sortearDuplasJogo(btn.dataset.jid);
+}
+
+// Calcula combo mais equilibrado para um jogo
+async function getComboEquilibrado(jogo_id, equipe_a, equipe_b){
+  // Busca histórico de sorteios das duas equipes
+  var r=await fetch(SB+"/rest/v1/sorteio_duplas?select=categoria_1,categoria_2,jogo_id&jogo_id=neq."+jogo_id,{headers:h()});
+  var all=await r.json();
+  // Busca jogos para saber quais equipes participaram
+  var rj=await fetch(SB+"/rest/v1/jogos?select=id,equipe_a,equipe_b",{headers:h()});
+  var jogosAll=await rj.json();
+  var jogoMap={};
+  if(Array.isArray(jogosAll)) jogosAll.forEach(function(j){jogoMap[j.id]=j;});
+
+  // Conta quantas vezes cada categoria jogou por equipe
+  var count={};
+  ["Soma 7","Soma 9","Soma 11"].forEach(function(c){
+    count[equipe_a+":"+c]=0;
+    count[equipe_b+":"+c]=0;
+  });
+  if(Array.isArray(all)){
+    all.forEach(function(s){
+      var jg=jogoMap[s.jogo_id]; if(!jg) return;
+      [equipe_a,equipe_b].forEach(function(eq){
+        if(jg.equipe_a===eq||jg.equipe_b===eq){
+          if(count[eq+":"+s.categoria_1]!==undefined) count[eq+":"+s.categoria_1]++;
+          if(count[eq+":"+s.categoria_2]!==undefined) count[eq+":"+s.categoria_2]++;
+        }
+      });
+    });
+  }
+  // Escolhe combo com menor soma de partidas já jogadas
+  var best=null, bestScore=999;
+  COMBOS.forEach(function(combo){
+    var score=["Soma 7","Soma 9","Soma 11"].reduce(function(s,c){
+      return s+(count[equipe_a+":"+c]||0)+(count[equipe_b+":"+c]||0);
+    },0);
+    // Pondera: prefer combos onde as duplas jogaram menos
+    var s2=(count[equipe_a+":"+combo[0]]||0)+(count[equipe_a+":"+combo[1]]||0)+
+           (count[equipe_b+":"+combo[0]]||0)+(count[equipe_b+":"+combo[1]]||0);
+    if(s2<bestScore){bestScore=s2;best=combo;}
+  });
+  return best||COMBOS[Math.floor(Math.random()*3)];
+}
+
+async function sortearDuplasJogo(jogo_id, silent){
+  var jg=null;
+  var r=await fetch(SB+"/rest/v1/jogos?select=*&id=eq."+jogo_id,{headers:h()});
+  var arr=await r.json();
+  if(Array.isArray(arr)&&arr.length) jg=arr[0];
+  if(!jg){if(!silent)alert("Jogo não encontrado.");return;}
+
+  var combo=await getComboEquilibrado(jogo_id, jg.equipe_a, jg.equipe_b);
+  var cat3=CATS.filter(function(c){return c!==combo[0]&&c!==combo[1];})[0];
+
+  if(!silent){
+    var msg="Sorteio sugerido para "+jg.equipe_a+" vs "+jg.equipe_b+":\n\n"+
+      "✓ "+combo[0]+" joga\n✓ "+combo[1]+" joga\n😴 "+cat3+" descansa\n\nConfirmar?";
+    if(!confirm(msg)) return;
+  }
+
+  // Verifica se já existe e salva
+  var re=await fetch(SB+"/rest/v1/sorteio_duplas?jogo_id=eq."+jogo_id,{headers:h()});
+  var existing=await re.json();
+  var body={jogo_id:jogo_id,categoria_1:combo[0],categoria_2:combo[1]};
+  if(Array.isArray(existing)&&existing.length){
+    await fetch(SB+"/rest/v1/sorteio_duplas?id=eq."+existing[0].id,{method:"PATCH",headers:h(),body:JSON.stringify(body)});
+  } else {
+    await fetch(SB+"/rest/v1/sorteio_duplas",{method:"POST",headers:h(),body:JSON.stringify(body)});
+  }
+  if(!silent){loadSorteioDuplas();loadR();}
+}
+
+document.getElementById("btnSortearDuplas").addEventListener("click",async function(){
+  var r=await fetch(SB+"/rest/v1/jogos?select=*&order=fase.asc,data_hora.asc",{headers:h()});
+  var jogos=await r.json();
+  if(!Array.isArray(jogos)||!jogos.length){alert("Nenhum jogo cadastrado.");return;}
+  var fases=jogos.filter(function(j){return j.fase&&j.fase.startsWith("Grupo");});
+  if(!fases.length){alert("Nenhum jogo de fase de grupos encontrado.");return;}
+  if(!confirm("Sortear duplas para todos os "+fases.length+" jogos da fase de grupos de uma vez?\n\nO sistema vai distribuir automaticamente as categorias para equilibrar o número de jogos de cada dupla.")) return;
+  var btn=document.getElementById("btnSortearDuplas");
+  btn.disabled=true; btn.textContent="⏳ Sorteando...";
+  for(var i=0;i<fases.length;i++){
+    await sortearDuplasJogo(fases[i].id, true);
+    await new Promise(function(r){setTimeout(r,150);});
+  }
+  btn.disabled=false; btn.textContent="🎯 Sortear Todas";
+  alert("✅ Sorteio concluído! "+fases.length+" jogos sorteados.");
+  loadSorteioDuplas();
+  loadR();
+});
+
+
+// ── FOTOS PASTAS ──────────────────────────────────────
+document.getElementById("tab-fotos").addEventListener("click",function(){ showTab("fotos"); });
+document.getElementById("tab-interesse").addEventListener("click",function(){ showTab("interesse"); });
+var PASTAS_DB=[];
+
+async function loadPastas(){
+  var el=document.getElementById("lista-pastas");
+  if(!el)return;
+  el.innerHTML='<div style="text-align:center;padding:20px;color:var(--tl);">⏳ Carregando...</div>';
+  try{
+    var r=await fetch(SB+"/rest/v1/fotos_pastas?select=*&order=created_at.asc",{headers:{"apikey":K,"Authorization":"Bearer "+(TOK||K)}});
+    PASTAS_DB=await r.json();
+    if(!Array.isArray(PASTAS_DB)||!PASTAS_DB.length){
+      el.innerHTML='<div style="text-align:center;padding:40px;color:var(--tl);">Nenhuma pasta cadastrada. Clique em "+ Adicionar Pasta".</div>';
+      return;
+    }
+    var html='';
+    PASTAS_DB.forEach(function(p){
+      var link='https://drive.google.com/drive/folders/'+p.folder_id;
+      html+='<div class="card" style="margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">'+
+        '<div style="flex:1;min-width:0;"><div style="font-weight:600;">'+p.nome+'</div>'+
+        '<div style="font-size:0.74rem;color:var(--tl);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:380px;">'+link+'</div></div>'+
+        '<div style="display:flex;gap:6px;flex-shrink:0;">'+
+        '<a href="'+link+'" target="_blank" class="btn bg" style="padding:5px 12px;font-size:0.76rem;">👁 Ver</a>'+
+        '<button class="btn bg" style="padding:5px 12px;font-size:0.76rem;" data-id="'+p.id+'" data-nome="'+p.nome+'" data-fid="'+p.folder_id+'" onclick="editPastaBtn(this)">✏</button>'+
+        '<button class="btn bd" style="padding:5px 12px;font-size:0.76rem;" data-id="'+p.id+'" onclick="delPastaBtn(this)">✕</button>'+
+        '</div></div>';
+    });
+    el.innerHTML=html;
+  }catch(e){
+    el.innerHTML='<div style="color:#dc2626;padding:20px;">Erro: '+e.message+'</div>';
+  }
+}
+
+function editPastaBtn(btn){editPasta(btn.dataset.id,btn.dataset.nome,btn.dataset.fid);}
+function delPastaBtn(btn){delPasta(btn.dataset.id);}
+function editPasta(id,nome,folderId){
+  document.getElementById("pasta-idx").value=id;
+  document.getElementById("pasta-nome").value=nome;
+  document.getElementById("pasta-url").value='https://drive.google.com/drive/folders/'+folderId;
+  document.getElementById("modal-pasta-title").textContent="Editar Pasta";
+  openM("modal-pasta");
+}
+async function delPasta(id){
+  if(!confirm("Remover esta pasta?"))return;
+  await fetch(SB+"/rest/v1/fotos_pastas?id=eq."+id,{method:"DELETE",headers:h()});
+  loadPastas();
+}
+document.addEventListener("click",function(e){
+  if(e.target&&e.target.id==="btnAddPasta"){
+    document.getElementById("pasta-idx").value="";
+    document.getElementById("pasta-nome").value="";
+    document.getElementById("pasta-url").value="";
+    document.getElementById("modal-pasta-title").textContent="Adicionar Pasta";
+    openM("modal-pasta");
+  }
+  if(e.target&&e.target.id==="btnSalvarPasta"){
+    var nome=document.getElementById("pasta-nome").value.trim();
+    var url=document.getElementById("pasta-url").value.trim();
+    if(!nome||!url){alert("Preencha nome e URL.");return;}
+    var m=url.match(/folders\/([^?/]+)/);
+    var fid=m?m[1]:url;
+    var idx=document.getElementById("pasta-idx").value;
+    var body={nome:nome,folder_id:fid};
+    var req=idx?
+      fetch(SB+"/rest/v1/fotos_pastas?id=eq."+idx,{method:"PATCH",headers:h(),body:JSON.stringify(body)}):
+      fetch(SB+"/rest/v1/fotos_pastas",{method:"POST",headers:h(),body:JSON.stringify(body)});
+    req.then(function(){closeM("modal-pasta");loadPastas();});
+  }
+});
+
+// ── INTERESSE ─────────────────────────────────────────
+var INTERESSE_DATA=[];
+async function loadInteresse(){
+  var tb=document.getElementById("tb-interesse");
+  var ct=document.getElementById("interesse-count");
+  if(!tb)return;
+  try{
+    var r=await fetch(SB+"/rest/v1/interesse_torneio?select=*&order=created_at.desc",{headers:{"apikey":K,"Authorization":"Bearer "+(TOK||K)}});
+    INTERESSE_DATA=await r.json();
+    if(!Array.isArray(INTERESSE_DATA)||!INTERESSE_DATA.length){
+      tb.innerHTML="<tr><td colspan='6' style='text-align:center;padding:30px;color:var(--tl);'>Nenhum interesse registrado ainda.</td></tr>";
+      if(ct)ct.textContent="0 registros";
+      return;
+    }
+    if(ct)ct.textContent=INTERESSE_DATA.length+" registro"+(INTERESSE_DATA.length!==1?"s":"");
+    tb.innerHTML=INTERESSE_DATA.map(function(p,i){
+      var dt=new Date(p.created_at).toLocaleString("pt-BR");
+      return "<tr>"+
+        "<td style='color:var(--tl);'>"+(i+1)+"</td>"+
+        "<td style='font-weight:500;'>"+p.nome+"</td>"+
+        "<td>"+p.sobrenome+"</td>"+
+        "<td><a href='https://wa.me/55"+p.telefone.replace(/\D/g,"")+"' target='_blank' style='color:var(--g);text-decoration:none;'>"+p.telefone+"</a></td>"+
+        "<td><a href='mailto:"+p.email+"' style='color:var(--r);text-decoration:none;'>"+p.email+"</a></td>"+
+        "<td style='color:var(--tl);font-size:0.8rem;'>"+dt+"</td>"+
+      "</tr>";
+    }).join("");
+  }catch(e){
+    if(tb)tb.innerHTML="<tr><td colspan='6' style='color:#dc2626;padding:20px;'>Erro: "+e.message+"</td></tr>";
+  }
+}
+function exportInteresse(){
+  if(!INTERESSE_DATA.length){alert("Nenhum dado para exportar.");return;}
+  var rows=[["#","Nome","Sobrenome","WhatsApp","E-mail","Data"]];
+  INTERESSE_DATA.forEach(function(p,i){
+    rows.push([i+1,p.nome,p.sobrenome,p.telefone,p.email,new Date(p.created_at).toLocaleString("pt-BR")]);
+  });
+  var csv=rows.map(function(r){return r.map(function(v){return '"'+String(v).replace(/"/g,'""')+'"';}).join(",");}).join("\n");
+  var blob=new Blob(["﻿"+csv],{type:"text/csv;charset=utf-8;"});
+  var a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="interesse_torneio_"+(new Date().toLocaleDateString("pt-BR").replace(/\//g,"-"))+".csv";
+  a.click();
+}
+
+</script>
+</body>
+</html>
+
+    <!-- FOTOS -->
+    <div id="tc-fotos" class="tc">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+        <div>
+          <div class="stitle">Pastas de Fotos</div>
+          <div style="font-size:0.84rem;color:var(--tl);margin-top:4px;">Links das pastas do Google Drive que aparecem na galeria</div>
+        </div>
+        <button class="btn bp" id="btnAddPasta">+ Adicionar Pasta</button>
+      </div>
+      <div id="lista-pastas"></div>
+      <div style="background:rgba(123,94,167,0.06);border:1px solid rgba(123,94,167,0.15);border-radius:12px;padding:14px 18px;margin-top:16px;font-size:0.82rem;color:var(--tl);">
+        💡 Adicione múltiplas pastas do Google Drive. As fotos de todas as pastas são combinadas automaticamente na galeria pública.
+      </div>
+    </div>
+
+    <!-- INTERESSE -->
+    <div id="tc-interesse" class="tc">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+        <div>
+          <div class="stitle">Interesse no Torneio</div>
+          <div style="font-size:0.84rem;color:var(--tl);margin-top:4px;" id="interesse-count">Carregando...</div>
+        </div>
+        <button class="btn bp" onclick="exportInteresse()">⬇ Exportar Excel</button>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;overflow-x:auto;">
+        <table>
+          <thead><tr><th>#</th><th>Nome</th><th>Sobrenome</th><th>WhatsApp</th><th>E-mail</th><th>Data</th></tr></thead>
+          <tbody id="tb-interesse"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- MODAL: Pasta de Fotos -->
+    <div id="modal-pasta" class="modal"><div class="mc">
+      <div class="mt" id="modal-pasta-title">Pasta de Fotos</div>
+      <input type="hidden" id="pasta-idx"/>
+      <div class="fr">
+        <label>Nome da pasta</label>
+        <input type="text" id="pasta-nome" placeholder="Nome descritivo..."/>
+      </div>
+      <div class="fr">
+        <label>Link da pasta do Google Drive</label>
+        <input type="text" id="pasta-url" placeholder="https://drive.google.com/drive/folders/..."/>
+        <div style="font-size:0.74rem;color:var(--tl);margin-top:4px;">A pasta deve estar pública</div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px;">
+        <button class="btn bg" onclick="closeM('modal-pasta')">Cancelar</button>
+        <button class="btn bp" id="btnSalvarPasta">Salvar</button>
+      </div>
+    </div></div>
+
+
