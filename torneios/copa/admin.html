@@ -1147,31 +1147,53 @@ async function loadMata(){
 }
 
 function calcSeedsAdmin(jogos){
-  // Calcula stats de grupos
+  // Stats idêntico ao grupos.html
   var s={};
-  jogos.forEach(function(j){
-    if(!j.fase||!j.fase.startsWith('Grupo')) return;
+  var jogosGrupos=jogos.filter(function(j){return j.fase&&j.fase.startsWith('Grupo');});
+  jogosGrupos.forEach(function(j){
     var sp=sumP(j.resultados||[]);
     if(!sp.ta&&!sp.tb) return;
     var g=j.fase.replace('Grupo ','');
-    function en(n){if(!s[n])s[n]={grupo:g,j:0,v:0,gf:0,gc:0,gm:0,gs:0};}
+    function en(n){if(!s[n])s[n]={grupo:g,j:0,v:0,d:0,gf:0,gc:0,gm:0,gs:0};}
     en(j.equipe_a); en(j.equipe_b);
     s[j.equipe_a].j++; s[j.equipe_b].j++;
     s[j.equipe_a].gf+=sp.ta; s[j.equipe_a].gc+=sp.tb;
+    s[j.equipe_a].gm+=(j.resultados||[]).reduce(function(acc,p){return acc+(p.games_a||0);},0);
+    s[j.equipe_a].gs+=(j.resultados||[]).reduce(function(acc,p){return acc+(p.games_b||0);},0);
     s[j.equipe_b].gf+=sp.tb; s[j.equipe_b].gc+=sp.ta;
-    if(sp.ta>sp.tb){s[j.equipe_a].v++;}
-    else if(sp.tb>sp.ta){s[j.equipe_b].v++;}
+    s[j.equipe_b].gm+=(j.resultados||[]).reduce(function(acc,p){return acc+(p.games_b||0);},0);
+    s[j.equipe_b].gs+=(j.resultados||[]).reduce(function(acc,p){return acc+(p.games_a||0);},0);
+    if(sp.ta>sp.tb){s[j.equipe_a].v++;s[j.equipe_b].d++;}
+    else if(sp.tb>sp.ta){s[j.equipe_b].v++;s[j.equipe_a].d++;}
   });
-  var list=Object.entries(s).map(function(e){
-    return {nome:e[0],grupo:e[1].grupo,j:e[1].j,v:e[1].v,gf:e[1].gf,gc:e[1].gc};
+
+  // sortRows idêntico ao grupos.html
+  function getDR(t1,t2){
+    var j=jogosGrupos.find(function(x){return(x.equipe_a===t1&&x.equipe_b===t2)||(x.equipe_a===t2&&x.equipe_b===t1);});
+    if(!j||!j.resultados||!j.resultados.length) return null;
+    var sp=sumP(j.resultados); if(!sp.ta&&!sp.tb) return null;
+    return j.equipe_a===t1?{v:sp.ta}:{v:sp.tb};
+  }
+  function sortRows(rows){
+    return rows.slice().sort(function(a,b){
+      if(b.v!==a.v) return b.v-a.v;
+      var sdA=a.gf-a.gc, sdB=b.gf-b.gc;
+      if(sdB!==sdA) return sdB-sdA;
+      if(b.gm!==a.gm) return b.gm-a.gm;
+      if(a.gs!==b.gs) return a.gs-b.gs;
+      var da=getDR(a.nome,b.nome), db=getDR(b.nome,a.nome);
+      if(da&&db&&da.v!==db.v) return db.v-da.v;
+      return 0;
+    });
+  }
+
+  var list=Object.keys(s).map(function(nome){
+    var e=s[nome];
+    return {nome:nome,grupo:e.grupo,j:e.j,v:e.v,d:e.d,gf:e.gf,gc:e.gc,gm:e.gm,gs:e.gs};
   }).filter(function(t){return t.j>=3;});
   if(list.length<16) return null;
-  list.sort(function(a,b){
-    if(b.v!==a.v) return b.v-a.v;
-    var sda=a.gf-a.gc, sdb=b.gf-b.gc;
-    if(sdb!==sda) return sdb-sda;
-    return b.gf-a.gf;
-  });
+
+  list=sortRows(list);
   var all16=list.slice(0,16);
   function nm(i){return all16[i]?all16[i].nome:null;}
   return {
