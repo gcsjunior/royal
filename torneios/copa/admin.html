@@ -1049,7 +1049,6 @@ async function loadMata(){
   var el=document.getElementById('mata-lista');
   el.innerHTML='<div style="text-align:center;padding:20px;color:var(--tl);">⏳ Carregando...</div>';
   try{
-    // Buscar todos os jogos com resultados
     var [rj, rr] = await Promise.all([
       fetch(SB+'/rest/v1/jogos?select=*&order=data_hora.asc',{headers:h()}).then(r=>r.json()),
       fetch(SB+'/rest/v1/resultados?select=*',{headers:h()}).then(r=>r.json())
@@ -1057,35 +1056,38 @@ async function loadMata(){
     if(!Array.isArray(rj)) rj=[];
     if(!Array.isArray(rr)) rr=[];
 
-    // Merge resultados
     var resMap={};
     rr.forEach(function(r){ if(!resMap[r.jogo_id]) resMap[r.jogo_id]=[]; resMap[r.jogo_id].push(r); });
     rj.forEach(function(j){ j.resultados = resMap[j.id]||[]; });
 
-    // Calcular seeds (ranking geral)
-    var seeds = calcSeedsAdmin(rj);
-    if(!seeds){ el.innerHTML='<div style="text-align:center;padding:40px;color:var(--tl);">⏳ Aguardando conclusão da fase de grupos...</div>'; return; }
+    // OITAVAS: vêm diretamente do banco (pares já fixos)
+    var oitavasBD = rj.filter(function(j){ return j.fase==='Oitavas'; });
+    var oitavas = oitavasBD.map(function(j){ return [j.equipe_a, j.equipe_b]; });
 
-    // Calcular pares de cada fase dinamicamente
-    var L=seeds.L, R=seeds.R;
+    // QUARTAS em diante: calcular dinamicamente a partir dos vencedores
     function w(t1,t2){ return winnerOf(rj,t1,t2); }
 
-    var oitavas = [
-      [L[0][0],L[0][1]], [L[1][0],L[1][1]], [L[2][0],L[2][1]], [L[3][0],L[3][1]],
-      [R[0][0],R[0][1]], [R[1][0],R[1][1]], [R[2][0],R[2][1]], [R[3][0],R[3][1]]
-    ];
-    var lq1=[w(L[0][0],L[0][1]),w(L[1][0],L[1][1])];
-    var lq2=[w(L[2][0],L[2][1]),w(L[3][0],L[3][1])];
-    var rq1=[w(R[0][0],R[0][1]),w(R[1][0],R[1][1])];
-    var rq2=[w(R[2][0],R[2][1]),w(R[3][0],R[3][1])];
-    var quartas=[[lq1[0],lq1[1]],[lq2[0],lq2[1]],[rq1[0],rq1[1]],[rq2[0],rq2[1]]];
-
+    // Calcular seeds apenas para quartas+
+    var seeds = calcSeedsAdmin(rj);
+    var lq1,lq2,rq1,rq2,quartas,semis,final_;
+    if(seeds){
+      var L=seeds.L, R=seeds.R;
+      lq1=[w(L[0][0],L[0][1]),w(L[1][0],L[1][1])];
+      lq2=[w(L[2][0],L[2][1]),w(L[3][0],L[3][1])];
+      rq1=[w(R[0][0],R[0][1]),w(R[1][0],R[1][1])];
+      rq2=[w(R[2][0],R[2][1]),w(R[3][0],R[3][1])];
+    } else {
+      // Se seeds não disponível, usar vencedores das oitavas do banco em ordem
+      var venc=oitavasBD.map(function(j){ return w(j.equipe_a,j.equipe_b); });
+      lq1=[venc[0],venc[1]]; lq2=[venc[2],venc[3]];
+      rq1=[venc[4],venc[5]]; rq2=[venc[6],venc[7]];
+    }
+    quartas=[[lq1[0],lq1[1]],[lq2[0],lq2[1]],[rq1[0],rq1[1]],[rq2[0],rq2[1]]];
     var ls=[w(lq1[0],lq1[1]),w(lq2[0],lq2[1])];
     var rs=[w(rq1[0],rq1[1]),w(rq2[0],rq2[1])];
-    var semis=[[ls[0],ls[1]],[rs[0],rs[1]]];
-
+    semis=[[ls[0],ls[1]],[rs[0],rs[1]]];
     var fin=[w(ls[0],ls[1]),w(rs[0],rs[1])];
-    var final_=[[fin[0],fin[1]]];
+    final_=[[fin[0],fin[1]]];
 
     var fasesPares = [
       {fase:'Oitavas', pares:oitavas},
