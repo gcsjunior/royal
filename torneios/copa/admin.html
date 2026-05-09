@@ -105,9 +105,12 @@ tr:last-child td{border-bottom:none;}
 
     <!-- JOGOS -->
     <div id="tc-jogos" class="tc on">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
         <div class="stitle">Jogos</div>
         <button class="btn bp" id="btnNewJogo">+ Novo Jogo</button>
+      </div>
+      <div style="background:rgba(242,101,34,0.06);border:1px solid rgba(242,101,34,0.15);border-radius:10px;padding:10px 14px;margin-bottom:16px;font-size:0.8rem;color:#b45309;">
+        ⚠️ Use esta aba apenas para jogos de <strong>Fase de Grupos</strong>. Para lançar resultados do Mata-Mata, use <strong>Resultados → ⚡ Mata-Mata</strong>.
       </div>
       <div class="card" style="padding:0;overflow:hidden;">
         <table><thead><tr><th>Fase</th><th>Equipe A</th><th>Equipe B</th><th>Data/Hora</th><th>Quadra</th><th></th></tr></thead>
@@ -238,7 +241,7 @@ tr:last-child td{border-bottom:none;}
 <div id="mj" class="modal"><div class="mc">
   <div class="mt">Jogo</div><input type="hidden" id="jid"/>
   <div class="g2"><div class="fr"><label>Equipe A</label><input id="jea"/></div><div class="fr"><label>Equipe B</label><input id="jeb"/></div></div>
-  <div class="g2"><div class="fr"><label>Fase</label><select id="jfase"><option>Grupo A</option><option>Grupo B</option><option>Grupo C</option><option>Grupo D</option><option>Grupo E</option><option>Grupo F</option><option>Oitavas</option><option>Quartas</option><option>Semi</option><option>Final</option></select></div><div class="fr"><label>Quadra</label><input id="jq"/></div></div>
+  <div class="g2"><div class="fr"><label>Fase</label><select id="jfase"><option>Grupo A</option><option>Grupo B</option><option>Grupo C</option><option>Grupo D</option><option>Grupo E</option><option>Grupo F</option></select></div><div class="fr"><label>Quadra</label><input id="jq"/></div></div>
   <div class="fr"><label>Data/Hora</label><input type="datetime-local" id="jdt"/></div>
   <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px;"><button class="btn bg" id="btnCancJogo">Cancelar</button><button class="btn bp" id="btnSaveJogo">Salvar</button></div>
 </div></div>
@@ -1223,37 +1226,48 @@ async function saveMataResult(){
   var d=MATA_MODAL_DATA;
   var cats=['Soma 7','Soma 9','Soma 11'];
 
-  // Criar jogo se não existe
-  var jid=d.jid;
-  if(!jid){
-    var rj=await fetch(SB+'/rest/v1/jogos',{method:'POST',headers:Object.assign({},h(),{'Prefer':'return=representation'}),
-      body:JSON.stringify({fase:d.fase,equipe_a:d.t1,equipe_b:d.t2})}).then(r=>r.json());
-    jid=Array.isArray(rj)?rj[0].id:rj.id;
-    MATA_MODAL_DATA.jid=jid;
-  }
+  try{
+    // Criar jogo se não existe
+    var jid=d.jid;
+    if(!jid){
+      var rj=await fetch(SB+'/rest/v1/jogos',{method:'POST',headers:Object.assign({},h(),{'Prefer':'return=representation'}),
+        body:JSON.stringify({fase:d.fase,equipe_a:d.t1,equipe_b:d.t2})}).then(function(r){return r.json();});
+      jid=Array.isArray(rj)?rj[0].id:rj.id;
+      MATA_MODAL_DATA.jid=jid;
+    }
 
-  // Deletar resultados anteriores
-  await fetch(SB+'/rest/v1/resultados?jogo_id=eq.'+jid,{method:'DELETE',headers:h()});
+    // Deletar resultados anteriores
+    await fetch(SB+'/rest/v1/resultados?jogo_id=eq.'+jid,{method:'DELETE',headers:h()});
 
-  // Salvar partidas
-  var saves=[];
-  for(var n=1;n<=3;n++){
-    var gaEl=document.getElementById('mm-ga'+n);
-    if(!gaEl||gaEl.closest('#mm-p3-wrap')&&document.getElementById('mm-p3-wrap').style.display==='none') continue;
-    var ga=+gaEl.value||0, gb=+document.getElementById('mm-gb'+n).value||0;
-    var tb=document.getElementById('mm-tb'+n).checked;
-    if(n>1&&ga===0&&gb===0) continue;
-    saves.push({jogo_id:jid,numero_partida:n,categoria:cats[n-1],
-      dupla_sorteada_a:cats[n-1],dupla_sorteada_b:cats[n-1],
-      games_a:ga,games_b:gb,tiebreak:tb,
-      total_a:ga>gb?1:0,total_b:gb>ga?1:0});
+    // Salvar partidas
+    var saves=[];
+    var p3vis=document.getElementById('mm-p3-wrap').style.display!=='none';
+    for(var n=1;n<=3;n++){
+      if(n===3&&!p3vis) continue;
+      var gaEl=document.getElementById('mm-ga'+n);
+      var gbEl=document.getElementById('mm-gb'+n);
+      var tbEl=document.getElementById('mm-tb'+n);
+      if(!gaEl||!gbEl) continue;
+      var ga=parseInt(gaEl.value)||0;
+      var gb=parseInt(gbEl.value)||0;
+      var tb=tbEl?tbEl.checked:false;
+      if(n>1&&ga===0&&gb===0) continue;
+      saves.push({jogo_id:jid,numero_partida:n,categoria:cats[n-1],
+        dupla_sorteada_a:cats[n-1],dupla_sorteada_b:cats[n-1],
+        games_a:ga,games_b:gb,tiebreak:tb,
+        total_a:ga>gb?1:0,total_b:gb>ga?1:0});
+    }
+    if(saves.length){
+      var resp=await fetch(SB+'/rest/v1/resultados',{method:'POST',headers:h(),body:JSON.stringify(saves)});
+      if(!resp.ok){ var err=await resp.text(); alert('Erro ao salvar: '+err); return; }
+    }
+    closeM('modal-mata');
+    loadMata();
+    loadR();
+  }catch(e){
+    alert('Erro: '+e.message);
+    console.error(e);
   }
-  if(saves.length){
-    await fetch(SB+'/rest/v1/resultados',{method:'POST',headers:h(),body:JSON.stringify(saves)});
-  }
-  closeM('modal-mata');
-  loadMata();
-  loadR();
 }
 </script>
 
