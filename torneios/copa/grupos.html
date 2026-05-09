@@ -85,9 +85,9 @@ tr:last-child td{border-bottom:none;}
 /* Desktop bracket - horizontal */
 .bwrap{background:#0d0d18;border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:28px 16px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .binner{display:inline-flex;align-items:stretch;min-width:900px;}
-.rnd{display:flex;flex-direction:column;justify-content:space-around;min-width:150px;padding:0 4px;height:360px;}
+.rnd{display:flex;flex-direction:column;justify-content:space-around;min-width:150px;padding:0 4px;}
 .rt{font-size:0.62rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.3);text-align:center;margin-bottom:12px;}
-.mt{display:flex;flex-direction:column;margin:4px 0;min-height:52px;justify-content:center;}
+.mt{display:flex;flex-direction:column;margin:4px 0;}
 .tm{padding:7px 11px;font-size:0.75rem;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px;}
 .tm:first-child{border-radius:8px 8px 0 0;border-bottom:none;}
 .tm:last-child{border-radius:0 0 8px 8px;}
@@ -605,12 +605,12 @@ function buildBracket(seeds,jogos){
   var fin=[win(ls[0],ls[1],jogos),win(rs[0],rs[1],jogos)];
   var champ=win(fin[0],fin[1],jogos);
 
-  var c1L=svg([{d:'M0,44 L10,44 L10,90 L20,90',c:pc},{d:'M0,132 L10,132 L10,90 L20,90',c:pc},{d:'M0,220 L10,220 L10,270 L20,270',c:pc},{d:'M0,308 L10,308 L10,270 L20,270',c:pc}],H);
-  var c2L=svg([{d:'M0,90 L10,90 L10,180 L20,180',c:pc},{d:'M0,270 L10,270 L10,180 L20,180',c:pc}],H);
-  var cFL=svg([{d:'M0,180 L20,180',c:fc}],H);
-  var cFR=svg([{d:'M20,180 L0,180',c:fc}],H);
-  var c2R=svg([{d:'M20,90 L10,90 L10,180 L0,180',c:pc},{d:'M20,270 L10,270 L10,180 L0,180',c:pc}],H);
-  var c1R=svg([{d:'M20,44 L10,44 L10,90 L0,90',c:pc},{d:'M20,132 L10,132 L10,90 L0,90',c:pc},{d:'M20,220 L10,220 L10,270 L0,270',c:pc},{d:'M20,308 L10,308 L10,270 L0,270',c:pc}],H);
+  var c1L=svg([{d:'M0,44 L10,44 L10,88 L20,88',c:pc},{d:'M0,132 L10,132 L10,88 L20,88',c:pc},{d:'M0,220 L10,220 L10,264 L20,264',c:pc},{d:'M0,308 L10,308 L10,264 L20,264',c:pc}],H);
+  var c2L=svg([{d:'M0,88 L10,88 L10,176 L20,176',c:pc},{d:'M0,264 L10,264 L10,176 L20,176',c:pc}],H);
+  var cFL=svg([{d:'M0,176 L20,176',c:fc}],H);
+  var cFR=svg([{d:'M20,176 L0,176',c:fc}],H);
+  var c2R=svg([{d:'M20,88 L10,88 L10,176 L0,176',c:pc},{d:'M20,264 L10,264 L10,176 L0,176',c:pc}],H);
+  var c1R=svg([{d:'M20,44 L10,44 L10,88 L0,88',c:pc},{d:'M20,132 L10,132 L10,88 L0,88',c:pc},{d:'M20,220 L10,220 L10,264 L0,264',c:pc},{d:'M20,308 L10,308 L10,264 L0,264',c:pc}],H);
 
   var fin_html='<div class="fcol"><div class="rt">Grande Final</div><div class="fbox"><div style="font-size:1.4rem;margin-bottom:8px;">🏆</div>';
   if(champ)fin_html+='<div style="font-size:1.6rem;margin-bottom:4px;">'+flag(champ)+'</div><div style="font-size:1rem;font-weight:700;color:#fff;margin-bottom:4px;">'+pais(champ)+'</div><div style="font-size:0.68rem;color:rgba(255,255,255,0.4);">🏆 Campeão</div>';
