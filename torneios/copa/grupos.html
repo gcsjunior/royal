@@ -85,9 +85,9 @@ tr:last-child td{border-bottom:none;}
 /* Desktop bracket - horizontal */
 .bwrap{background:#0d0d18;border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:28px 16px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .binner{display:inline-flex;align-items:stretch;min-width:900px;}
-.rnd{display:flex;flex-direction:column;min-width:150px;padding:0 4px;height:360px;}
+.rnd{display:flex;flex-direction:column;justify-content:space-around;min-width:150px;padding:0 4px;height:360px;}
 .rt{font-size:0.62rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.3);text-align:center;margin-bottom:12px;}
-.mt{display:flex;flex-direction:column;margin:4px 0;}
+.mt{display:flex;flex-direction:column;margin:4px 0;min-height:52px;justify-content:center;}
 .tm{padding:7px 11px;font-size:0.75rem;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px;}
 .tm:first-child{border-radius:8px 8px 0 0;border-bottom:none;}
 .tm:last-child{border-radius:0 0 8px 8px;}
@@ -577,8 +577,7 @@ function mHtml(t1,t2,res){
   var s1='',s2='';
   if(res){if(res[0]>res[1])s1='win';else if(res[1]>res[0])s2='win';}
   function th(n,cls){return '<div class="tm '+(n?cls:'tbd')+'">'+(n?fp(n):'A definir')+'</div>';}
-  var inner='<div class="mt">'+th(t1,s1)+th(t2,s2)+(res?'<div style="text-align:center;font-size:0.65rem;color:rgba(255,255,255,0.3);padding:1px;">'+res[0]+' x '+res[1]+'</div>':'')+'</div>';
-  return '<div style="flex:1;display:flex;align-items:center;">'+inner+'</div>';
+  return '<div class="mt">'+th(t1,s1)+th(t2,s2)+(res?'<div style="text-align:center;font-size:0.65rem;color:rgba(255,255,255,0.3);padding:1px;">'+res[0]+' x '+res[1]+'</div>':'')+'</div>';
 }
 function svg(paths,H){
   return '<svg style="width:20px;height:'+H+'px;" viewBox="0 0 20 '+H+'" preserveAspectRatio="none">'+
@@ -586,13 +585,11 @@ function svg(paths,H){
     '</svg>';
 }
 function rnd(title,matches,pt,pb,jogos){
-  var s='<div class="rnd"><div class="rt">'+title+'</div>';
-  if(pt) s+='<div style="flex:'+pt+';min-height:0;"></div>';
+  var s='<div class="rnd" style="padding-top:'+(pt||0)+'px;padding-bottom:'+(pb||0)+'px;"><div class="rt">'+title+'</div>';
   matches.forEach(function(m){
     var r=fRes(m[0],m[1],jogos);
     s+=mHtml(m[0],m[1],r);
   });
-  if(pb) s+='<div style="flex:'+pb+';min-height:0;"></div>';
   return s+'</div>';
 }
 function buildBracket(seeds,jogos){
