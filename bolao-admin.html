@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Admin · Bolão da Copa 2026 — Royal Tênis Clube</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root{--royal:#7B5EA7;--royal-dark:#5a4080;--green:#2EBD9A;--orange:#F26522;--gold:#F2C94C;--cream:#FAF7F2;--dark:#100a1c;--text:#2d2040;--text-light:#8a7fa0;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);}
+  nav{background:var(--dark);color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;}
+  nav .t{font-family:'Nunito';font-weight:800;font-size:1rem;}
+  nav .t span{font-weight:400;color:rgba(255,255,255,.5);font-size:.72rem;display:block;}
+  nav a{color:rgba(255,255,255,.6);text-decoration:none;font-size:.82rem;}
+  .wrap{max-width:1000px;margin:0 auto;padding:24px 16px 80px;}
+  .btn{cursor:pointer;border:none;font-family:'DM Sans';font-weight:600;border-radius:10px;padding:11px 18px;font-size:.88rem;transition:.2s;}
+  .btn-royal{background:var(--royal);color:#fff;} .btn-royal:hover{background:var(--royal-dark);}
+  .btn-green{background:var(--green);color:#fff;} .btn-green:hover{filter:brightness(1.05);}
+  .btn-ghost{background:#fff;border:1px solid rgba(0,0,0,.12);color:var(--text);}
+  .btn-sm{padding:8px 12px;font-size:.8rem;}
+  .btn-del{background:#fff;border:1px solid #e7c3b5;color:#c44e18;}
+  .card{background:#fff;border-radius:14px;padding:22px;box-shadow:0 4px 18px rgba(90,64,128,.06);margin-bottom:18px;}
+  .card h2{font-family:'Nunito';font-size:1.1rem;color:var(--dark);margin-bottom:4px;}
+  .card .desc{color:var(--text-light);font-size:.85rem;margin-bottom:16px;}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px;}
+  .tab{padding:9px 16px;border-radius:100px;background:#fff;border:1px solid rgba(0,0,0,.1);cursor:pointer;font-size:.85rem;font-weight:600;color:var(--text-light);}
+  .tab.active{background:var(--royal);color:#fff;border-color:var(--royal);}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+  .field{margin-bottom:12px;}
+  .field label{display:block;font-size:.75rem;font-weight:600;margin-bottom:5px;}
+  .field input,.field select,.field textarea{width:100%;padding:10px 12px;border:1px solid rgba(0,0,0,.14);border-radius:9px;font-size:.9rem;font-family:'DM Sans';outline:none;}
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--royal);}
+  textarea{min-height:160px;resize:vertical;font-family:ui-monospace,monospace;font-size:.82rem;}
+  .msg{font-size:.85rem;margin:10px 0;min-height:1.1em;}
+  .msg.ok{color:#1a9b7c;font-weight:600;} .msg.err{color:#c44e18;font-weight:600;}
+  .flag-prev{font-size:1.4rem;}
+  table{width:100%;border-collapse:collapse;font-size:.85rem;}
+  th,td{padding:9px 8px;text-align:left;border-bottom:1px solid rgba(0,0,0,.06);}
+  th{font-size:.72rem;text-transform:uppercase;color:var(--text-light);}
+  .jrow td{vertical-align:middle;}
+  .mini{width:40px;height:38px;text-align:center;border:1px solid rgba(0,0,0,.18);border-radius:8px;font-weight:700;font-family:'Nunito';}
+  .hide{display:none;}
+  .gate{max-width:360px;margin:60px auto;background:#fff;border-radius:16px;padding:30px;box-shadow:0 8px 30px rgba(90,64,128,.1);text-align:center;}
+  .gate h1{font-family:'Nunito';font-size:1.3rem;margin-bottom:6px;color:var(--dark);}
+  .gate p{color:var(--text-light);font-size:.88rem;margin-bottom:18px;}
+  .tag{font-size:.7rem;font-weight:600;color:#fff;background:var(--royal);padding:2px 9px;border-radius:100px;}
+  .tag.done{background:var(--green);} .tag.lock{background:var(--orange);}
+  .note{background:rgba(123,94,167,.07);border-radius:10px;padding:12px 14px;font-size:.82rem;color:var(--text-light);margin-top:6px;}
+  @media(max-width:680px){.grid{grid-template-columns:1fr;} td .nm{font-size:.8rem;}}
+</style>
+</head>
+<body>
+<nav>
+  <div class="t">⚙️ Admin · Bolão da Copa<span>Royal Tênis Clube</span></div>
+  <a href="bolao.html">Ver bolão →</a>
+</nav>
+
+<!-- GATE -->
+<div id="gate" class="gate">
+  <h1>Área restrita</h1>
+  <p>Informe o PIN do administrador.</p>
+  <div class="field"><input id="pin" type="password" placeholder="PIN" onkeydown="if(event.key==='Enter')entrar()"/></div>
+  <div class="msg" id="gate-msg"></div>
+  <button class="btn btn-royal" style="width:100%" onclick="entrar()">Entrar</button>
+</div>
+
+<!-- PAINEL -->
+<div id="painel" class="wrap hide">
+  <div class="tabs">
+    <div class="tab active" data-t="res" onclick="tab('res')">🏁 Resultados</div>
+    <div class="tab" data-t="add" onclick="tab('add')">➕ Adicionar jogo</div>
+    <div class="tab" data-t="imp" onclick="tab('imp')">📋 Importar em lote</div>
+    <div class="tab" data-t="part" onclick="tab('part')">👥 Participantes</div>
+    <div class="tab" data-t="cfg" onclick="tab('cfg')">🔑 PIN</div>
+  </div>
+
+  <!-- RESULTADOS / LISTA -->
+  <div id="t-res">
+    <div class="card">
+      <h2>Jogos cadastrados</h2>
+      <p class="desc">Lance o placar real e marque como encerrado — o ranking recalcula sozinho. Você pode editar a qualquer momento.</p>
+      <div id="lista-jogos">Carregando…</div>
+    </div>
+  </div>
+
+  <!-- ADICIONAR -->
+  <div id="t-add" class="hide">
+    <div class="card">
+      <h2>Adicionar um jogo</h2>
+      <p class="desc">A bandeira é preenchida sozinha pelo nome do país (você pode ajustar).</p>
+      <div class="grid">
+        <div class="field"><label>Fase</label><input id="a-fase" value="Fase de Grupos"/></div>
+        <div class="field"><label>Grupo (opcional)</label><input id="a-grupo" placeholder="A, B, C…"/></div>
+      </div>
+      <div class="grid">
+        <div class="field"><label>Time mandante</label><input id="a-casa" oninput="prev('a-casa','a-flagc')" placeholder="Brasil"/></div>
+        <div class="field"><label>Time visitante</label><input id="a-fora" oninput="prev('a-fora','a-flagf')" placeholder="Argentina"/></div>
+      </div>
+      <div class="grid">
+        <div class="field"><label>Bandeira mandante <span class="flag-prev" id="a-flagc"></span></label><input id="a-flagc-in" placeholder="🇧🇷"/></div>
+        <div class="field"><label>Bandeira visitante <span class="flag-prev" id="a-flagf"></span></label><input id="a-flagf-in" placeholder="🇦🇷"/></div>
+      </div>
+      <div class="field"><label>Data e hora do início (horário de Brasília)</label><input id="a-inicio" type="datetime-local"/></div>
+      <div class="msg" id="add-msg"></div>
+      <button class="btn btn-green" onclick="addJogo()">Adicionar jogo</button>
+    </div>
+  </div>
+
+  <!-- IMPORTAR -->
+  <div id="t-imp" class="hide">
+    <div class="card">
+      <h2>Importar vários jogos de uma vez</h2>
+      <p class="desc">Cole uma linha por jogo no formato abaixo. As bandeiras são preenchidas automaticamente pelo nome do país.</p>
+      <div class="note"><b>Formato:</b> <code>AAAA-MM-DD HH:MM | Grupo | Mandante | Visitante</code><br>
+      <b>Exemplo:</b><br>
+      <code>2026-06-11 22:00 | A | México | Polônia</code><br>
+      <code>2026-06-12 16:00 | B | Canadá | Marrocos</code><br>
+      <small>Horário de Brasília. O "Grupo" é opcional — deixe vazio se não tiver (ex.: <code>2026-07-15 16:00 || Brasil | França</code>).</small></div>
+      <div class="field" style="margin-top:14px;"><label>Fase destes jogos</label><input id="i-fase" value="Fase de Grupos"/></div>
+      <div class="field"><label>Jogos</label><textarea id="i-text" placeholder="2026-06-11 22:00 | A | México | Polônia&#10;2026-06-12 16:00 | B | Canadá | Marrocos"></textarea></div>
+      <div class="msg" id="imp-msg"></div>
+      <button class="btn btn-green" onclick="importar()">Importar jogos</button>
+    </div>
+  </div>
+
+  <!-- PARTICIPANTES -->
+  <div id="t-part" class="hide">
+    <div class="card">
+      <h2>Participantes inscritos</h2>
+      <p class="desc">Dados de cadastro dos inscritos no bolão.</p>
+      <button class="btn btn-ghost btn-sm" onclick="carregarParticipantes()">Atualizar</button>
+      <div id="lista-part" style="margin-top:14px;">Carregando…</div>
+    </div>
+  </div>
+
+  <!-- PIN -->
+  <div id="t-cfg" class="hide">
+    <div class="card">
+      <h2>Trocar PIN do admin</h2>
+      <p class="desc">O PIN inicial é <b>2026</b> — troque por segurança.</p>
+      <div class="field"><label>PIN atual</label><input id="p-atual" type="password"/></div>
+      <div class="field"><label>Novo PIN</label><input id="p-novo" type="password"/></div>
+      <div class="msg" id="cfg-msg"></div>
+      <button class="btn btn-royal" onclick="trocarPin()">Salvar novo PIN</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SB="https://vfrjqkwdxjvggzkfxfen.supabase.co";
+const KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZmcmpxa3dkeGp2Z2d6a2Z4ZmVuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxODcyNDcsImV4cCI6MjA5Mzc2MzI0N30.PaHe7kQL8DUs8gmt9Wk47qaz6CX5PLfbeuhv3OIdigU";
+const H={'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json'};
+let PIN="";
+
+// bandeiras (nome PT -> emoji). Normaliza minúsculas/acentos.
+const FLAGS={
+ 'brasil':'🇧🇷','argentina':'🇦🇷','uruguai':'🇺🇾','colombia':'🇨🇴','equador':'🇪🇨','paraguai':'🇵🇾','peru':'🇵🇪','chile':'🇨🇱','bolivia':'🇧🇴','venezuela':'🇻🇪',
+ 'estados unidos':'🇺🇸','eua':'🇺🇸','canada':'🇨🇦','mexico':'🇲🇽','costa rica':'🇨🇷','panama':'🇵🇦','honduras':'🇭🇳','jamaica':'🇯🇲','el salvador':'🇸🇻','guatemala':'🇬🇹','haiti':'🇭🇹','curacao':'🇨🇼','trinidad e tobago':'🇹🇹',
+ 'franca':'🇫🇷','espanha':'🇪🇸','portugal':'🇵🇹','alemanha':'🇩🇪','inglaterra':'🏴󠁧󠁢󠁥󠁮󠁧󠁿','escocia':'🏴󠁧󠁢󠁳󠁣󠁴󠁿','italia':'🇮🇹','holanda':'🇳🇱','paises baixos':'🇳🇱','belgica':'🇧🇪','croacia':'🇭🇷','suica':'🇨🇭','dinamarca':'🇩🇰','suecia':'🇸🇪','noruega':'🇳🇴','polonia':'🇵🇱','austria':'🇦🇹','servia':'🇷🇸','turquia':'🇹🇷','ucrania':'🇺🇦','republica tcheca':'🇨🇿','tchequia':'🇨🇿','hungria':'🇭🇺','grecia':'🇬🇷','romenia':'🇷🇴','eslovenia':'🇸🇮','eslovaquia':'🇸🇰','irlanda':'🇮🇪','pais de gales':'🏴󠁧󠁢󠁷󠁬󠁳󠁿','russia':'🇷🇺','islandia':'🇮🇸','finlandia':'🇫🇮','albania':'🇦🇱','bosnia':'🇧🇦','georgia':'🇬🇪','macedonia do norte':'🇲🇰','montenegro':'🇲🇪','luxemburgo':'🇱🇺',
+ 'japao':'🇯🇵','coreia do sul':'🇰🇷','coreia':'🇰🇷','ira':'🇮🇷','ira (pais)':'🇮🇷','arabia saudita':'🇸🇦','australia':'🇦🇺','catar':'🇶🇦','emirados arabes unidos':'🇦🇪','iraque':'🇮🇶','uzbequistao':'🇺🇿','jordania':'🇯🇴','china':'🇨🇳','tailandia':'🇹🇭','vietna':'🇻🇳','indonesia':'🇮🇩','india':'🇮🇳',
+ 'marrocos':'🇲🇦','senegal':'🇸🇳','egito':'🇪🇬','tunisia':'🇹🇳','argelia':'🇩🇿','nigeria':'🇳🇬','gana':'🇬🇭','camaroes':'🇨🇲','costa do marfim':'🇨🇮','mali':'🇲🇱','africa do sul':'🇿🇦','rd congo':'🇨🇩','congo':'🇨🇬','cabo verde':'🇨🇻','angola':'🇦🇴','burkina faso':'🇧🇫','guine':'🇬🇳','zambia':'🇿🇲',
+ 'nova zelandia':'🇳🇿','nova caledonia':'🇳🇨'
+};
+function norm(s){return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();}
+function flag(nome){return FLAGS[norm(nome)]||'';}
+
+async function rpc(fn,body){
+  const r=await fetch(SB+'/rest/v1/rpc/'+fn,{method:'POST',headers:H,body:JSON.stringify(body||{})});
+  const t=await r.text();let d=null;try{d=t?JSON.parse(t):null;}catch(e){}
+  if(!r.ok) throw new Error((d&&(d.message||d.hint))||('Erro '+r.status));
+  return d;
+}
+async function get(path){const r=await fetch(SB+'/rest/v1/'+path,{headers:H});if(!r.ok)throw new Error('Erro '+r.status);return r.json();}
+function el(id){return document.getElementById(id);}
+function val(id){return (el(id).value||'').trim();}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+const fmt=iso=>new Intl.DateTimeFormat('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'America/Recife'}).format(new Date(iso));
+// datetime-local (Brasília -03) -> ISO com offset
+function toISO(local){ if(!local)return null; return local.length===16? local+':00-03:00' : local+'-03:00'; }
+
+async function entrar(){
+  const msg=el('gate-msg'); PIN=val('pin');
+  if(!PIN){msg.className='msg err';msg.textContent='Informe o PIN.';return;}
+  msg.textContent='Verificando…';
+  try{
+    await rpc('bolao_admin_participantes',{p_pin:PIN}); // valida o PIN
+    sessionStorage.setItem('bolao_pin',PIN);
+    el('gate').classList.add('hide'); el('painel').classList.remove('hide');
+    carregarLista();
+  }catch(e){msg.className='msg err';msg.textContent=e.message;}
+}
+
+function tab(t){
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.t===t));
+  ['res','add','imp','part','cfg'].forEach(x=>el('t-'+x).classList.toggle('hide',x!==t));
+  if(t==='res')carregarLista();
+  if(t==='part')carregarParticipantes();
+}
+function prev(inId,prevId){ const f=flag(val(inId)); el(prevId).textContent=f; const tgt=el(inId==='a-casa'?'a-flagc-in':'a-flagf-in'); if(f&&!tgt.value)tgt.value=f; }
+
+// ---- lista de jogos + resultados ----
+async function carregarLista(){
+  const box=el('lista-jogos');
+  let jogos=[]; try{jogos=await get('bolao_jogos?select=*&order=inicio.asc,ordem.asc');}catch(e){box.textContent='Erro ao carregar.';return;}
+  if(!jogos.length){box.innerHTML='<p style="color:var(--text-light)">Nenhum jogo cadastrado ainda. Use “Adicionar jogo” ou “Importar em lote”.</p>';return;}
+  let h='<table><thead><tr><th>Quando</th><th>Jogo</th><th>Placar real</th><th></th><th></th></tr></thead><tbody>';
+  jogos.forEach(j=>{
+    const tag=j.encerrado?'<span class="tag done">encerrado</span>':'<span class="tag">aberto</span>';
+    h+='<tr class="jrow" id="row-'+j.id+'">'+
+      '<td>'+esc(fmt(j.inicio))+'<br><span style="color:var(--text-light);font-size:.72rem;">'+esc(j.fase)+(j.grupo?' • Grupo '+esc(j.grupo):'')+'</span></td>'+
+      '<td class="nm">'+(j.flag_casa||'')+' '+esc(j.time_casa)+'<br>'+(j.flag_fora||'')+' '+esc(j.time_fora)+'</td>'+
+      '<td><input class="mini" id="rc-'+j.id+'" type="number" min="0" value="'+(j.gols_casa!=null?j.gols_casa:'')+'"> × <input class="mini" id="rf-'+j.id+'" type="number" min="0" value="'+(j.gols_fora!=null?j.gols_fora:'')+'"><br>'+tag+'</td>'+
+      '<td><button class="btn btn-green btn-sm" onclick="salvarResultado(\''+j.id+'\')">Salvar</button></td>'+
+      '<td><button class="btn btn-del btn-sm" onclick="delJogo(\''+j.id+'\',\''+esc(j.time_casa)+' x '+esc(j.time_fora)+'\')">Excluir</button></td>'+
+      '</tr><tr><td colspan="5" style="border:none;padding:0 8px 8px;"><span class="msg" id="rmsg-'+j.id+'"></span></td></tr>';
+  });
+  box.innerHTML=h+'</tbody></table>';
+}
+async function salvarResultado(id){
+  const a=parseInt(val('rc-'+id),10),b=parseInt(val('rf-'+id),10),m=el('rmsg-'+id);
+  if(isNaN(a)||isNaN(b)){m.className='msg err';m.textContent='Preencha os dois placares.';return;}
+  m.textContent='Salvando…';
+  try{await rpc('bolao_admin_set_resultado',{p_pin:PIN,p_jogo:id,p_casa:a,p_fora:b,p_encerrado:true});m.className='msg ok';m.textContent='Resultado salvo ✓ — ranking atualizado.';carregarLista();}
+  catch(e){m.className='msg err';m.textContent=e.message;}
+}
+async function delJogo(id,nome){
+  if(!confirm('Excluir o jogo "'+nome+'"? Os palpites desse jogo serão removidos.'))return;
+  try{await rpc('bolao_admin_del_jogo',{p_pin:PIN,p_jogo:id});carregarLista();}catch(e){alert(e.message);}
+}
+
+// ---- adicionar ----
+async function addJogo(){
+  const m=el('add-msg');
+  const casa=val('a-casa'),fora=val('a-fora');
+  if(!casa||!fora||!val('a-inicio')){m.className='msg err';m.textContent='Preencha os times e a data/hora.';return;}
+  m.textContent='Salvando…';
+  try{
+    await rpc('bolao_admin_add_jogo',{p_pin:PIN,p_ordem:0,p_fase:val('a-fase')||'Fase de Grupos',p_grupo:val('a-grupo'),
+      p_casa:casa,p_fora:fora,p_flag_casa:val('a-flagc-in')||flag(casa),p_flag_fora:val('a-flagf-in')||flag(fora),p_inicio:toISO(val('a-inicio'))});
+    m.className='msg ok';m.textContent='Jogo adicionado ✓';
+    ['a-casa','a-fora','a-flagc-in','a-flagf-in','a-grupo'].forEach(x=>el(x).value='');el('a-flagc').textContent='';el('a-flagf').textContent='';
+  }catch(e){m.className='msg err';m.textContent=e.message;}
+}
+
+// ---- importar lote ----
+async function importar(){
+  const m=el('imp-msg'), fase=val('i-fase')||'Fase de Grupos';
+  const linhas=el('i-text').value.split('\n').map(l=>l.trim()).filter(Boolean);
+  if(!linhas.length){m.className='msg err';m.textContent='Cole pelo menos uma linha.';return;}
+  const jogos=[]; const erros=[];
+  linhas.forEach((l,i)=>{
+    const p=l.split('|').map(x=>x.trim());
+    if(p.length<4){erros.push('Linha '+(i+1)+': formato inválido');return;}
+    const [dt,grupo,casa,fora]=p;
+    const iso=toISO(dt.replace(' ','T'));
+    if(!casa||!fora||!iso||isNaN(new Date(iso).getTime())){erros.push('Linha '+(i+1)+': verifique data/times');return;}
+    jogos.push({ordem:i,fase:fase,grupo:grupo,time_casa:casa,time_fora:fora,flag_casa:flag(casa),flag_fora:flag(fora),inicio:iso});
+  });
+  if(erros.length){m.className='msg err';m.innerHTML=erros.join('<br>');return;}
+  m.textContent='Importando '+jogos.length+' jogos…';
+  try{const r=await rpc('bolao_admin_import_jogos',{p_pin:PIN,p_jogos:jogos});m.className='msg ok';m.textContent='✓ '+r.inseridos+' jogos importados! Confira na aba Resultados.';el('i-text').value='';}
+  catch(e){m.className='msg err';m.textContent=e.message;}
+}
+
+// ---- participantes ----
+async function carregarParticipantes(){
+  const box=el('lista-part');box.textContent='Carregando…';
+  try{
+    const rows=await rpc('bolao_admin_participantes',{p_pin:PIN});
+    if(!rows||!rows.length){box.innerHTML='<p style="color:var(--text-light)">Nenhum inscrito ainda.</p>';return;}
+    let h='<table><thead><tr><th>Nome</th><th>CPF</th><th>E-mail</th><th>Telefone</th><th>Modalidade</th><th>Inscrição</th></tr></thead><tbody>';
+    rows.forEach(p=>{h+='<tr><td>'+esc(p.nome_completo)+'</td><td>'+esc(p.cpf)+'</td><td>'+esc(p.email)+'</td><td>'+esc(p.telefone)+'</td><td>'+esc(p.modalidade)+'</td><td>'+esc(fmt(p.created_at))+'</td></tr>';});
+    box.innerHTML=h+'</tbody></table><p style="margin-top:10px;color:var(--text-light);font-size:.82rem;">Total: '+rows.length+' inscritos</p>';
+  }catch(e){box.innerHTML='<span class="msg err">'+esc(e.message)+'</span>';}
+}
+
+// ---- pin ----
+async function trocarPin(){
+  const m=el('cfg-msg');
+  try{await rpc('bolao_admin_trocar_pin',{p_pin_atual:val('p-atual'),p_pin_novo:val('p-novo')});
+    PIN=val('p-novo');sessionStorage.setItem('bolao_pin',PIN);
+    m.className='msg ok';m.textContent='PIN alterado ✓';el('p-atual').value='';el('p-novo').value='';
+  }catch(e){m.className='msg err';m.textContent=e.message;}
+}
+
+// auto-login se PIN na sessão
+(function(){const s=sessionStorage.getItem('bolao_pin');if(s){PIN=s;el('pin').value=s;}})();
+</script>
+</body>
+</html>
