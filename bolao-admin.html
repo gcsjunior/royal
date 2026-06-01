@@ -129,8 +129,9 @@
   <div id="t-part" class="hide">
     <div class="card">
       <h2>Participantes inscritos</h2>
-      <p class="desc">Dados de cadastro dos inscritos no bolão.</p>
+      <p class="desc">Dados de cadastro dos inscritos no bolão. Use o CSV para levar a base para planilha, e-mail marketing ou CRM.</p>
       <button class="btn btn-ghost btn-sm" onclick="carregarParticipantes()">Atualizar</button>
+      <button class="btn btn-green btn-sm" onclick="exportarCSV()">⬇ Exportar CSV</button>
       <div id="lista-part" style="margin-top:14px;">Carregando…</div>
     </div>
   </div>
@@ -153,6 +154,7 @@ const SB="https://vfrjqkwdxjvggzkfxfen.supabase.co";
 const KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZmcmpxa3dkeGp2Z2d6a2Z4ZmVuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxODcyNDcsImV4cCI6MjA5Mzc2MzI0N30.PaHe7kQL8DUs8gmt9Wk47qaz6CX5PLfbeuhv3OIdigU";
 const H={'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json'};
 let PIN="";
+let PART_ROWS=[];
 
 // bandeiras (nome PT -> emoji). Normaliza minúsculas/acentos.
 const FLAGS={
@@ -269,11 +271,28 @@ async function carregarParticipantes(){
   const box=el('lista-part');box.textContent='Carregando…';
   try{
     const rows=await rpc('bolao_admin_participantes',{p_pin:PIN});
+    PART_ROWS=rows||[];
     if(!rows||!rows.length){box.innerHTML='<p style="color:var(--text-light)">Nenhum inscrito ainda.</p>';return;}
     let h='<table><thead><tr><th>Nome</th><th>CPF</th><th>E-mail</th><th>Telefone</th><th>Modalidade</th><th>Inscrição</th></tr></thead><tbody>';
     rows.forEach(p=>{h+='<tr><td>'+esc(p.nome_completo)+'</td><td>'+esc(p.cpf)+'</td><td>'+esc(p.email)+'</td><td>'+esc(p.telefone)+'</td><td>'+esc(p.modalidade)+'</td><td>'+esc(fmt(p.created_at))+'</td></tr>';});
     box.innerHTML=h+'</tbody></table><p style="margin-top:10px;color:var(--text-light);font-size:.82rem;">Total: '+rows.length+' inscritos</p>';
   }catch(e){box.innerHTML='<span class="msg err">'+esc(e.message)+'</span>';}
+}
+function exportarCSV(){
+  if(!PART_ROWS.length){ alert('Carregue a lista primeiro (aba Participantes) ou ainda não há inscritos.'); return; }
+  const cols=['Nome','CPF','E-mail','Telefone','Modalidade','Inscrição'];
+  const esc=v=>{ v=(v==null?'':String(v)); return /[";\n]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v; };
+  const linhas=[cols.join(';')];
+  PART_ROWS.forEach(p=>{
+    linhas.push([esc(p.nome_completo),esc(p.cpf),esc(p.email),esc(p.telefone),esc(p.modalidade),esc(fmt(p.created_at))].join(';'));
+  });
+  const csv='\ufeff'+linhas.join('\r\n');                       // BOM p/ acentos no Excel
+  const hoje=new Date().toISOString().slice(0,10);
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download='participantes-bolao-'+hoje+'.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
 }
 
 // ---- pin ----
