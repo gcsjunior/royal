@@ -64,6 +64,7 @@ tr:last-child td{border-bottom:none;}
   .grp-grid{grid-template-columns:repeat(2,1fr) !important;}
 }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -101,6 +102,7 @@ tr:last-child td{border-bottom:none;}
       <button class="tab" id="tab-sorteio-duplas">🎯 Sorteio Duplas</button>
       <button class="tab" id="tab-fotos">📸 Fotos</button>
       <button class="tab" id="tab-interesse">📋 Interesse</button>
+      <button class="tab" id="tab-import">📥 Importar Jogos</button>
     </div>
 
     <!-- JOGOS -->
@@ -110,7 +112,7 @@ tr:last-child td{border-bottom:none;}
         <button class="btn bp" id="btnNewJogo">+ Novo Jogo</button>
       </div>
       <div style="background:rgba(242,101,34,0.06);border:1px solid rgba(242,101,34,0.15);border-radius:10px;padding:10px 14px;margin-bottom:16px;font-size:0.8rem;color:#b45309;">
-        ⚠️ Use esta aba apenas para jogos de <strong>Fase de Grupos</strong>. Para lançar resultados do Mata-Mata, use <strong>Resultados → ⚡ Mata-Mata</strong>.
+        ℹ️ Use esta aba para cadastrar jogos e preencher <strong>data, horário e quadra</strong> de qualquer fase. Para lançar <strong>placares do Mata-Mata</strong>, use <strong>Resultados → ⚡ Mata-Mata</strong>.
       </div>
       <div class="card" style="padding:0;overflow:hidden;">
         <table><thead><tr><th>Fase</th><th>Equipe A</th><th>Equipe B</th><th>Data/Hora</th><th>Quadra</th><th></th></tr></thead>
@@ -179,8 +181,11 @@ tr:last-child td{border-bottom:none;}
         </div>
         <button class="btn bp" id="btnSortearDuplas" style="background:linear-gradient(135deg,#F26522,#7B5EA7);">🎯 Sortear Todas</button>
       </div>
-      <div id="sorteio-duplas-info" style="background:rgba(123,94,167,0.06);border:1px solid rgba(123,94,167,0.15);border-radius:12px;padding:14px 18px;margin-bottom:20px;font-size:0.84rem;color:var(--tl);">
+      <div id="sorteio-duplas-info" style="background:rgba(123,94,167,0.06);border:1px solid rgba(123,94,167,0.15);border-radius:12px;padding:14px 18px;margin-bottom:12px;font-size:0.84rem;color:var(--tl);">
         <strong style="color:var(--r);">Como funciona:</strong> Cada confronto tem 3 duplas por equipe (Dupla 1, 2 e 3). O sistema sorteia 2 das 3 para jogar, garantindo que ao longo dos 3 confrontos da fase de grupos cada dupla jogue 2 vezes. Em caso de empate (1×1), a 3ª dupla entra como desempate.
+      </div>
+      <div id="sd-pendentes-aviso" style="display:none;background:rgba(242,101,34,0.08);border:1px solid rgba(242,101,34,0.2);border-radius:12px;padding:12px 16px;margin-bottom:16px;font-size:0.84rem;color:#b45309;">
+        ⚠️ <strong id="sd-pendentes-txt"></strong> — clique em <strong>🎯 Sortear Todas</strong> para sortear automaticamente, ou use o botão individual em cada jogo.
       </div>
       <div id="sd-list"><div style="text-align:center;padding:40px;color:var(--tl);">⏳ Carregando...</div></div>
     </div>
@@ -232,12 +237,78 @@ tr:last-child td{border-bottom:none;}
       </div>
       <div class="card" style="padding:0;overflow:hidden;overflow-x:auto;">
         <table>
-          <thead><tr><th>#</th><th>Nome</th><th>Sobrenome</th><th>WhatsApp</th><th>E-mail</th><th>Data</th></tr></thead>
+          <thead><tr><th>#</th><th>Nome</th><th>Sobrenome</th><th>Categoria</th><th>WhatsApp</th><th>E-mail</th><th>Data</th></tr></thead>
           <tbody id="tb-interesse"></tbody>
         </table>
       </div>
     </div>
 
+
+    <!-- IMPORTAR JOGOS -->
+    <div id="tc-import" class="tc">
+      <div class="stitle" style="margin-bottom:6px;">Importar Jogos via Excel</div>
+      <div style="font-size:0.84rem;color:var(--tl);margin-bottom:20px;">Importe uma planilha Excel com os jogos do torneio. A planilha deve ter as colunas na ordem: <strong>Fase, Equipe A, Equipe B, Data, Horário, Quadra</strong>.</div>
+
+      <div style="background:rgba(123,94,167,0.06);border:1px solid rgba(123,94,167,0.15);border-radius:12px;padding:16px 20px;margin-bottom:20px;">
+        <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--r);margin-bottom:10px;">Formato esperado</div>
+        <table style="font-size:0.8rem;width:auto;">
+          <thead><tr>
+            <th style="background:rgba(123,94,167,0.15);padding:6px 12px;border-radius:6px 0 0 0;">Fase</th>
+            <th style="background:rgba(123,94,167,0.15);padding:6px 12px;">Equipe A</th>
+            <th style="background:rgba(123,94,167,0.15);padding:6px 12px;">Equipe B</th>
+            <th style="background:rgba(123,94,167,0.15);padding:6px 12px;">Data</th>
+            <th style="background:rgba(123,94,167,0.15);padding:6px 12px;">Horário</th>
+            <th style="background:rgba(123,94,167,0.15);padding:6px 12px;border-radius:0 6px 0 0;">Quadra</th>
+          </tr></thead>
+          <tbody>
+            <tr>
+              <td style="padding:5px 12px;border-bottom:1px solid rgba(0,0,0,0.05);">Grupo A</td>
+              <td style="padding:5px 12px;border-bottom:1px solid rgba(0,0,0,0.05);">Equipe Brasil</td>
+              <td style="padding:5px 12px;border-bottom:1px solid rgba(0,0,0,0.05);">Equipe Chile</td>
+              <td style="padding:5px 12px;border-bottom:1px solid rgba(0,0,0,0.05);">19/06/2026</td>
+              <td style="padding:5px 12px;border-bottom:1px solid rgba(0,0,0,0.05);">18:00</td>
+              <td style="padding:5px 12px;border-bottom:1px solid rgba(0,0,0,0.05);">1</td>
+            </tr>
+            <tr>
+              <td style="padding:5px 12px;">Oitavas</td>
+              <td style="padding:5px 12px;">Equipe Brasil</td>
+              <td style="padding:5px 12px;">Equipe Argentina</td>
+              <td style="padding:5px 12px;">20/06/2026</td>
+              <td style="padding:5px 12px;">18:30</td>
+              <td style="padding:5px 12px;">2</td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="font-size:0.75rem;color:var(--tl);margin-top:10px;">A primeira linha deve ser o cabeçalho. Data no formato DD/MM/AAAA e horário HH:MM.</div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px;">
+        <label style="display:flex;flex-direction:column;align-items:center;gap:12px;cursor:pointer;padding:20px;border:2px dashed rgba(123,94,167,0.25);border-radius:10px;transition:all 0.2s;" id="import-drop-area">
+          <div style="font-size:2rem;">📊</div>
+          <div style="font-weight:600;color:var(--dk);">Clique para selecionar o arquivo Excel</div>
+          <div style="font-size:0.78rem;color:var(--tl);">.xlsx ou .xls</div>
+          <input type="file" id="import-file" accept=".xlsx,.xls" style="display:none;" onchange="handleImportFile(this)"/>
+        </label>
+      </div>
+
+      <div id="import-preview" style="display:none;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--tl);" id="import-count"></div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn bg" onclick="document.getElementById('import-file').value='';document.getElementById('import-preview').style.display='none';">✕ Cancelar</button>
+            <button class="btn bp" id="btn-confirm-import" onclick="confirmarImport()">✅ Importar Jogos</button>
+          </div>
+        </div>
+        <div class="card" style="padding:0;overflow:hidden;overflow-x:auto;">
+          <table id="import-table">
+            <thead><tr><th>#</th><th>Fase</th><th>Equipe A</th><th>Equipe B</th><th>Data/Hora</th><th>Quadra</th><th>Status</th></tr></thead>
+            <tbody id="import-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="import-result" style="display:none;"></div>
+    </div>
     </div>
 
   </div>
@@ -247,7 +318,7 @@ tr:last-child td{border-bottom:none;}
 <div id="mj" class="modal"><div class="mc">
   <div class="mt">Jogo</div><input type="hidden" id="jid"/>
   <div class="g2"><div class="fr"><label>Equipe A</label><input id="jea"/></div><div class="fr"><label>Equipe B</label><input id="jeb"/></div></div>
-  <div class="g2"><div class="fr"><label>Fase</label><select id="jfase"><option>Grupo A</option><option>Grupo B</option><option>Grupo C</option><option>Grupo D</option><option>Grupo E</option><option>Grupo F</option></select></div><div class="fr"><label>Quadra</label><input id="jq"/></div></div>
+  <div class="g2"><div class="fr"><label>Fase</label><select id="jfase"><option>Grupo A</option><option>Grupo B</option><option>Grupo C</option><option>Grupo D</option><option>Grupo E</option><option>Grupo F</option><option>Oitavas</option><option>Quartas</option><option>Semi</option><option>Final</option></select></div><div class="fr"><label>Quadra</label><input id="jq"/></div></div>
   <div class="fr"><label>Data/Hora</label><input type="datetime-local" id="jdt"/></div>
   <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px;"><button class="btn bg" id="btnCancJogo">Cancelar</button><button class="btn bp" id="btnSaveJogo">Salvar</button></div>
 </div></div>
@@ -445,8 +516,20 @@ document.getElementById("tbj").addEventListener("click",function(e){
 });
 document.getElementById("btnSaveJogo").addEventListener("click",function(){
   var id=document.getElementById("jid").value;
-  var b={equipe_a:document.getElementById("jea").value,equipe_b:document.getElementById("jeb").value,fase:document.getElementById("jfase").value,quadra:document.getElementById("jq").value||null,data_hora:document.getElementById("jdt").value||null};
-  fetch(id?SB+"/rest/v1/jogos?id=eq."+id:SB+"/rest/v1/jogos",{method:id?"PATCH":"POST",headers:h(),body:JSON.stringify(b)}).then(function(){closeM("mj");loadJ();loadR();});
+  var fase=document.getElementById("jfase").value;
+  var b={equipe_a:document.getElementById("jea").value,equipe_b:document.getElementById("jeb").value,fase:fase,quadra:document.getElementById("jq").value||null,data_hora:document.getElementById("jdt").value||null};
+  fetch(id?SB+"/rest/v1/jogos?id=eq."+id:SB+"/rest/v1/jogos",{method:id?"PATCH":"POST",headers:h(),body:JSON.stringify(b)}).then(function(){
+    closeM("mj");
+    loadJ();
+    loadR();
+    // Lembrar de sortear duplas para qualquer jogo novo
+    if(!id){
+      setTimeout(function(){
+        var goSortear=confirm("✅ Jogo cadastrado!\n\n⚠️ Lembre-se de sortear as duplas para este jogo.\n\nIr para a aba de Sorteio de Duplas agora?");
+        if(goSortear) showTab("sorteio-duplas");
+      }, 200);
+    }
+  });
 });
 
 // ── RESULTADOS ───────────────────────────────────────
@@ -811,10 +894,10 @@ async function loadSorteioDuplas(){
     var sdMap={};
     if(Array.isArray(rs)) rs.forEach(function(s){sdMap[s.jogo_id]=s;});
 
-    // Agrupa jogos por equipe para calcular quantas vezes cada dupla jogou
-    var duplaCount={}; // chave: "equipe:categoria" → count
+    // Todos os jogos têm sorteio de duplas (grupos e mata-mata)
+    var rjGrupos = rj; // nome mantido para compatibilidade
 
-    // Renderiza grupos de jogos
+    // Agrupa por fase
     var grupos={};
     rj.forEach(function(j){
       var fase=j.fase||"Sem fase";
@@ -823,6 +906,10 @@ async function loadSorteioDuplas(){
     });
 
     var html="";
+    if(!rjGrupos.length){
+      el.innerHTML="<div style='text-align:center;padding:30px;color:var(--tl);'>Nenhum jogo cadastrado. Cadastre os jogos primeiro.</div>";
+      return;
+    }
     Object.keys(grupos).forEach(function(fase){
       html+="<div style='margin-bottom:24px;'>";
       html+="<div style='font-size:0.7rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--tl);margin-bottom:8px;'>"+fase+"</div>";
@@ -852,6 +939,17 @@ async function loadSorteioDuplas(){
     });
     el.innerHTML=html;
     el.addEventListener("click", onSdClick);
+
+    // Show pending banner
+    var pendCount = rjGrupos.filter(function(j){return !sdMap[j.id];}).length;
+    var aviso = document.getElementById("sd-pendentes-aviso");
+    var avisoTxt = document.getElementById("sd-pendentes-txt");
+    if(aviso && pendCount > 0){
+      avisoTxt.textContent = pendCount + " jogo"+(pendCount!==1?"s":"")+" sem sorteio de duplas";
+      aviso.style.display = "";
+    } else if(aviso){
+      aviso.style.display = "none";
+    }
   } catch(e){
     el.innerHTML="<div style='color:#dc2626;padding:20px;'>Erro: "+e.message+"</div>";
   }
@@ -936,17 +1034,33 @@ document.getElementById("btnSortearDuplas").addEventListener("click",async funct
   var r=await fetch(SB+"/rest/v1/jogos?select=*&order=fase.asc,data_hora.asc",{headers:h()});
   var jogos=await r.json();
   if(!Array.isArray(jogos)||!jogos.length){alert("Nenhum jogo cadastrado.");return;}
-  var fases=jogos.filter(function(j){return j.fase&&j.fase.startsWith("Grupo");});
-  if(!fases.length){alert("Nenhum jogo de fase de grupos encontrado.");return;}
-  if(!confirm("Sortear duplas para todos os "+fases.length+" jogos da fase de grupos de uma vez?\n\nO sistema vai distribuir automaticamente as categorias para equilibrar o número de jogos de cada dupla.")) return;
+  var fases=jogos; // sortear duplas para todos os jogos
+  if(!fases.length){alert("Nenhum jogo cadastrado.");return;}
+
+  // Buscar sorteios já existentes
+  var rs=await fetch(SB+"/rest/v1/sorteio_duplas?select=jogo_id",{headers:h()});
+  var jaFeitos=await rs.json();
+  var jaFeitosSet=new Set(Array.isArray(jaFeitos)?jaFeitos.map(function(s){return s.jogo_id;}):[]);
+  var pendentes=fases.filter(function(j){return !jaFeitosSet.has(j.id);});
+
+  if(!pendentes.length){
+    alert("✅ Todos os jogos já têm duplas sorteadas!\nUse o botão 🔄 Ressortear em cada jogo individualmente se quiser refazer algum.");
+    return;
+  }
+
+  var msg="Sortear duplas para os "+pendentes.length+" jogo(s) ainda pendentes?";
+  if(jaFeitosSet.size>0) msg+="\n\n("+jaFeitosSet.size+" jogo(s) já sorteados serão mantidos)";
+  msg+="\n\nO sistema vai distribuir automaticamente as categorias.";
+  if(!confirm(msg)) return;
+
   var btn=document.getElementById("btnSortearDuplas");
   btn.disabled=true; btn.textContent="⏳ Sorteando...";
-  for(var i=0;i<fases.length;i++){
-    await sortearDuplasJogo(fases[i].id, true);
+  for(var i=0;i<pendentes.length;i++){
+    await sortearDuplasJogo(pendentes[i].id, true);
     await new Promise(function(r){setTimeout(r,150);});
   }
   btn.disabled=false; btn.textContent="🎯 Sortear Todas";
-  alert("✅ Sorteio concluído! "+fases.length+" jogos sorteados.");
+  alert("✅ Sorteio concluído! "+pendentes.length+" jogos sorteados.");
   loadSorteioDuplas();
   loadR();
 });
@@ -1008,6 +1122,7 @@ async function loadInteresse(){
     tb.innerHTML=INTERESSE_DATA.map(function(p,i){
       var dt=new Date(p.created_at).toLocaleString("pt-BR");
       return "<tr><td style='color:var(--tl);'>"+(i+1)+"</td><td style='font-weight:500;'>"+p.nome+"</td><td>"+p.sobrenome+"</td>"+
+        "<td><span style='background:rgba(123,94,167,0.1);color:var(--r);padding:2px 8px;border-radius:6px;font-size:0.8rem;font-weight:600;'>"+(p.categoria||'—')+"</span></td>"+
         "<td><a href='https://wa.me/55"+p.telefone.replace(/\D/g,"")+"' target='_blank' style='color:var(--g);text-decoration:none;'>"+p.telefone+"</a></td>"+
         "<td><a href='mailto:"+p.email+"' style='color:var(--r);text-decoration:none;'>"+p.email+"</a></td>"+
         "<td style='color:var(--tl);font-size:0.8rem;'>"+dt+"</td></tr>";
@@ -1016,8 +1131,8 @@ async function loadInteresse(){
 }
 function exportInteresse(){
   if(!INTERESSE_DATA.length){alert("Sem dados.");return;}
-  var rows=[["#","Nome","Sobrenome","WhatsApp","E-mail","Data"]];
-  INTERESSE_DATA.forEach(function(p,i){rows.push([i+1,p.nome,p.sobrenome,p.telefone,p.email,new Date(p.created_at).toLocaleString("pt-BR")]);});
+  var rows=[["#","Nome","Sobrenome","Categoria","WhatsApp","E-mail","Data"]];
+  INTERESSE_DATA.forEach(function(p,i){rows.push([i+1,p.nome,p.sobrenome,p.categoria||'',p.telefone,p.email,new Date(p.created_at).toLocaleString("pt-BR")]);});
   var csv=rows.map(function(r){return r.map(function(v){return '"'+String(v).replace(/"/g,'""')+'"';}).join(",");}).join("\n");
   var a=document.createElement("a"); a.href=URL.createObjectURL(new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"}));
   a.download="interesse_"+(new Date().toLocaleDateString("pt-BR").replace(/\//g,"-"))+".csv"; a.click();
@@ -1246,12 +1361,9 @@ async function gerarOitavas(){
     ];
 
     // Confirmar com o usuário
-    var msg='Gerar as seguintes oitavas?
-
-';
+    var msg='Gerar as seguintes oitavas?\n\n';
     oitavasParas.forEach(function(p,i){
-      msg+=(i+1)+'. '+p.a.replace('Equipe ','')+' × '+p.b.replace('Equipe ','')+'
-';
+      msg+=(i+1)+'. '+p.a.replace('Equipe ','')+' x '+p.b.replace('Equipe ','')+' \n';
     });
     if(!confirm(msg)) {
       btn.disabled=false; btn.textContent='⚡ Gerar Oitavas Automaticamente';
@@ -1297,9 +1409,19 @@ function openMataModal(fase,t1,t2,jid){
     if(tb) tb.checked=false;
   });
   document.getElementById('mm-p3-wrap').style.display='none';
+  document.getElementById('mm-dt').value='';
+  document.getElementById('mm-quadra').value='';
 
-  // Carregar resultados existentes se houver
+  // Carregar dados do jogo existente se houver
   if(jid){
+    fetch(SB+'/rest/v1/jogos?id=eq.'+jid+'&select=*',{headers:h()})
+    .then(function(r){return r.json();}).then(function(arr){
+      var jg=arr&&arr[0];
+      if(jg){
+        if(jg.data_hora) document.getElementById('mm-dt').value=jg.data_hora.slice(0,16);
+        if(jg.quadra) document.getElementById('mm-quadra').value=jg.quadra;
+      }
+    });
     fetch(SB+'/rest/v1/resultados?jogo_id=eq.'+jid+'&order=numero_partida.asc',{headers:h()})
     .then(function(r){return r.json();}).then(function(parts){
       parts.forEach(function(p){
@@ -1328,13 +1450,21 @@ async function saveMataResult(){
   var cats=['Soma 7','Soma 9','Soma 11'];
 
   try{
-    // Criar jogo se não existe
+    // Criar jogo se não existe, ou atualizar data/hora e quadra
     var jid=d.jid;
+    var dtVal=document.getElementById('mm-dt').value||null;
+    var qVal=document.getElementById('mm-quadra').value.trim()||null;
     if(!jid){
       var rj=await fetch(SB+'/rest/v1/jogos',{method:'POST',headers:Object.assign({},h(),{'Prefer':'return=representation'}),
-        body:JSON.stringify({fase:d.fase,equipe_a:d.t1,equipe_b:d.t2})}).then(function(r){return r.json();});
+        body:JSON.stringify({fase:d.fase,equipe_a:d.t1,equipe_b:d.t2,data_hora:dtVal,quadra:qVal})}).then(function(r){return r.json();});
       jid=Array.isArray(rj)?rj[0].id:rj.id;
       MATA_MODAL_DATA.jid=jid;
+    } else if(dtVal||qVal){
+      // Atualizar data/hora e quadra se preenchidos
+      var upd={};
+      if(dtVal) upd.data_hora=dtVal;
+      if(qVal) upd.quadra=qVal;
+      await fetch(SB+'/rest/v1/jogos?id=eq.'+jid,{method:'PATCH',headers:h(),body:JSON.stringify(upd)});
     }
 
     // Deletar resultados anteriores
@@ -1370,15 +1500,162 @@ async function saveMataResult(){
     console.error(e);
   }
 }
+
+// ── IMPORTAR JOGOS ────────────────────────────────────
+document.getElementById('tab-import').addEventListener('click', function(){ showTab('import'); });
+
+// Update showTab to include import
+var _origShowTab = showTab;
+showTab = function(name) {
+  _origShowTab(name);
+  document.getElementById('tab-import').classList.toggle('on', name==='import');
+  document.getElementById('tc-import').classList.toggle('on', name==='import');
+};
+
+var IMPORT_ROWS = [];
+
+document.getElementById('import-drop-area').addEventListener('click', function(){
+  document.getElementById('import-file').click();
+});
+
+function handleImportFile(input) {
+  var file = input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var data = new Uint8Array(e.target.result);
+      var workbook = XLSX.read(data, {type:'array', cellDates:true});
+      var sheet = workbook.Sheets[workbook.SheetNames[0]];
+      var rows = XLSX.utils.sheet_to_json(sheet, {header:1, raw:false, dateNF:'dd/mm/yyyy'});
+      parseImportRows(rows);
+    } catch(err) {
+      alert('Erro ao ler arquivo: ' + err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function parseImportRows(rows) {
+  IMPORT_ROWS = [];
+  // Skip header row
+  var dataRows = rows.slice(1).filter(function(r){ return r && r.length >= 2 && r[0]; });
+  var tbody = document.getElementById('import-tbody');
+  var html = '';
+
+  dataRows.forEach(function(r, i) {
+    var fase = (r[0]||'').toString().trim();
+    var ea   = (r[1]||'').toString().trim();
+    var eb   = (r[2]||'').toString().trim();
+    var data = (r[3]||'').toString().trim();
+    var hora = (r[4]||'').toString().trim();
+    var quadra = (r[5]||'').toString().trim();
+
+    // Parse data/hora → ISO
+    var dtISO = null;
+    var dtDisplay = '—';
+    var erro = '';
+    if (!fase) erro = 'Fase vazia';
+    else if (!ea) erro = 'Equipe A vazia';
+    else if (!eb) erro = 'Equipe B vazia';
+    else {
+      // Try to parse date DD/MM/YYYY and time HH:MM
+      if (data) {
+        var parts = data.split('/');
+        if (parts.length === 3) {
+          var d = parts[0].padStart(2,'0');
+          var m = parts[1].padStart(2,'0');
+          var y = parts[2];
+          var timeStr = hora ? hora.substring(0,5) : '00:00';
+          dtISO = y + '-' + m + '-' + d + 'T' + timeStr + ':00';
+          dtDisplay = d + '/' + m + '/' + y + ' ' + timeStr;
+        } else {
+          // Maybe it's already a date string from Excel
+          try {
+            var dt = new Date(data);
+            if (!isNaN(dt)) {
+              var timeStr2 = hora ? hora.substring(0,5) : '00:00';
+              var pad = function(n){return n.toString().padStart(2,'0');};
+              dtISO = dt.getFullYear()+'-'+pad(dt.getMonth()+1)+'-'+pad(dt.getDate())+'T'+timeStr2+':00';
+              dtDisplay = pad(dt.getDate())+'/'+pad(dt.getMonth()+1)+'/'+dt.getFullYear()+' '+timeStr2;
+            }
+          } catch(e) {}
+        }
+      }
+    }
+
+    var status = erro
+      ? '<span style="color:#dc2626;font-size:0.75rem;">⚠ '+erro+'</span>'
+      : '<span style="color:#1a9b7c;font-size:0.75rem;">✓ Ok</span>';
+
+    IMPORT_ROWS.push({fase:fase, ea:ea, eb:eb, dtISO:dtISO, quadra:quadra, erro:erro});
+    html += '<tr>'
+      + '<td style="color:var(--tl);">'+(i+1)+'</td>'
+      + '<td><span style="background:rgba(123,94,167,0.1);color:var(--r);padding:2px 7px;border-radius:5px;font-size:0.72rem;">'+fase+'</span></td>'
+      + '<td>'+ea+'</td>'
+      + '<td>'+eb+'</td>'
+      + '<td style="font-size:0.8rem;color:var(--tl);">'+dtDisplay+'</td>'
+      + '<td>'+( quadra||'—')+'</td>'
+      + '<td>'+status+'</td>'
+      + '</tr>';
+  });
+
+  document.getElementById('import-tbody').innerHTML = html;
+  var valid = IMPORT_ROWS.filter(function(r){return !r.erro;}).length;
+  document.getElementById('import-count').textContent = IMPORT_ROWS.length + ' linhas encontradas — ' + valid + ' válidas';
+  document.getElementById('import-preview').style.display = '';
+  document.getElementById('import-result').style.display = 'none';
+}
+
+async function confirmarImport() {
+  var valid = IMPORT_ROWS.filter(function(r){return !r.erro;});
+  if (!valid.length) { alert('Nenhuma linha válida para importar.'); return; }
+  if (!confirm('Importar ' + valid.length + ' jogos para o banco?')) return;
+
+  var btn = document.getElementById('btn-confirm-import');
+  btn.disabled = true; btn.textContent = '⏳ Importando...';
+
+  var jogos = valid.map(function(r){
+    return {
+      fase: r.fase,
+      equipe_a: r.ea,
+      equipe_b: r.eb,
+      data_hora: r.dtISO || null,
+      quadra: r.quadra || null
+    };
+  });
+
+  try {
+    var resp = await fetch(SB+'/rest/v1/jogos', {
+      method:'POST', headers:h(), body:JSON.stringify(jogos)
+    });
+    if (!resp.ok) { var err=await resp.text(); alert('Erro: '+err); return; }
+    document.getElementById('import-result').innerHTML =
+      '<div style="background:rgba(46,189,154,0.1);border:1px solid rgba(46,189,154,0.3);border-radius:10px;padding:14px 18px;color:#1a9b7c;font-weight:600;">'+
+      '✅ '+valid.length+' jogos importados com sucesso!</div>';
+    document.getElementById('import-result').style.display = '';
+    document.getElementById('import-preview').style.display = 'none';
+    document.getElementById('import-file').value = '';
+    loadJ(); loadR();
+  } catch(e) {
+    alert('Erro: '+e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = '✅ Importar Jogos';
+  }
+}
 </script>
 
 <!-- MODAL MATA-MATA -->
 <div id="modal-mata" class="modal"><div class="mc" style="max-width:520px;">
   <div class="mt" id="mm-title">Resultado</div>
-  <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin-bottom:20px;padding:12px;background:rgba(123,94,167,0.06);border-radius:10px;">
+  <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin-bottom:14px;padding:12px;background:rgba(123,94,167,0.06);border-radius:10px;">
     <div style="text-align:right;font-weight:700;" id="mm-ea">—</div>
     <div style="text-align:center;font-size:0.72rem;color:var(--tl);">vs</div>
     <div style="text-align:left;font-weight:700;" id="mm-eb">—</div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;">
+    <div><label>Data e Hora</label><input type="datetime-local" id="mm-dt" style="font-size:0.84rem;"/></div>
+    <div><label>Quadra</label><input type="text" id="mm-quadra" placeholder="Ex: 1" style="font-size:0.84rem;"/></div>
   </div>
 
   <!-- Partida 1 -->
