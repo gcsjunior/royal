@@ -148,35 +148,62 @@ function render(){
   const el=document.getElementById("ct");
   const list=FAS?ALL.filter(j=>j.fase===FAS):ALL;
   if(!list.length){el.innerHTML='<div class="empty"><div class="ic">📭</div>Nenhum jogo'+(FAS?' neste grupo':'')+'</div>';return;}
-  const g={};list.forEach(j=>{if(!g[j.fase])g[j.fase]=[];g[j.fase].push(j);});
+
+  // Group by day
+  const byDay={};
+  list.forEach(j=>{
+    const dt=j.data_hora?new Date(j.data_hora):null;
+    const key=dt?dt.toLocaleDateString("pt-BR",{weekday:"long",day:"2-digit",month:"long",year:"numeric"}):"Sem data";
+    if(!byDay[key]) byDay[key]=[];
+    byDay[key].push(j);
+  });
+
   let html="";
-  for(const [fase,ls] of Object.entries(g)){
-    html+=`<div style="margin-bottom:28px;"><div style="font-size:0.7rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--r);margin-bottom:10px;">${fase}</div>`;
+  for(const [dia,ls] of Object.entries(byDay)){
+    html+=`<div style="display:flex;align-items:center;gap:12px;margin:24px 0 12px;">
+      <div style="background:var(--r);color:#fff;border-radius:10px;padding:8px 16px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;text-transform:capitalize;">${dia}</div>
+      <div style="flex:1;height:1px;background:rgba(123,94,167,0.15);"></div>
+      <div style="font-size:0.72rem;color:var(--tl);">${ls.length} jogo${ls.length!==1?'s':''}</div>
+    </div>`;
+
     for(const j of ls){
       const partidas=(j.resultados||[]).slice().sort((a,b)=>a.numero_partida-b.numero_partida);
       const {ta,tb}=sumP(partidas);
       const ok=partidas.length>0&&(ta>0||tb>0);
       const dt=j.data_hora?new Date(j.data_hora):null;
-      const ds=dt?dt.toLocaleDateString("pt-BR",{weekday:"short",day:"2-digit",month:"short"}):"—";
-      const hs=dt?dt.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}):"";
-      const cA=ok?(ta>tb?"var(--g)":"var(--tl)"):"var(--tl)";
-      const cB=ok?(tb>ta?"var(--g)":"var(--tl)"):"var(--tl)";
+      const hs=dt?dt.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}):"—";
+      const cA=ok?(ta>tb?"var(--g)":"var(--tl)"):"var(--tx)";
+      const cB=ok?(tb>ta?"var(--g)":"var(--tl)"):"var(--tx)";
       const jenc=encodeURIComponent(JSON.stringify(j));
-      html+=`<div class="card" style="margin-bottom:8px;padding:16px 20px;${ok?'cursor:pointer;':''}" ${ok?`onclick="openDetail('${jenc}')"`:''}>`;
-      html+=`<div style="display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;">`;
-      html+=`<div style="text-align:right"><div style="font-weight:600;font-size:0.9rem">${fp(j.equipe_a)}</div>${ok?`<div style="font-size:1.5rem;font-weight:900;color:${cA}">${ta}</div>`:''}</div>`;
-      html+=`<div style="text-align:center">
-        <div style="font-size:0.7rem;color:var(--tl)">${ds}</div>
-        <div style="font-size:0.76rem;font-weight:600;color:var(--r)">${hs}</div>
-        <div style="font-size:0.65rem;padding:2px 8px;border-radius:100px;margin-top:3px;${ok?'background:rgba(46,189,154,0.1);color:#1a9b7c':'background:rgba(123,94,167,0.08);color:var(--r)'}">${ok?"Encerrado":"A realizar"}</div>
-        ${ok?'<div style="font-size:0.65rem;color:var(--tl);margin-top:2px;">ver detalhes →</div>':''}</div>`;
-      html+=`<div style="text-align:left"><div style="font-weight:600;font-size:0.9rem">${fp(j.equipe_b)}</div>${ok?`<div style="font-size:1.5rem;font-weight:900;color:${cB}">${tb}</div>`:''}</div>`;
+
+      html+=`<div class="card" style="margin-bottom:8px;padding:14px 16px;${ok?'cursor:pointer;':''}" ${ok?`onclick="openDetail('${jenc}')"`:''}>`;
+
+      // Time + court + fase badges
+      html+=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+        <span style="background:rgba(123,94,167,0.1);color:var(--r);font-weight:700;font-size:0.8rem;padding:3px 10px;border-radius:100px;">⏰ ${hs}</span>
+        ${j.quadra?`<span style="background:rgba(46,189,154,0.1);color:#1a9b7c;font-weight:600;font-size:0.78rem;padding:3px 10px;border-radius:100px;">🎾 Quadra ${j.quadra}</span>`:''}
+        <span style="background:rgba(242,101,34,0.08);color:var(--o);font-size:0.68rem;padding:2px 8px;border-radius:100px;">${j.fase}</span>
+        <span style="margin-left:auto;font-size:0.65rem;padding:2px 8px;border-radius:100px;${ok?'background:rgba(46,189,154,0.1);color:#1a9b7c':'background:rgba(0,0,0,0.05);color:var(--tl)'}">${ok?"✓ Encerrado":"A realizar"}</span>
+      </div>`;
+
+      // Teams + score
+      html+=`<div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;">`;
+      html+=`<div style="text-align:right"><div style="font-weight:600;font-size:0.88rem;">${fp(j.equipe_a)}</div></div>`;
+      html+=`<div style="text-align:center;min-width:64px;">`;
+      if(ok){
+        html+=`<div style="font-size:1.4rem;font-weight:900;line-height:1;"><span style="color:${cA}">${ta}</span><span style="color:rgba(0,0,0,0.2);font-size:1rem;margin:0 2px;">×</span><span style="color:${cB}">${tb}</span></div>`;
+        html+=`<div style="font-size:0.6rem;color:var(--tl);margin-top:2px;">ver detalhes →</div>`;
+      } else {
+        html+=`<div style="font-size:0.8rem;font-weight:700;color:var(--tl);">vs</div>`;
+      }
+      html+=`</div>`;
+      html+=`<div style="text-align:left"><div style="font-weight:600;font-size:0.88rem;">${fp(j.equipe_b)}</div></div>`;
       html+=`</div></div>`;
     }
-    html+='</div>';
   }
   el.innerHTML=html;
 }
+
 
 function openDetail(jdata){
   const j=JSON.parse(decodeURIComponent(jdata));
