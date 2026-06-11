@@ -134,6 +134,7 @@
 
   /* RANKING */
   .rk-wrap{margin-top:30px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 8px 30px rgba(90,64,128,0.08);}
+  .rk-wrap td{color:var(--dark);}
   table{width:100%;border-collapse:collapse;}
   th,td{padding:13px 16px;text-align:left;font-size:0.9rem;}
   thead th{background:var(--royal);color:#fff;font-weight:600;font-size:0.78rem;text-transform:uppercase;letter-spacing:.05em;}
@@ -525,25 +526,11 @@ function renderJogos(){
   const wrap=document.getElementById('jogos-wrap'), empty=document.getElementById('jogos-empty');
   if(!JOGOS.length){empty.style.display='block';wrap.innerHTML='';return;}
   empty.style.display='none';
-  // menor horário de início por fase (mantém as fases em ordem cronológica)
-  const faseInicio={};
-  JOGOS.forEach(j=>{
-    const f=j.fase||'Fase de Grupos';
-    const t=j.inicio?new Date(j.inicio).getTime():Infinity;
-    if(faseInicio[f]===undefined||t<faseInicio[f]) faseInicio[f]=t;
-  });
   // agrupa por fase + grupo
   const groups={};
   JOGOS.forEach(j=>{const k=(j.fase||'Fase de Grupos')+(j.grupo?' • Grupo '+j.grupo:'');(groups[k]=groups[k]||[]).push(j);});
-  // ordena: fase em ordem cronológica e, dentro da fase, grupo em ordem alfabética
-  const keys=Object.keys(groups).sort((a,b)=>{
-    const ja=groups[a][0], jb=groups[b][0];
-    const fa=ja.fase||'Fase de Grupos', fb=jb.fase||'Fase de Grupos';
-    if(faseInicio[fa]!==faseInicio[fb]) return faseInicio[fa]-faseInicio[fb];
-    return (ja.grupo||'').localeCompare(jb.grupo||'','pt',{numeric:true});
-  });
   let html='';
-  keys.forEach(k=>{
+  Object.keys(groups).forEach(k=>{
     html+='<div class="fase-h"><span class="pill">'+esc(k)+'</span></div>';
     groups[k].forEach(j=>{ html+=jogoCard(j); });
   });
