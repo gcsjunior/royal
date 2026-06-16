@@ -27,8 +27,8 @@ label{font-size:0.78rem;font-weight:500;color:var(--tl);display:block;margin-bot
 .card{background:#fff;border-radius:14px;padding:24px;box-shadow:0 2px 12px rgba(0,0,0,0.06);}
 .stitle{font-family:"Nunito",sans-serif;font-size:1.5rem;font-weight:700;color:var(--dk);}
 .tabs{display:flex;border-bottom:2px solid rgba(0,0,0,0.08);margin-bottom:28px;}
-.tab{padding:8px 14px;font-size:0.78rem;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;color:var(--tl);background:none;border-top:none;border-left:none;border-right:none;white-space:nowrap;}
-.tabs-bar{display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;border-bottom:2px solid rgba(0,0,0,0.07);}
+.tab{padding:9px 15px;font-size:0.78rem;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;color:var(--tl);background:none;border-top:none;border-left:none;border-right:none;white-space:nowrap;}
+.tabs-bar{display:flex;flex-direction:column;border-bottom:2px solid rgba(0,0,0,0.07);}.tabs-row{display:flex;flex-wrap:wrap;}.tabs-row+.tabs-row{border-top:1px solid rgba(0,0,0,0.06);}
 .tabs-bar::-webkit-scrollbar{display:none;}
 .tab.on{color:var(--r);border-bottom-color:var(--r);}
 .tc{display:none;}
@@ -94,16 +94,20 @@ tr:last-child td{border-bottom:none;}
   </div>
   <div class="abody">
     <div class="tabs-bar" id="tabs">
-      <button class="tab on" id="tab-jogos">📅 Jogos</button>
-      <button class="tab" id="tab-resultados">🏆 Resultados</button>
-      <button class="tab" id="tab-atletas">👥 Atletas</button>
-      <button class="tab" id="tab-pat">🤝 Patrocinadores</button>
-      <button class="tab" id="tab-sorteio">🎲 Sorteio Grupos</button>
-      <button class="tab" id="tab-sorteio-duplas">🎯 Sorteio Duplas</button>
-      <button class="tab" id="tab-sorteio-paises">🌍 Sorteio Países</button>
-      <button class="tab" id="tab-fotos">📸 Fotos</button>
-      <button class="tab" id="tab-interesse">📋 Interesse</button>
-      <button class="tab" id="tab-import">📥 Importar Jogos</button>
+      <div class="tabs-row">
+        <button class="tab on" id="tab-jogos">📅 Jogos</button>
+        <button class="tab" id="tab-resultados">🏆 Resultados</button>
+        <button class="tab" id="tab-atletas">👥 Atletas</button>
+        <button class="tab" id="tab-pat">🤝 Patrocinadores</button>
+        <button class="tab" id="tab-fotos">📸 Fotos</button>
+        <button class="tab" id="tab-interesse">📋 Interesse</button>
+        <button class="tab" id="tab-import">📥 Importar Jogos</button>
+      </div>
+      <div class="tabs-row">
+        <button class="tab" id="tab-sorteio">🎲 Sorteio Grupos</button>
+        <button class="tab" id="tab-sorteio-duplas">🎯 Sorteio Duplas</button>
+        <button class="tab" id="tab-sorteio-paises">🌍 Sorteio Países</button>
+      </div>
     </div>
 
     <!-- JOGOS -->
