@@ -779,12 +779,15 @@ document.getElementById("tba").addEventListener("click",function(e){
 function normalizeFotoUrl(url){
   if(!url) return null;
   url=url.trim();
-  // drive.google.com/file/d/FILE_ID/view → uc?export=view&id=FILE_ID
+  // drive.google.com/file/d/FILE_ID/view
   var m=url.match(/drive\.google\.com\/file\/d\/([^\/\?]+)/);
-  if(m) return "https://drive.google.com/uc?export=view&id="+m[1];
+  if(m) return "https://lh3.googleusercontent.com/d/"+m[1];
   // drive.google.com/open?id=FILE_ID
   var m2=url.match(/drive\.google\.com\/open\?id=([^&]+)/);
-  if(m2) return "https://drive.google.com/uc?export=view&id="+m2[1];
+  if(m2) return "https://lh3.googleusercontent.com/d/"+m2[1];
+  // uc?export=view&id=FILE_ID (já convertido antes)
+  var m3=url.match(/[?&]id=([^&]+)/);
+  if(m3&&url.includes("drive.google")) return "https://lh3.googleusercontent.com/d/"+m3[1];
   return url;
 }
 
