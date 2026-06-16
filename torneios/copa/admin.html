@@ -233,10 +233,9 @@ tr:last-child td{border-bottom:none;}
       <!-- área de animação (slot machine) -->
       <div id="sp-stage" style="display:none;flex-direction:column;align-items:center;gap:20px;margin-bottom:28px;">
         <div style="font-size:1rem;font-weight:700;color:var(--r);letter-spacing:0.02em;" id="sp-capitao-nome">—</div>
-        <div id="sp-slot" style="width:260px;height:130px;border-radius:18px;overflow:hidden;background:#0f0a1a;border:2px solid rgba(123,94,167,0.4);position:relative;display:flex;align-items:center;justify-content:center;">
+        <div id="sp-slot" style="width:320px;height:180px;border-radius:22px;overflow:hidden;background:#0f0a1a;border:2px solid rgba(123,94,167,0.4);position:relative;display:flex;align-items:center;justify-content:center;">
           <div id="sp-reel" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:transform 0.08s linear;"></div>
           <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(15,10,26,0.85) 0%,transparent 30%,transparent 70%,rgba(15,10,26,0.85) 100%);pointer-events:none;"></div>
-          <div style="position:absolute;top:50%;left:0;right:0;height:2px;background:rgba(123,94,167,0.5);transform:translateY(-50%);pointer-events:none;"></div>
         </div>
         <div id="sp-resultado-flag" style="font-size:3.5rem;line-height:1;display:none;"></div>
         <div id="sp-resultado-nome" style="font-size:1.3rem;font-weight:800;color:#fff;display:none;"></div>
@@ -775,31 +774,44 @@ document.getElementById("btnSaveAtleta").addEventListener("click",function(){
 });
 
 // ── SORTEIO DE PAÍSES ─────────────────────────────────
-var SP_PAISES = [
+// Países principais (sorteados nas equipes 1–20)
+var SP_PAISES_PRINCIPAIS = [
   {nome:"Brasil",flag:"🇧🇷"},{nome:"Alemanha",flag:"🇩🇪"},{nome:"México",flag:"🇲🇽"},
   {nome:"África do Sul",flag:"🇿🇦"},{nome:"Espanha",flag:"🇪🇸"},{nome:"França",flag:"🇫🇷"},
-  {nome:"Canadá",flag:"🇨🇦"},{nome:"Costa de Marfim",flag:"🇨🇮"},{nome:"Argentina",flag:"🇦🇷"},
-  {nome:"Inglaterra",flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿"},{nome:"Marrocos",flag:"🇲🇦"},{nome:"Uruguai",flag:"🇺🇾"},
-  {nome:"Portugal",flag:"🇵🇹"},{nome:"Holanda",flag:"🇳🇱"},{nome:"Colômbia",flag:"🇨🇴"},
-  {nome:"Egito",flag:"🇪🇬"},{nome:"Japão",flag:"🇯🇵"},{nome:"Suíça",flag:"🇨🇭"},
-  {nome:"Escócia",flag:"🏴󠁧󠁢󠁳󠁣󠁴󠁿"},{nome:"Irã",flag:"🇮🇷"},{nome:"EUA",flag:"🇺🇸"},
-  {nome:"Bélgica",flag:"🇧🇪"},{nome:"Noruega",flag:"🇳🇴"},{nome:"Austrália",flag:"🇦🇺"}
+  {nome:"Canadá",flag:"🇨🇦"},{nome:"Argentina",flag:"🇦🇷"},{nome:"Inglaterra",flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿"},
+  {nome:"Marrocos",flag:"🇲🇦"},{nome:"Uruguai",flag:"🇺🇾"},{nome:"Portugal",flag:"🇵🇹"},
+  {nome:"Holanda",flag:"🇳🇱"},{nome:"Colômbia",flag:"🇨🇴"},{nome:"Japão",flag:"🇯🇵"},
+  {nome:"Suíça",flag:"🇨🇭"},{nome:"EUA",flag:"🇺🇸"},{nome:"Bélgica",flag:"🇧🇪"},
+  {nome:"Noruega",flag:"🇳🇴"},{nome:"Austrália",flag:"🇦🇺"}
 ];
+// Países reservados para as últimas equipes (21–24)
+var SP_PAISES_RESERVADOS = [
+  {nome:"Irã",flag:"🇮🇷"},{nome:"Egito",flag:"🇪🇬"},
+  {nome:"Escócia",flag:"🏴󠁧󠁢󠁳󠁣󠁴󠁿"},{nome:"Costa de Marfim",flag:"🇨🇮"}
+];
+var SP_PAISES = SP_PAISES_PRINCIPAIS.concat(SP_PAISES_RESERVADOS);
+// Nomes que identificam equipes com sorteio fixo (secreto)
+var SP_FIXO_CAPITAO = "Rebeca";      // equipe 16 → Suíça
+var SP_FIXO_ATLETA  = "Gilvan Souza"; // equipe dele → Brasil
 var SP_CAPITAES = [];
 var SP_SORTEADOS = {}; // equipe -> {nome,flag}
 var SP_ANIM_TIMER = null;
-var SP_FILA = [];
-var SP_CORRENTE = null;
 
 function loadSorteioPaises(){
   var grid=document.getElementById("sp-capitaes-grid");
   var aviso=document.getElementById("sp-aviso");
   grid.innerHTML="<div style='color:var(--tl);font-size:0.85rem;padding:12px;'>Carregando...</div>";
   document.getElementById("sp-stage").style.display="none";
-  fetch(SB+"/rest/v1/atletas?select=*&capitao=eq.true&order=equipe.asc",{headers:h()})
-  .then(function(r){return r.json();})
-  .then(function(list){
-    SP_CAPITAES=Array.isArray(list)?list:[];
+  // Busca capitães e também todos os atletas (para encontrar Gilvan)
+  Promise.all([
+    fetch(SB+"/rest/v1/atletas?select=*&capitao=eq.true&order=equipe.asc",{headers:h()}).then(function(r){return r.json();}),
+    fetch(SB+"/rest/v1/atletas?select=id,nome,equipe&order=equipe.asc",{headers:h()}).then(function(r){return r.json();})
+  ]).then(function(results){
+    SP_CAPITAES=Array.isArray(results[0])?results[0]:[];
+    var todosAtletas=Array.isArray(results[1])?results[1]:[];
+    // Encontra a equipe do Gilvan Souza
+    var gilvan=todosAtletas.find(function(a){ return a.nome&&a.nome.toLowerCase().includes("gilvan souza"); });
+    window._SP_EQUIPE_GILVAN=gilvan?String(gilvan.equipe):null;
     if(!SP_CAPITAES.length){
       aviso.style.display="block";
       document.getElementById("sp-aviso-txt").textContent="Nenhum capitão marcado. Vá em Atletas, edite cada atleta e marque ⭐ Capitão da equipe.";
@@ -828,6 +840,19 @@ function renderCapitaesGrid(){
   }).join("");
 }
 
+// Retorna o país fixo para um capitão/equipe, ou null se não houver
+function spPaisFixo(capitao){
+  // Fixo por nome do capitão
+  if(capitao.nome&&capitao.nome.toLowerCase().includes(SP_FIXO_CAPITAO.toLowerCase())){
+    return {nome:"Suíça",flag:"🇨🇭"};
+  }
+  // Fixo pela equipe do Gilvan
+  if(window._SP_EQUIPE_GILVAN&&String(capitao.equipe)===window._SP_EQUIPE_GILVAN){
+    return {nome:"Brasil",flag:"🇧🇷"};
+  }
+  return null;
+}
+
 function spSortearUm(capitao, paises_disp){
   return new Promise(function(resolve){
     var stage=document.getElementById("sp-stage");
@@ -836,45 +861,58 @@ function spSortearUm(capitao, paises_disp){
     var resFlagEl=document.getElementById("sp-resultado-flag");
     var resNomeEl=document.getElementById("sp-resultado-nome");
 
-    // Escolhe país aleatório
-    var idx=Math.floor(Math.random()*paises_disp.length);
-    var escolhido=paises_disp[idx];
+    // Verifica se há país fixo para este capitão (secreto)
+    var fixo=spPaisFixo(capitao);
+    var escolhido;
+    var idxRemover;
+    if(fixo){
+      // Encontra o fixo na lista disponível
+      idxRemover=paises_disp.findIndex(function(p){return p.nome===fixo.nome;});
+      if(idxRemover===-1){
+        // Já foi retirado ou não está — usa aleatório
+        idxRemover=Math.floor(Math.random()*paises_disp.length);
+      }
+      escolhido=paises_disp[idxRemover];
+    } else {
+      idxRemover=Math.floor(Math.random()*paises_disp.length);
+      escolhido=paises_disp[idxRemover];
+    }
 
     stage.style.display="flex";
     resFlagEl.style.display="none";
     resNomeEl.style.display="none";
     capNome.textContent="⭐ "+capitao.nome+" — Equipe "+capitao.equipe;
 
-    // Monta reel com ~40 itens aleatórios + o escolhido no final
+    // Monta reel: ~90 frames aleatórios + escolhido no final
     var items=[];
-    for(var i=0;i<42;i++) items.push(SP_PAISES[Math.floor(Math.random()*SP_PAISES.length)]);
+    for(var i=0;i<90;i++) items.push(SP_PAISES[Math.floor(Math.random()*SP_PAISES.length)]);
     items.push(escolhido);
 
     var cur=0;
-    var delay=40;
-    var maxDelay=300;
+    var delay=25;      // começa bem rápido
+    var maxDelay=550;  // desacelera bastante para drama
 
     function tick(){
       if(cur>=items.length){
-        // fim da animação
-        reel.innerHTML="<div style='text-align:center;'><div style='font-size:3rem;'>"+escolhido.flag+"</div><div style='font-size:0.9rem;font-weight:700;margin-top:4px;color:#fff;'>"+escolhido.nome+"</div></div>";
+        // Fim da animação — mostra resultado grande
+        reel.innerHTML="<div style='text-align:center;'><div style='font-size:4.5rem;'>"+escolhido.flag+"</div><div style='font-size:1.1rem;font-weight:800;margin-top:6px;color:#fff;letter-spacing:0.02em;'>"+escolhido.nome+"</div></div>";
         resFlagEl.textContent=escolhido.flag;
+        resFlagEl.style.fontSize="5rem";
         resFlagEl.style.display="block";
         resNomeEl.textContent=escolhido.nome;
         resNomeEl.style.display="block";
-        // Salva resultado e re-renderiza grid
         SP_SORTEADOS[capitao.equipe]=escolhido;
-        paises_disp.splice(idx,1);
+        paises_disp.splice(idxRemover,1);
         renderCapitaesGrid();
-        setTimeout(function(){ resolve(); },1600);
+        setTimeout(function(){ resolve(); },2500);
         return;
       }
       var item=items[cur];
-      reel.innerHTML="<div style='text-align:center;'><div style='font-size:2.8rem;line-height:1;'>"+item.flag+"</div><div style='font-size:0.85rem;font-weight:600;margin-top:4px;color:rgba(255,255,255,0.7);'>"+item.nome+"</div></div>";
+      reel.innerHTML="<div style='text-align:center;'><div style='font-size:4rem;line-height:1;'>"+item.flag+"</div><div style='font-size:0.95rem;font-weight:600;margin-top:6px;color:rgba(255,255,255,0.7);'>"+item.nome+"</div></div>";
       cur++;
-      // Desacelera progressivamente após 70% do caminho
+      // Começa a desacelerar após 65% do caminho
       var prog=cur/items.length;
-      if(prog>0.7) delay=Math.min(maxDelay, delay+18);
+      if(prog>0.65) delay=Math.min(maxDelay, delay+16);
       SP_ANIM_TIMER=setTimeout(tick, delay);
     }
     tick();
@@ -884,26 +922,35 @@ function spSortearUm(capitao, paises_disp){
 async function iniciarSorteioPaises(){
   if(SP_CAPITAES.length===0){alert("Nenhum capitão cadastrado.");return;}
   var ja=Object.keys(SP_SORTEADOS).length;
-  if(ja>0&&ja<SP_CAPITAES.length){
-    // continua de onde parou
-  } else if(ja===SP_CAPITAES.length){
+  if(ja===SP_CAPITAES.length){
     alert("Todos já foram sorteados! Clique em 🔄 Resetar para fazer novo sorteio.");
     return;
   }
-  // Equipes que ainda não foram sorteadas
+  // Separa pendentes entre "normais" (1-20) e "reservados" (21-24)
+  // Equipes com número >= 21 ficam para o final e usam SP_PAISES_RESERVADOS
   var pendentes=SP_CAPITAES.filter(function(c){return !SP_SORTEADOS[c.equipe];});
-  // Países disponíveis: remove os já sorteados
-  var paises_disp=SP_PAISES.filter(function(p){
+  var normais=pendentes.filter(function(c){return parseInt(c.equipe)<=20;});
+  var reservados=pendentes.filter(function(c){return parseInt(c.equipe)>20;});
+  var fila=normais.concat(reservados);
+
+  // Pool de países disponíveis para normais (principais - já sorteados)
+  var paises_normais=SP_PAISES_PRINCIPAIS.filter(function(p){
     return !Object.values(SP_SORTEADOS).some(function(s){return s.nome===p.nome;});
   });
-  if(pendentes.length>paises_disp.length){alert("Mais equipes do que países disponíveis!");return;}
+  // Pool para reservados (apenas os reservados disponíveis)
+  var paises_reservados=SP_PAISES_RESERVADOS.filter(function(p){
+    return !Object.values(SP_SORTEADOS).some(function(s){return s.nome===p.nome;});
+  });
 
   document.getElementById("btnSortearPaises").disabled=true;
   document.getElementById("btnResetSorteio").disabled=true;
 
-  for(var i=0;i<pendentes.length;i++){
-    await spSortearUm(pendentes[i], paises_disp);
-    await new Promise(function(res){setTimeout(res,300);});
+  for(var i=0;i<fila.length;i++){
+    var cap=fila[i];
+    var pool=parseInt(cap.equipe)>20?paises_reservados:paises_normais;
+    if(!pool.length) break; // segurança
+    await spSortearUm(cap, pool);
+    await new Promise(function(res){setTimeout(res,400);});
   }
 
   document.getElementById("btnSortearPaises").disabled=false;
