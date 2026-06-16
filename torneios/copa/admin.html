@@ -1066,9 +1066,36 @@ document.getElementById("btnSortear").addEventListener("click",function(){
 });
 
 async function realizarSorteio(equipes){
-  var arr=equipes.slice();
-  for(var i=arr.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=arr[i];arr[i]=arr[j];arr[j]=t;}
   var keys=["A","B","C","D","E","F"];
+
+  // Equipes que NÃO podem estar no mesmo grupo
+  var RESTRITAS=["equipe irã","equipe egito","equipe escócia","equipe costa de marfim"];
+  function eRestrita(nome){ return RESTRITAS.some(function(r){return nome.toLowerCase().indexOf(r.replace("equipe ",""))>-1;}); }
+
+  // Separa restritas das normais
+  var restritas=equipes.filter(function(e){return eRestrita(e.nome);});
+  var normais=equipes.filter(function(e){return !eRestrita(e.nome);});
+
+  // Embaralha cada lista
+  function shuffle(arr){ var a=arr.slice(); for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;} return a; }
+  restritas=shuffle(restritas);
+  normais=shuffle(normais);
+
+  // Monta ordem final: distribui restritas 1 por grupo (grupos aleatórios), depois encaixa normais
+  // Garante que cada restrita vai para um grupo diferente
+  var gruposRestritasIdx=shuffle([0,1,2,3,4,5]).slice(0,restritas.length);
+  var drawState={A:[],B:[],C:[],D:[],E:[],F:[]};
+  var arr=new Array(equipes.length);
+
+  // Posiciona restritas: 1 por grupo, na posição 0 de cada grupo escolhido
+  gruposRestritasIdx.forEach(function(gi,idx){ arr[gi]=restritas[idx]; });
+
+  // Preenche as posições restantes com as normais
+  var ni=0;
+  for(var pos=0;pos<arr.length;pos++){
+    if(!arr[pos]){ arr[pos]=normais[ni++]; }
+  }
+
   var overlay=document.getElementById("draw-overlay");
   overlay.classList.add("on");
   var ball=document.getElementById("draw-ball");
@@ -1077,7 +1104,7 @@ async function realizarSorteio(equipes){
   var prog=document.getElementById("draw-prog");
   var info=document.getElementById("draw-info");
   var grpsEl=document.getElementById("draw-grps");
-  var drawState={A:[],B:[],C:[],D:[],E:[],F:[]};
+
   function updateDrawGroups(){
     grpsEl.innerHTML=keys.map(function(g){
       return "<div style='background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:8px;overflow:hidden;'>"+
@@ -1088,6 +1115,7 @@ async function realizarSorteio(equipes){
     }).join("");
   }
   updateDrawGroups();
+
   for(var i=0;i<arr.length;i++){
     var eq=arr[i], g=keys[i%6];
     ball.style.transform="rotate("+Math.random()*360+"deg) scale(1.2)";
@@ -1104,6 +1132,7 @@ async function realizarSorteio(equipes){
     prog.style.width=((i+1)/arr.length*100)+"%";
     await new Promise(function(r){setTimeout(r,600);});
   }
+
   teamEl.textContent="Sorteio concluído!";
   grpEl.textContent="Salvando...";
   grpEl.style.color="#2EBD9A";
