@@ -399,7 +399,7 @@ tr:last-child td{border-bottom:none;}
   <div class="fr"><label>Nome</label><input id="ano" placeholder="Nome completo"/></div>
   <div class="g2"><div class="fr"><label>Equipe</label><input id="aeq"/></div><div class="fr"><label>Classe</label><select id="acl"><option value="3ª">3ª</option><option value="4ª">4ª</option><option value="5ª">5ª</option><option value="6ª">6ª</option></select></div></div>
   <div class="fr"><label>Dupla</label><input id="adu" placeholder="Ex: Soma 7, Soma 9 ou Soma 11"/></div>
-  <div class="fr"><label>URL Foto (opcional)</label><input id="afo" placeholder="https://..."/></div>
+  <div class="fr"><label>URL Foto (opcional)</label><input id="afo" placeholder="Cole link direto ou do Google Drive"/></div>
   <div class="fr" style="flex-direction:row;align-items:center;gap:10px;padding:10px 0;">
     <input type="checkbox" id="acap" style="width:18px;height:18px;accent-color:var(--r);cursor:pointer;"/>
     <label for="acap" style="font-weight:600;font-size:0.9rem;cursor:pointer;margin:0;">⭐ Capitão da equipe</label>
@@ -776,9 +776,21 @@ document.getElementById("tba").addEventListener("click",function(e){
   if(btn.dataset.act==="ea"){ document.getElementById("aid").value=a.id; document.getElementById("ano").value=a.nome; document.getElementById("aeq").value=a.equipe; document.getElementById("acl").value=a.classe; document.getElementById("adu").value=a.dupla||""; document.getElementById("afo").value=a.foto_url||""; document.getElementById("acap").checked=!!a.capitao; openM("ma"); }
   else if(btn.dataset.act==="da"){ if(!confirm("Excluir atleta?")) return; fetch(SB+"/rest/v1/atletas?id=eq."+id,{method:"DELETE",headers:h()}).then(function(){loadA();}); }
 });
+function normalizeFotoUrl(url){
+  if(!url) return null;
+  url=url.trim();
+  // drive.google.com/file/d/FILE_ID/view → uc?export=view&id=FILE_ID
+  var m=url.match(/drive\.google\.com\/file\/d\/([^\/\?]+)/);
+  if(m) return "https://drive.google.com/uc?export=view&id="+m[1];
+  // drive.google.com/open?id=FILE_ID
+  var m2=url.match(/drive\.google\.com\/open\?id=([^&]+)/);
+  if(m2) return "https://drive.google.com/uc?export=view&id="+m2[1];
+  return url;
+}
+
 document.getElementById("btnSaveAtleta").addEventListener("click",function(){
   var id=document.getElementById("aid").value;
-  var b={nome:document.getElementById("ano").value,equipe:document.getElementById("aeq").value,classe:document.getElementById("acl").value,dupla:document.getElementById("adu").value||null,foto_url:document.getElementById("afo").value||null,capitao:document.getElementById("acap").checked};
+  var b={nome:document.getElementById("ano").value,equipe:document.getElementById("aeq").value,classe:document.getElementById("acl").value,dupla:document.getElementById("adu").value||null,foto_url:normalizeFotoUrl(document.getElementById("afo").value),capitao:document.getElementById("acap").checked};
   fetch(id?SB+"/rest/v1/atletas?id=eq."+id:SB+"/rest/v1/atletas",{method:id?"PATCH":"POST",headers:h(),body:JSON.stringify(b)}).then(function(){closeM("ma");loadA();});
 });
 
