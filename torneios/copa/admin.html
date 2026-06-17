@@ -826,14 +826,12 @@ function loadSorteioPaises(){
   var aviso=document.getElementById("sp-aviso");
   grid.innerHTML="<div style='color:var(--tl);font-size:0.85rem;padding:12px;'>Carregando...</div>";
   document.getElementById("sp-stage").style.display="none";
-  // Busca capitães e também todos os atletas (para encontrar Gilvan)
   Promise.all([
     fetch(SB+"/rest/v1/atletas?select=*&capitao=eq.true&order=equipe.asc",{headers:h()}).then(function(r){return r.json();}),
     fetch(SB+"/rest/v1/atletas?select=id,nome,equipe&order=equipe.asc",{headers:h()}).then(function(r){return r.json();})
   ]).then(function(results){
     SP_CAPITAES=Array.isArray(results[0])?results[0]:[];
     var todosAtletas=Array.isArray(results[1])?results[1]:[];
-    // Encontra a equipe do Gilvan Souza
     var gilvan=todosAtletas.find(function(a){ return a.nome&&a.nome.toLowerCase().includes("gilvan souza"); });
     window._SP_EQUIPE_GILVAN=gilvan?String(gilvan.equipe):null;
     if(!SP_CAPITAES.length){
@@ -842,6 +840,11 @@ function loadSorteioPaises(){
       grid.innerHTML="";
       return;
     }
+    // Carrega resultados já salvos no banco
+    SP_SORTEADOS={};
+    SP_CAPITAES.forEach(function(c){
+      if(c.pais_sorteado) SP_SORTEADOS[c.equipe]={nome:c.pais_sorteado, flag:c.pais_flag||""};
+    });
     aviso.style.display="none";
     renderCapitaesGrid();
   });
@@ -935,6 +938,8 @@ function spSortearUm(capitao, paises_disp){
         resNomeEl.style.display="block";
         SP_SORTEADOS[capitao.equipe]=escolhido;
         paises_disp.splice(idxRemover,1);
+        // Persiste no banco
+        fetch(SB+"/rest/v1/atletas?id=eq."+capitao.id,{method:"PATCH",headers:h(),body:JSON.stringify({pais_sorteado:escolhido.nome,pais_flag:escolhido.flag})});
         renderCapitaesGrid();
         setTimeout(function(){ resolve(); },2500);
         return;
@@ -992,8 +997,11 @@ async function iniciarSorteioPaises(){
 
 document.getElementById("btnSortearPaises").addEventListener("click",iniciarSorteioPaises);
 document.getElementById("btnResetSorteio").addEventListener("click",function(){
+  if(!confirm("Resetar o sorteio? Isso apagará todos os países sorteados.")) return;
   if(SP_ANIM_TIMER) clearTimeout(SP_ANIM_TIMER);
   SP_SORTEADOS={};
+  // Limpa no banco
+  fetch(SB+"/rest/v1/atletas?capitao=eq.true",{method:"PATCH",headers:h(),body:JSON.stringify({pais_sorteado:null,pais_flag:null})});
   document.getElementById("sp-stage").style.display="none";
   renderCapitaesGrid();
 });
