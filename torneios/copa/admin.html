@@ -751,6 +751,18 @@ document.getElementById("btnSaveRes").addEventListener("click",async function(){
 });
 
 // ── ATLETAS ──────────────────────────────────────────
+// Mapa de sorteio: equipe -> {pais, flag}
+var SORTEIO_PAISES = {
+  "01":{pais:"Canadá",flag:"🇨🇦"},"02":{pais:"Alemanha",flag:"🇩🇪"},"03":{pais:"EUA",flag:"🇺🇸"},
+  "04":{pais:"Suíça",flag:"🇨🇭"},"05":{pais:"Colômbia",flag:"🇨🇴"},"06":{pais:"Portugal",flag:"🇵🇹"},
+  "07":{pais:"Austrália",flag:"🇦🇺"},"08":{pais:"Argentina",flag:"🇦🇷"},"09":{pais:"França",flag:"🇫🇷"},
+  "10":{pais:"Holanda",flag:"🇳🇱"},"11":{pais:"Brasil",flag:"🇧🇷"},"12":{pais:"Inglaterra",flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿"},
+  "13":{pais:"Espanha",flag:"🇪🇸"},"14":{pais:"Uruguai",flag:"🇺🇾"},"15":{pais:"Japão",flag:"🇯🇵"},
+  "16":{pais:"África do Sul",flag:"🇿🇦"},"17":{pais:"Bélgica",flag:"🇧🇪"},"18":{pais:"México",flag:"🇲🇽"},
+  "19":{pais:"Marrocos",flag:"🇲🇦"},"20":{pais:"Noruega",flag:"🇳🇴"},"21":{pais:"Escócia",flag:"🏴󠁧󠁢󠁳󠁣󠁴󠁿"},
+  "22":{pais:"Costa de Marfim",flag:"🇨🇮"},"23":{pais:"Irã",flag:"🇮🇷"},"24":{pais:"Egito",flag:"🇪🇬"}
+};
+
 function loadA(){
   fetch(SB+"/rest/v1/atletas?select=*&order=equipe.asc,nome.asc",{headers:h()})
   .then(function(r){return r.json();})
@@ -761,7 +773,10 @@ function loadA(){
     list.forEach(function(a){ATLETAS[a.id]=a;});
     tb.innerHTML=list.map(function(a){
       var cap=a.capitao?"<span style='background:rgba(242,101,34,0.15);color:#b45309;padding:1px 6px;border-radius:4px;font-size:0.68rem;font-weight:700;margin-left:4px;'>⭐CAP</span>":"";
-      return "<tr><td>"+a.nome+cap+"</td><td>"+a.equipe+"</td><td>"+a.classe+"</td><td>"+(a.dupla||"—")+"</td><td><button class='btn bg' style='padding:3px 9px;font-size:0.72rem;' data-id='"+a.id+"' data-act='ea'>✏</button> <button class='btn bd' style='padding:3px 9px;font-size:0.72rem;' data-id='"+a.id+"' data-act='da'>✕</button></td></tr>";
+      var eq=a.equipe||"";
+      var s=SORTEIO_PAISES[eq];
+      var eqCell=s?"<span style='font-size:0.9rem;'>"+s.flag+"</span> <span style='font-size:0.75rem;color:var(--tl);'>"+s.pais+"</span>":eq;
+      return "<tr><td>"+a.nome+cap+"</td><td>"+eqCell+"</td><td>"+a.classe+"</td><td>"+(a.dupla||"—")+"</td><td><button class='btn bg' style='padding:3px 9px;font-size:0.72rem;' data-id='"+a.id+"' data-act='ea'>✏</button> <button class='btn bd' style='padding:3px 9px;font-size:0.72rem;' data-id='"+a.id+"' data-act='da'>✕</button></td></tr>";
     }).join("");
   });
 }
