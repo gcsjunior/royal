@@ -109,10 +109,8 @@ function showAtletaFoto(nome,fotoUrl){
   var img=document.getElementById('modal-atleta-img');
   var ph=document.getElementById('modal-atleta-ph');
   if(fotoUrl){
-    // Converte lh3.googleusercontent.com/d/FILE_ID → uc?export=view&id=FILE_ID (imagem original)
-    var src=fotoUrl;
-    var m=fotoUrl.match(/lh3\.googleusercontent\.com\/d\/([^?&/]+)/);
-    if(m) src='https://drive.google.com/uc?export=view&id='+m[1];
+    // lh3.googleusercontent.com/d/FILE_ID — adiciona =s800 para resolução maior
+    var src=fotoUrl.replace(/=s\d+$/,'')+'=s800';
     img.src=src;
     img.style.display='block';
     ph.style.display='none';
