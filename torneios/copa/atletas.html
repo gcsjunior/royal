@@ -136,31 +136,39 @@ async function load(){
 }
 function setC(c){cl=c;fil();}
 function fil(){
-  const q=document.getElementById("busca").value.toLowerCase();
-  let lista=all;
-  if(cl) lista=lista.filter(a=>a.classe===cl);
-  if(q) lista=lista.filter(a=>a.nome.toLowerCase().includes(q)||a.equipe.toLowerCase().includes(q));
-  const el=document.getElementById("ct");
+  var q=document.getElementById("busca").value.toLowerCase();
+  var lista=all.slice();
+  if(cl) lista=lista.filter(function(a){return a.classe===cl;});
+  if(q) lista=lista.filter(function(a){return a.nome.toLowerCase().indexOf(q)>-1||a.equipe.toLowerCase().indexOf(q)>-1;});
+  var el=document.getElementById("ct");
   if(!lista.length){el.innerHTML='<div class="empty"><div class="icon">👤</div>Nenhum atleta encontrado</div>';return;}
-  const g={};lista.forEach(a=>{if(!g[a.equipe])g[a.equipe]=[];g[a.equipe].push(a);});
-  const cc={"3ª":"var(--orange)","4ª":"var(--royal)","5ª":"var(--green)","6ª":"#e11d48"};
-  el.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;">'+
-  Object.entries(g).map(([eq,ats])=>
-  '<div class="card">'+
-  '<div onclick="showTimeFoto(''+eq+'')" style="font-family:serif;font-size:1.05rem;font-weight:700;color:var(--dark);margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid rgba(0,0,0,0.06);cursor:pointer;display:flex;align-items:center;gap:6px;" title="Ver foto do time">'+
-  fp(eq)+' <span style="font-size:0.65rem;color:#aaa;font-weight:400;font-family:sans-serif;">📷</span></div>'+
-  ats.map(a=>{
-    var safeName=a.nome.replace(/\/g,'\\').replace(/'/g,"\'");
-    var foto=a.foto_url||'';
-    return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(0,0,0,0.04);">'+
-    '<div onclick="showAtletaFoto(''+safeName+'',''+foto+'')" style="cursor:pointer;flex-shrink:0;">'+
-    (a.foto_url?'<img src="'+a.foto_url+'" style="width:36px;height:36px;border-radius:50%;object-fit:cover;transition:opacity 0.2s;" onmouseover="this.style.opacity=0.7" onmouseout="this.style.opacity=1"/>':'<div style="width:36px;height:36px;border-radius:50%;background:rgba(123,94,167,0.1);display:flex;align-items:center;justify-content:center;">👤</div>')+
-    '</div>'+
-    '<div style="cursor:pointer;" onclick="showAtletaFoto(''+safeName+'',''+foto+'')">'+
-    '<div style="font-size:0.88rem;font-weight:500;">'+a.nome+'</div>'+
-    '<div style="font-size:0.72rem;color:'+(cc[a.classe]||"var(--text-light)")+';">'+a.classe+' Classe'+(a.dupla?' · Dupla '+a.dupla:'')+'</div></div></div>';
-  }).join('')+
-  '</div>').join('')+'</div>';
+  var g={};lista.forEach(function(a){if(!g[a.equipe])g[a.equipe]=[];g[a.equipe].push(a);});
+  var cc={"3ª":"var(--orange)","4ª":"var(--royal)","5ª":"var(--green)","6ª":"#e11d48"};
+  var html='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;">';
+  Object.entries(g).forEach(function(entry){
+    var eq=entry[0], ats=entry[1];
+    html+='<div class="card">';
+    html+='<div onclick="showTimeFoto(this.dataset.eq)" data-eq="'+eq+'" style="font-family:serif;font-size:1.05rem;font-weight:700;color:var(--dark);margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid rgba(0,0,0,0.06);cursor:pointer;display:flex;align-items:center;gap:6px;" title="Ver foto do time">';
+    html+=fp(eq)+' <span style="font-size:0.65rem;color:#aaa;font-weight:400;font-family:sans-serif;">📷</span></div>';
+    ats.forEach(function(a){
+      var foto=a.foto_url||'';
+      html+='<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(0,0,0,0.04);">';
+      html+='<div onclick="showAtletaFoto(this.dataset.nome,this.dataset.foto)" data-nome="'+a.nome.replace(/"/g,'&quot;')+'" data-foto="'+foto.replace(/"/g,'&quot;')+'" style="cursor:pointer;flex-shrink:0;">';
+      if(a.foto_url){
+        html+='<img src="'+a.foto_url+'" style="width:36px;height:36px;border-radius:50%;object-fit:cover;transition:opacity 0.2s;" onmouseover="this.style.opacity=0.7" onmouseout="this.style.opacity=1"/>';
+      } else {
+        html+='<div style="width:36px;height:36px;border-radius:50%;background:rgba(123,94,167,0.1);display:flex;align-items:center;justify-content:center;">👤</div>';
+      }
+      html+='</div>';
+      html+='<div onclick="showAtletaFoto(this.dataset.nome,this.dataset.foto)" data-nome="'+a.nome.replace(/"/g,'&quot;')+'" data-foto="'+foto.replace(/"/g,'&quot;')+'" style="cursor:pointer;">';
+      html+='<div style="font-size:0.88rem;font-weight:500;">'+a.nome+'</div>';
+      html+='<div style="font-size:0.72rem;color:'+(cc[a.classe]||'var(--text-light)')+';">'+a.classe+' Classe'+(a.dupla?' · Dupla '+a.dupla:'')+'</div>';
+      html+='</div></div>';
+    });
+    html+='</div>';
+  });
+  html+='</div>';
+  el.innerHTML=html;
 }
 load();
 </script><!-- Modal: Foto do Atleta -->
