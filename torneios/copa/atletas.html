@@ -156,7 +156,7 @@ function fil(){
   Object.entries(g).forEach(function(entry){
     var eq=entry[0], ats=entry[1];
     html+='<div class="card">';
-    html+='<div onclick="showTimeFoto(this.dataset.eq)" data-eq="'+eq+'" style="font-family:serif;font-size:1.05rem;font-weight:700;color:var(--dark);margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid rgba(0,0,0,0.06);cursor:pointer;display:flex;align-items:center;gap:6px;" title="Ver foto do time">';
+    html+='<div onclick="showTimeFoto(this.dataset.eq)" data-eq="'+eq+'" style="font-family:\'Nunito\',sans-serif;font-size:1rem;font-weight:800;color:var(--dark);margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid rgba(0,0,0,0.06);cursor:pointer;display:flex;align-items:center;gap:6px;" title="Ver foto do time">';
     html+=fp(eq)+' <span style="font-size:0.65rem;color:#aaa;font-weight:400;font-family:sans-serif;">📷</span></div>';
     ats.forEach(function(a){
       var foto=a.foto_url||'';
@@ -181,12 +181,12 @@ function fil(){
 load();
 </script><!-- Modal: Foto do Atleta -->
 <div id="modal-atleta" class="modal" onclick="if(event.target===this)closeModal('modal-atleta')">
-  <div style="background:#fff;border-radius:20px;padding:0;max-width:420px;width:100%;text-align:center;position:relative;box-shadow:0 20px 60px rgba(0,0,0,0.25);overflow:hidden;">
+  <div style="background:#fff;border-radius:20px;padding:0;max-width:90vw;width:auto;max-height:90vh;text-align:center;position:relative;box-shadow:0 20px 60px rgba(0,0,0,0.25);overflow:hidden;display:flex;flex-direction:column;">
     <button onclick="closeModal('modal-atleta')" style="position:absolute;top:12px;right:14px;background:rgba(0,0,0,0.35);border:none;width:30px;height:30px;border-radius:50%;font-size:1rem;cursor:pointer;color:#fff;z-index:10;display:flex;align-items:center;justify-content:center;line-height:1;">✕</button>
-    <img id="modal-atleta-img" src="" alt="" style="width:100%;max-height:420px;object-fit:cover;display:none;"/>
-    <div id="modal-atleta-ph" style="width:100%;height:240px;background:rgba(123,94,167,0.08);display:none;align-items:center;justify-content:center;font-size:5rem;">👤</div>
-    <div style="padding:18px 20px 22px;">
-      <div id="modal-atleta-nome" style="font-size:1.15rem;font-weight:700;color:#1a1a2e;"></div>
+    <img id="modal-atleta-img" src="" alt="" style="max-width:90vw;max-height:80vh;width:auto;height:auto;object-fit:contain;display:none;"/>
+    <div id="modal-atleta-ph" style="width:240px;height:240px;background:rgba(123,94,167,0.08);display:none;align-items:center;justify-content:center;font-size:5rem;">👤</div>
+    <div style="padding:14px 20px 18px;">
+      <div id="modal-atleta-nome" style="font-size:1.1rem;font-weight:700;color:#1a1a2e;"></div>
     </div>
   </div>
 </div>
