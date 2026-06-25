@@ -150,6 +150,8 @@ function fil(){
   if(q) lista=lista.filter(function(a){return a.nome.toLowerCase().indexOf(q)>-1||a.equipe.toLowerCase().indexOf(q)>-1;});
   var el=document.getElementById("ct");
   if(!lista.length){el.innerHTML='<div class="empty"><div class="icon">👤</div>Nenhum atleta encontrado</div>';return;}
+  // Filtra atletas de equipes removidas do torneio (não presentes no mapa EP)
+  lista=lista.filter(function(a){var eq=String(a.equipe||'').trim();return EP[eq]!==undefined;});
   var g={};lista.forEach(function(a){if(!g[a.equipe])g[a.equipe]=[];g[a.equipe].push(a);});
   var cc={"3ª":"var(--orange)","4ª":"var(--royal)","5ª":"var(--green)","6ª":"#e11d48"};
   var html='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;">';
