@@ -239,6 +239,7 @@ footer{background:var(--dk);color:rgba(255,255,255,0.3);padding:20px 20px;displa
 <script>
 var SB='https://vfrjqkwdxjvggzkfxfen.supabase.co', K='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZmcmpxa3dkeGp2Z2d6a2Z4ZmVuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxODcyNDcsImV4cCI6MjA5Mzc2MzI0N30.PaHe7kQL8DUs8gmt9Wk47qaz6CX5PLfbeuhv3OIdigU';
 var GC={A:'#7B5EA7',B:'#1a9b7c',C:'#c44e18',D:'#b45309',E:'#0369a1',F:'#7c2d12'};
+var BONUS_FANTASIA={}; // chave: norm(pais(equipe)) -> valor do bonus de saldo
 function h(){return{'apikey':K,'Authorization':'Bearer '+K};}
 
 async function load(){
@@ -246,12 +247,21 @@ async function load(){
     var r1=await fetch(SB+'/rest/v1/equipes?select=*&order=grupo.asc,created_at.asc',{headers:h()});
     var r2=await fetch(SB+'/rest/v1/jogos?select=*,resultados(*),sorteio_duplas(*)&order=data_hora.asc',{headers:h()});
     var r3=await fetch(SB+'/rest/v1/resultados?select=*',{headers:h()});
+    var r4=await fetch(SB+'/rest/v1/bonus_fantasia?select=*',{headers:h()});
     var equipes=await r1.json();
     var jogos=await r2.json();
     var todosResultados=await r3.json();
+    var bonusRows=await r4.json();
     if(!Array.isArray(equipes))equipes=[];
     if(!Array.isArray(jogos))jogos=[];
     if(!Array.isArray(todosResultados))todosResultados=[];
+    if(!Array.isArray(bonusRows))bonusRows=[];
+    // monta o mapa de bonus de fantasia (saldo efetivo)
+    BONUS_FANTASIA={};
+    bonusRows.forEach(function(b){
+      var eq=b&&b.equipe?String(b.equipe).trim():'';
+      if(eq){ BONUS_FANTASIA[norm(pais(eq))]=parseFloat(b.bonus)||0; }
+    });
     // Merge: garantir que todos os jogos tenham resultados corretos do banco
     var resMap={};
     todosResultados.forEach(function(r){
@@ -309,6 +319,8 @@ async function load(){
 function pais(nome){return nome?nome.replace(/^Equipe\s+/i,'').trim():(nome||'');}
 // chave normalizada: sem acento, minúscula, sem espaço sobrando
 function norm(s){return (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim();}
+// bonus de fantasia (saldo efetivo) para uma equipe pelo nome
+function bonusFor(nome){return BONUS_FANTASIA[norm(pais(nome))]||0;}
 var FLAGS={
   'australia':'🇦🇺','espanha':'🇪🇸','inglaterra':'🇬🇧','noruega':'🇳🇴',
   'canada':'🇨🇦','franca':'🇫🇷','portugal':'🇵🇹','republica tcheca':'🇨🇿',
@@ -362,8 +374,8 @@ function sortRows(rows,jogos){
   return rows.slice().sort(function(a,b){
     // 1. Vitórias
     if(b.v!==a.v) return b.v-a.v;
-    // 2. Saldo de gols
-    var sdA=a.gf-a.gc, sdB=b.gf-b.gc;
+    // 2. Saldo de gols (efetivo: inclui bonus de fantasia quando presente)
+    var sdA=a.gf-a.gc+(a.bonus||0), sdB=b.gf-b.gc+(b.bonus||0);
     if(sdB!==sdA) return sdB-sdA;
     // 3. TGM — Total Games Marcados
     if(b.gm!==a.gm) return b.gm-a.gm;
@@ -393,7 +405,7 @@ function renderGrupos(equipes,jogos,stats){
     if(!membros||!membros.length)return;
     var rows=membros.map(function(n){
       var s=stats[n]||{j:0,v:0,d:0,gf:0,gc:0};
-      return{nome:n,j:s.j,v:s.v,d:s.d,gf:s.gf,gc:s.gc,saldo:s.gf-s.gc,gm:s.gm||0,gs:s.gs||0};
+      return{nome:n,j:s.j,v:s.v,d:s.d,gf:s.gf,gc:s.gc,saldo:s.gf-s.gc,gm:s.gm||0,gs:s.gs||0,bonus:bonusFor(n)};
     });
     var gj=jogos.filter(function(j){return j.fase==='Grupo '+g;});
     rows=sortRows(rows,gj);
@@ -414,9 +426,11 @@ function renderGrupos(equipes,jogos,stats){
     rows.forEach(function(r,i){
       var tr=document.createElement('tr');
       if(i<2)tr.className='cl';
-      var sd=r.gf-r.gc;
+      var bonus=r.bonus||0;
+      var sd=(r.gf-r.gc)+bonus;
       var sdColor=sd>0?'#1a9b7c':sd<0?'#dc2626':'var(--tx)';
-      tr.innerHTML='<td style="max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(medals[i]||'')+(medals[i]?' ':'')+fp(r.nome)+'</td>'+
+      var fanTag=bonus>0?' <span title="Bônus de fantasia +'+bonus+'" style="font-size:0.75em;">🎭</span>':'';
+      tr.innerHTML='<td style="max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(medals[i]||'')+(medals[i]?' ':'')+fp(r.nome)+fanTag+'</td>'+
         '<td style="color:var(--tl)">'+r.j+'</td>'+
         '<td style="font-weight:700;color:#1a9b7c">'+r.v+'</td>'+
         '<td style="color:#dc2626">'+r.d+'</td>'+
@@ -537,7 +551,7 @@ function getRankingGeral(stats, jogos, equipes){
   var jogosGrupos=jogos.filter(function(j){return j.fase&&j.fase.startsWith('Grupo');});
   var list=equipes.filter(function(e){return e.grupo;}).map(function(e){
     var s=stats[e.nome]||{j:0,v:0,d:0,gf:0,gc:0,gm:0,gs:0};
-    return{nome:e.nome,grupo:e.grupo,j:s.j,v:s.v,d:s.d,gf:s.gf,gc:s.gc,saldo:s.gf-s.gc,gm:s.gm||0,gs:s.gs||0};
+    return{nome:e.nome,grupo:e.grupo,j:s.j,v:s.v,d:s.d,gf:s.gf,gc:s.gc,saldo:s.gf-s.gc,gm:s.gm||0,gs:s.gs||0,bonus:bonusFor(e.nome)};
   });
   var hasGames=list.some(function(t){return t.j>0;});
   if(hasGames) list=sortRows(list,jogosGrupos);
@@ -629,10 +643,11 @@ function renderRanking(equipes, stats){
   if(!el)return;
   var list=equipes.filter(function(e){return e.grupo;}).map(function(e){
     var s=stats[e.nome]||{j:0,v:0,d:0,gf:0,gc:0};
-    return{nome:e.nome,grupo:e.grupo,j:s.j,v:s.v,d:s.d,gf:s.gf,gc:s.gc,saldo:s.gf-s.gc,gm:s.gm||0,gs:s.gs||0};
+    return{nome:e.nome,grupo:e.grupo,j:s.j,v:s.v,d:s.d,gf:s.gf,gc:s.gc,saldo:s.gf-s.gc,gm:s.gm||0,gs:s.gs||0,bonus:bonusFor(e.nome)};
   });
   var hasGames=list.some(function(t){return t.j>0;});
-  if(hasGames){
+  var hasBonus=list.some(function(t){return (t.bonus||0)>0;});
+  if(hasGames||hasBonus){
     var gruposOnly=ALL_JOGOS.filter(function(j){return j.fase&&j.fase.startsWith('Grupo');});
     list=sortRows(list, gruposOnly);
   } else {
@@ -650,18 +665,22 @@ function renderRanking(equipes, stats){
     else if(pos<=16)posStyle='background:rgba(46,189,154,0.12);color:#1a9b7c;font-weight:600;';
     else posStyle='color:var(--tl);';
     var borderTop=pos===17?'border-top:2px dashed rgba(46,189,154,0.3);':'';
-    var saldo=t.gf-t.gc;
-    var saldoStr=hasGames?(saldo>0?'+'+saldo:''+saldo):'—';
+    var bonus=t.bonus||0;
+    var showSd=hasGames||bonus>0;
+    var saldo=(t.gf-t.gc)+bonus;
+    var saldoStr=showSd?(saldo>0?'+'+saldo:''+saldo):'—';
     var saldoColor=saldo>0?'#1a9b7c':saldo<0?'#dc2626':'var(--tl)';
+    var fanTag=bonus>0?'<span title="Bônus de fantasia +'+bonus+'" style="font-size:0.6rem;">🎭</span>':'';
     html+='<div style="display:grid;grid-template-columns:22px 1fr auto;align-items:center;gap:4px;padding:3px 10px;border-bottom:1px solid rgba(0,0,0,0.04);'+borderTop+'">';
     html+='<div style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;'+posStyle+'">'+pos+'</div>';
-    html+='<div><div style="font-size:0.76rem;font-weight:500;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:130px;">'+fp(t.nome)+'</div>';
-    var sd_r=t.gf-t.gc;
-    var sdStr_r=hasGames?(sd_r>0?'+'+sd_r:''+sd_r):'—';
+    html+='<div><div style="font-size:0.76rem;font-weight:500;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:130px;">'+fp(t.nome)+' '+fanTag+'</div>';
+    var sd_r=(t.gf-t.gc)+bonus;
+    var sdStr_r=showSd?(sd_r>0?'+'+sd_r:''+sd_r):'—';
     var sdColor_r=sd_r>0?'#1a9b7c':sd_r<0?'#dc2626':'var(--tl)';
     html+='<div style="display:flex;align-items:center;gap:6px;margin-top:2px;flex-wrap:wrap;">'+
       '<span style="display:inline-flex;align-items:center;gap:3px;"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:'+gc[t.grupo]+';margin-right:2px;"></span><span style="font-size:0.64rem;color:var(--tl);">G'+t.grupo+'</span></span>'+
-      (hasGames?'<span style="font-size:0.64rem;color:#1a9b7c;font-weight:600;">'+t.v+'V</span><span style="font-size:0.64rem;color:'+sdColor_r+';font-weight:700;">SD '+sdStr_r+'</span>':'')+
+      (hasGames?'<span style="font-size:0.64rem;color:#1a9b7c;font-weight:600;">'+t.v+'V</span>':'')+
+      (showSd?'<span style="font-size:0.64rem;color:'+sdColor_r+';font-weight:700;">SD '+sdStr_r+'</span>':'')+
     '</div></div>';
     html+='<div style="text-align:right;font-size:0.72rem;font-weight:700;color:'+saldoColor+';">'+saldoStr+'</div>';
     html+='</div>';
@@ -705,7 +724,7 @@ function openDetail(jogo){
   m.classList.add('open');
 }
 
-console.log('grupos.html — flags v2 (accent-proof) ✅');
+console.log('grupos.html — flags v2 + saldo efetivo (fantasia) + menu padronizado ✅');
 load();
 setInterval(load,60000);
 </script>
