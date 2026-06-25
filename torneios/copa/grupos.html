@@ -338,7 +338,38 @@ var FLAGS={
   'irã':'🇮🇷','ira':'🇮🇷','irão':'🇮🇷',
   'egito':'🇪🇬'
 };
-function flag(nome){if(!nome)return'';var p=pais(nome).toLowerCase();return FLAGS[p]||'🏳️';}
+function flag(nome){
+  if(!nome) return '';
+  var p=pais(nome);
+  // Normaliza: remove acentos para comparação
+  var norm=p.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  // Tenta direto, depois sem acento
+  var r=FLAGS[p.toLowerCase()]||FLAGS[norm]||'🏳️';
+  // Fallback manual para casos problemáticos
+  if(r==='🏳️'){
+    if(/^eua$/i.test(p)) r='🇺🇸';
+    else if(/uruguai/i.test(p)) r='🇺🇾';
+    else if(/marrocos/i.test(p)) r='🇲🇦';
+    else if(/africa|áfrica/i.test(p)) r='🇿🇦';
+    else if(/belg/i.test(p)) r='🇧🇪';
+    else if(/fran[cç]/i.test(p)) r='🇫🇷';
+    else if(/sui[cç]/i.test(p)) r='🇨🇭';
+    else if(/colomb/i.test(p)) r='🇨🇴';
+    else if(/alemanha/i.test(p)) r='🇩🇪';
+    else if(/australia|austr[aá]lia/i.test(p)) r='🇦🇺';
+    else if(/canad/i.test(p)) r='🇨🇦';
+    else if(/portugal/i.test(p)) r='🇵🇹';
+    else if(/holanda/i.test(p)) r='🇳🇱';
+    else if(/espanha/i.test(p)) r='🇪🇸';
+    else if(/brasil/i.test(p)) r='🇧🇷';
+    else if(/argentina/i.test(p)) r='🇦🇷';
+    else if(/japo|japão/i.test(p)) r='🇯🇵';
+    else if(/inglat/i.test(p)) r='🏴󠁧󠁢󠁥󠁮󠁧󠁿';
+    else if(/uruguai/i.test(p)) r='🇺🇾';
+    else if(/espanha/i.test(p)) r='🇪🇸';
+  }
+  return r;
+}
 function fp(nome){return flag(nome)+' '+pais(nome);}
 function sumPartidas(partidas){
   var ta=0,tb=0,ga=0,gb=0;
