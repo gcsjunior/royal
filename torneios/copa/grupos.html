@@ -387,14 +387,15 @@ function sortRows(rows,jogos){
 }
 
 function renderGrupos(equipes,jogos,stats){
-  var grupos={A:[],B:[],C:[],D:[],E:[],F:[]};
+  var grupos={A:[],B:[],C:[],D:[],E:[]};
   equipes.forEach(function(e){if(e.grupo&&grupos[e.grupo])grupos[e.grupo].push(e.nome);});
 
   var con=document.getElementById('gcon');
   con.innerHTML='';
 
-  ['A','B','C','D','E','F'].forEach(function(g){
+  ['A','B','C','D','E'].forEach(function(g){
     var membros=grupos[g];
+    if(!membros||!membros.length)return;
     var rows=membros.map(function(n){
       var s=stats[n]||{j:0,v:0,d:0,gf:0,gc:0};
       return{nome:n,j:s.j,v:s.v,d:s.d,gf:s.gf,gc:s.gc,saldo:s.gf-s.gc,gm:s.gm||0,gs:s.gs||0};
