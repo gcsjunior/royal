@@ -311,20 +311,19 @@ async function load(){
   }catch(ex){console.error(ex);}
 }
 
-function pais(nome){return nome?nome.replace(/^Equipe\s+/i,''):(nome||'');}
+function pais(nome){return nome?nome.replace(/^Equipe\s+/i,'').trim():(nome||'');}
+// chave normalizada: sem acento, minúscula, sem espaço sobrando
+function norm(s){return (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim();}
 var FLAGS={
-  'australia':'🇦🇺','austrália':'🇦🇺','espanha':'🇪🇸','inglaterra':'🇬🇧',
-  'noruega':'🇳🇴','canadá':'🇨🇦','canada':'🇨🇦','frança':'🇫🇷','franca':'🇫🇷',
-  'portugal':'🇵🇹','república tcheca':'🇨🇿','republica tcheca':'🇨🇿',
-  'argentina':'🇦🇷','itália':'🇮🇹','italia':'🇮🇹','sérvia':'🇷🇸','servia':'🇷🇸',
-  'suécia':'🇸🇪','suecia':'🇸🇪','alemanha':'🇩🇪','chile':'🇨🇱',
-  'holanda':'🇳🇱','japão':'🇯🇵','japao':'🇯🇵','bélgica':'🇧🇪','belgica':'🇧🇪',
-  'colômbia':'🇨🇴','colombia':'🇨🇴','dinamarca':'🇩🇰','suíça':'🇨🇭','suica':'🇨🇭',
-  'brasil':'🇧🇷','croácia':'🇭🇷','croacia':'🇭🇷','estados unidos':'🇺🇸','eua':'🇺🇸',
-  'uruguai':'🇺🇾','marrocos':'🇲🇦','áfrica do sul':'🇿🇦','africa do sul':'🇿🇦',
-  'polônia':'🇵🇱','polonia':'🇵🇱'
+  'australia':'🇦🇺','espanha':'🇪🇸','inglaterra':'🇬🇧','noruega':'🇳🇴',
+  'canada':'🇨🇦','franca':'🇫🇷','portugal':'🇵🇹','republica tcheca':'🇨🇿',
+  'argentina':'🇦🇷','italia':'🇮🇹','servia':'🇷🇸','suecia':'🇸🇪',
+  'alemanha':'🇩🇪','chile':'🇨🇱','holanda':'🇳🇱','japao':'🇯🇵',
+  'belgica':'🇧🇪','colombia':'🇨🇴','dinamarca':'🇩🇰','suica':'🇨🇭',
+  'brasil':'🇧🇷','croacia':'🇭🇷','estados unidos':'🇺🇸','eua':'🇺🇸',
+  'uruguai':'🇺🇾','marrocos':'🇲🇦','africa do sul':'🇿🇦','polonia':'🇵🇱'
 };
-function flag(nome){if(!nome)return'';var p=pais(nome).toLowerCase();return FLAGS[p]||'🏳️';}
+function flag(nome){if(!nome)return'';return FLAGS[norm(pais(nome))]||'🏳️';}
 function fp(nome){return flag(nome)+' '+pais(nome);}
 function sumPartidas(partidas){
   var ta=0,tb=0,ga=0,gb=0;
@@ -710,6 +709,7 @@ function openDetail(jogo){
   m.classList.add('open');
 }
 
+console.log('grupos.html — flags v2 (accent-proof) ✅');
 load();
 setInterval(load,60000);
 </script>
