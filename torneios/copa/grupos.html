@@ -243,7 +243,7 @@ footer{background:var(--dk);color:rgba(255,255,255,0.3);padding:20px 20px;displa
 
 <script>
 var SB='https://vfrjqkwdxjvggzkfxfen.supabase.co', K='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZmcmpxa3dkeGp2Z2d6a2Z4ZmVuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxODcyNDcsImV4cCI6MjA5Mzc2MzI0N30.PaHe7kQL8DUs8gmt9Wk47qaz6CX5PLfbeuhv3OIdigU';
-var GC={A:'#7B5EA7',B:'#1a9b7c',C:'#c44e18',D:'#b45309',E:'#0369a1'};
+var GC={A:'#7B5EA7',B:'#1a9b7c',C:'#c44e18',D:'#b45309',E:'#0369a1',F:'#7c2d12'};
 function h(){return{'apikey':K,'Authorization':'Bearer '+K};}
 
 async function load(){
@@ -281,7 +281,7 @@ async function load(){
     if(!sorted){
       document.getElementById('gcon').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--tl);">🎲 O sorteio ainda não foi realizado.</div>';
     } else {
-      document.getElementById('gsub').textContent='Top 3 de cada grupo + melhor 4º avançam para oitavas (16 classificados)';
+      document.getElementById('gsub').textContent='Top 2 de cada grupo + 4 melhores 3ºs avançam para oitavas';
       renderGrupos(equipes,jogos,stats);
     }
 
@@ -312,35 +312,19 @@ async function load(){
 }
 
 function pais(nome){return nome?nome.replace(/^Equipe\s+/i,''):(nome||'');}
-function flag(nome){
-  if(!nome) return '';
-  var p=pais(nome);
-  if(/^brasil$/i.test(p)) return'🇧🇷';
-  if(/^alemanha$/i.test(p)) return'🇩🇪';
-  if(/^eua$|estados unidos/i.test(p)) return'🇺🇸';
-  if(/sui[cç]/i.test(p)) return'🇨🇭';
-  if(/colomb/i.test(p)) return'🇨🇴';
-  if(/^portugal$/i.test(p)) return'🇵🇹';
-  if(/austral/i.test(p)) return'🇦🇺';
-  if(/^argentina$/i.test(p)) return'🇦🇷';
-  if(/fran[cç]/i.test(p)) return'🇫🇷';
-  if(/^holanda$/i.test(p)) return'🇳🇱';
-  if(/inglat/i.test(p)) return'🏴󠁧󠁢󠁥󠁮󠁧󠁿';
-  if(/^espanha$/i.test(p)) return'🇪🇸';
-  if(/uruguai/i.test(p)) return'🇺🇾';
-  if(/jap[ao]/i.test(p)) return'🇯🇵';
-  if(/frica.do.sul|africa.do.sul/i.test(p)) return'🇿🇦';
-  if(/belg/i.test(p)) return'🇧🇪';
-  if(/marrocos/i.test(p)) return'🇲🇦';
-  if(/canad/i.test(p)) return'🇨🇦';
-  if(/m[eé]xico/i.test(p)) return'🇲🇽';
-  if(/noruega/i.test(p)) return'🇳🇴';
-  if(/esc[oó]cia/i.test(p)) return'🏴󠁧󠁢󠁳󠁣󠁴󠁿';
-  if(/marfim/i.test(p)) return'🇨🇮';
-  if(/ir[aã]/i.test(p)) return'🇮🇷';
-  if(/egito/i.test(p)) return'🇪🇬';
-  return'🏳️';
-}
+var FLAGS={
+  'australia':'🇦🇺','austrália':'🇦🇺','espanha':'🇪🇸','inglaterra':'🇬🇧',
+  'noruega':'🇳🇴','canadá':'🇨🇦','canada':'🇨🇦','frança':'🇫🇷','franca':'🇫🇷',
+  'portugal':'🇵🇹','república tcheca':'🇨🇿','republica tcheca':'🇨🇿',
+  'argentina':'🇦🇷','itália':'🇮🇹','italia':'🇮🇹','sérvia':'🇷🇸','servia':'🇷🇸',
+  'suécia':'🇸🇪','suecia':'🇸🇪','alemanha':'🇩🇪','chile':'🇨🇱',
+  'holanda':'🇳🇱','japão':'🇯🇵','japao':'🇯🇵','bélgica':'🇧🇪','belgica':'🇧🇪',
+  'colômbia':'🇨🇴','colombia':'🇨🇴','dinamarca':'🇩🇰','suíça':'🇨🇭','suica':'🇨🇭',
+  'brasil':'🇧🇷','croácia':'🇭🇷','croacia':'🇭🇷','estados unidos':'🇺🇸','eua':'🇺🇸',
+  'uruguai':'🇺🇾','marrocos':'🇲🇦','áfrica do sul':'🇿🇦','africa do sul':'🇿🇦',
+  'polônia':'🇵🇱','polonia':'🇵🇱'
+};
+function flag(nome){if(!nome)return'';var p=pais(nome).toLowerCase();return FLAGS[p]||'🏳️';}
 function fp(nome){return flag(nome)+' '+pais(nome);}
 function sumPartidas(partidas){
   var ta=0,tb=0,ga=0,gb=0;
@@ -358,7 +342,7 @@ function calcStats(jogos){
     var sp=sumPartidas(partidas);
     if(partidas.length===0||(sp.ta===0&&sp.tb===0))return;
     var f=j.fase;
-    if(!['Grupo A','Grupo B','Grupo C','Grupo D','Grupo E'].includes(f))return;
+    if(!['Grupo A','Grupo B','Grupo C','Grupo D','Grupo E','Grupo F'].includes(f))return;
     var g=f.replace('Grupo ','');
     function en(n){if(!s[n])s[n]={grupo:g,j:0,v:0,d:0,gf:0,gc:0,gm:0,gs:0};}
     en(j.equipe_a);en(j.equipe_b);
@@ -404,13 +388,13 @@ function sortRows(rows,jogos){
 }
 
 function renderGrupos(equipes,jogos,stats){
-  var grupos={A:[],B:[],C:[],D:[],E:[]};
+  var grupos={A:[],B:[],C:[],D:[],E:[],F:[]};
   equipes.forEach(function(e){if(e.grupo&&grupos[e.grupo])grupos[e.grupo].push(e.nome);});
 
   var con=document.getElementById('gcon');
   con.innerHTML='';
 
-  ['A','B','C','D','E'].forEach(function(g){
+  ['A','B','C','D','E','F'].forEach(function(g){
     var membros=grupos[g];
     var rows=membros.map(function(n){
       var s=stats[n]||{j:0,v:0,d:0,gf:0,gc:0};
@@ -568,7 +552,7 @@ function getRankingGeral(stats, jogos, equipes){
 
 function getSeeds(stats,jogos,equipes){
   var rankingGeral=getRankingGeral(stats,jogos,equipes);
-  var all16=rankingGeral.filter(function(t){return t.j>=2;}).slice(0,16);
+  var all16=rankingGeral.filter(function(t){return t.j>=3;}).slice(0,16);
   while(all16.length<16) all16.push(null);
   function nm(i){return all16[i]?all16[i].nome:null;}
   return{
