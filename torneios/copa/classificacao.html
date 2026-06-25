@@ -90,11 +90,10 @@ tr.possivel td{background:rgba(242,101,34,0.03);}
     <button class="gtab on" data-g="geral">🌐 Geral (1º–24º)</button>
     <button class="gtab" data-g="A">Grupo A</button>
     <button class="gtab" data-g="B">Grupo B</button>
-    <button class="gtab" data-g="C">Grupo C</button>
+    <button class="gtab" data-g="C">Grupo C</button>MARK_D
     <button class="gtab" data-g="D">Grupo D</button>
     <button class="gtab" data-g="E">Grupo E</button>
-    <button class="gtab" data-g="F">Grupo F</button>
-  </div>
+    </div>
 
   <div id="ct"><div style="text-align:center;padding:60px;color:var(--tl);">⏳ Carregando...</div></div>
 
@@ -111,7 +110,11 @@ tr.possivel td{background:rgba(242,101,34,0.03);}
 <script>
 var SB="https://vfrjqkwdxjvggzkfxfen.supabase.co";
 var K="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZmcmpxa3dkeGp2Z2d6a2Z4ZmVuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxODcyNDcsImV4cCI6MjA5Mzc2MzI0N30.PaHe7kQL8DUs8gmt9Wk47qaz6CX5PLfbeuhv3OIdigU";
-var GRP="geral", ALL_STATS={}, ALL_JOGOS=[];
+var GRP="geral", ALL_STATS={}, ALL_JOGOS=[], BONUS_FANTASIA={};
+
+// Grupos de 3 times (B e D) e grupos de 4 times (A, C, E)
+var GRUPOS_VALIDOS=["Grupo A","Grupo B","Grupo C","Grupo D","Grupo E"];
+var GRUPOS_3=["B","D"]; // grupos com 3 times
 
 function h(){return{"apikey":K,"Authorization":"Bearer "+K};}
 
@@ -130,25 +133,32 @@ function calcStats(jogos){
     var r=jogo.resultados&&jogo.resultados[0];
     if(!r||(r.total_a===0&&r.total_b===0)) return;
     var fase=jogo.fase;
-    if(!["Grupo A","Grupo B","Grupo C","Grupo D","Grupo E","Grupo F"].includes(fase)) return;
+    if(!GRUPOS_VALIDOS.includes(fase)) return;
     var grp=fase.replace("Grupo ","");
-    function ensure(nm){if(!s[nm])s[nm]={nome:nm,grupo:grp,j:0,v:0,d:0,gf:0,gc:0};}
+    function ensure(nm){if(!s[nm])s[nm]={nome:nm,grupo:grp,j:0,v:0,d:0,gf:0,gc:0,bonus:0};}
     ensure(jogo.equipe_a); ensure(jogo.equipe_b);
     s[jogo.equipe_a].j++; s[jogo.equipe_b].j++;
-    // SF/SC = sets (games do set) marcados/contra
     s[jogo.equipe_a].gf+=r.games_a||0; s[jogo.equipe_a].gc+=r.games_b||0;
     s[jogo.equipe_b].gf+=r.games_b||0; s[jogo.equipe_b].gc+=r.games_a||0;
-    // Vitória = quem venceu o set (total_a=1 ou total_b=1)
     if(r.total_a>r.total_b){s[jogo.equipe_a].v++;s[jogo.equipe_b].d++;}
     else if(r.total_b>r.total_a){s[jogo.equipe_b].v++;s[jogo.equipe_a].d++;}
   });
+  // Aplica bônus de fantasia
+  Object.keys(BONUS_FANTASIA).forEach(function(equipe){
+    if(s[equipe]) s[equipe].bonus=BONUS_FANTASIA[equipe];
+  });
   return s;
+}
+
+function saldoEfetivo(t){
+  // Saldo de gols + bônus fantasia
+  return (t.gf-t.gc)+t.bonus;
 }
 
 function sortTeams(list,jogos){
   return list.sort(function(a,b){
     if(b.v!==a.v) return b.v-a.v;
-    var sa=a.gf-a.gc, sb=b.gf-b.gc;
+    var sa=saldoEfetivo(a), sb=saldoEfetivo(b);
     if(sb!==sa) return sb-sa;
     if(b.gf!==a.gf) return b.gf-a.gf;
     // confronto direto
@@ -174,18 +184,22 @@ function render(){
   var list=GRP==="geral"?Object.values(stats):Object.values(stats).filter(function(t){return t.grupo===GRP;});
   var sorted=sortTeams(list.slice(),ALL_JOGOS);
   var isGeral=GRP==="geral";
+  var is3=GRUPOS_3.includes(GRP);
 
   var html="<div class='card'><table><thead><tr>"+
     "<th style='width:40px;text-align:center;'>#</th>"+
     "<th style='text-align:left;'>Equipe</th>"+
     (isGeral?"<th>Grupo</th>":"")+
     "<th title='Jogos'>J</th><th title='Vitórias' style='color:#1a9b7c;'>V</th><th title='Derrotas' style='color:#dc2626;'>D</th>"+
-    "<th title='Sets Feitos'>SF</th><th title='Sets Contra'>SC</th><th title='Saldo de Sets'>Saldo</th><th>Situação</th>"+
+    "<th title='Sets Feitos'>SF</th><th title='Sets Contra'>SC</th><th title='Saldo Efetivo'>Saldo</th>"+
+    "<th title='Bônus Fantasia' style='color:#c44e18;'>🎭</th>"+
+    "<th>Situação</th>"+
     "</tr></thead><tbody>";
 
   sorted.forEach(function(t,i){
     var pos=i+1;
     var saldo=t.gf-t.gc;
+    var saldoEf=saldoEfetivo(t);
     var pb="";
     if(pos===1) pb="<span class='badge-pos' style='background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#fff;'>1</span>";
     else if(pos===2) pb="<span class='badge-pos' style='background:linear-gradient(135deg,#9ca3af,#6b7280);color:#fff;'>2</span>";
@@ -194,13 +208,23 @@ function render(){
 
     var sit="",rowcls="";
     if(isGeral){
-      if(pos<=12){sit="<span style='background:rgba(46,189,154,0.15);color:#1a9b7c;padding:3px 8px;border-radius:6px;font-size:0.7rem;font-weight:600;'>✓ Oitavas</span>";rowcls="classifica";}
+      // Top 16 avançam: 15 (1º/2º/3º de cada grupo) + melhor 4º
+      if(pos<=16){sit="<span style='background:rgba(46,189,154,0.15);color:#1a9b7c;padding:3px 8px;border-radius:6px;font-size:0.7rem;font-weight:600;'>✓ Oitavas</span>";rowcls="classifica";}
       else{sit="<span style='background:rgba(220,38,38,0.1);color:#dc2626;padding:3px 8px;border-radius:6px;font-size:0.7rem;'>✗ Eliminado</span>";}
     } else {
-      if(pos<=2){sit="<span style='background:rgba(46,189,154,0.15);color:#1a9b7c;padding:3px 8px;border-radius:6px;font-size:0.7rem;font-weight:600;'>✓ Classifica</span>";rowcls="classifica";}
-      else if(pos===3){sit="<span style='background:rgba(242,101,34,0.12);color:#c44e18;padding:3px 8px;border-radius:6px;font-size:0.7rem;'>🔶 Disputa vaga</span>";rowcls="possivel";}
-      else{sit="<span style='background:rgba(220,38,38,0.1);color:#dc2626;padding:3px 8px;border-radius:6px;font-size:0.7rem;'>✗ Eliminado</span>";}
+      // Grupos de 4: top 3 classificam + 4º pode ser melhor 4º
+      // Grupos de 3: todos os 3 classificam
+      if(is3){
+        sit="<span style='background:rgba(46,189,154,0.15);color:#1a9b7c;padding:3px 8px;border-radius:6px;font-size:0.7rem;font-weight:600;'>✓ Classifica</span>";
+        rowcls="classifica";
+      } else {
+        if(pos<=3){sit="<span style='background:rgba(46,189,154,0.15);color:#1a9b7c;padding:3px 8px;border-radius:6px;font-size:0.7rem;font-weight:600;'>✓ Classifica</span>";rowcls="classifica";}
+        else{sit="<span style='background:rgba(242,101,34,0.12);color:#c44e18;padding:3px 8px;border-radius:6px;font-size:0.7rem;'>🔶 Melhor 4º?</span>";rowcls="possivel";}
+      }
     }
+
+    var bonusCell=t.bonus>0?"<td style='font-weight:700;color:#c44e18;font-size:0.82rem;'>+"+t.bonus.toFixed(1)+"</td>":"<td style='color:var(--tl);font-size:0.78rem;'>—</td>";
+    var saldoColor=saldoEf>0?"#1a9b7c":saldoEf<0?"#dc2626":"var(--tx)";
 
     html+="<tr class='"+rowcls+"'>"+
       "<td>"+pb+"</td>"+
@@ -210,7 +234,8 @@ function render(){
       "<td style='font-weight:700;color:#1a9b7c;'>"+t.v+"</td>"+
       "<td style='color:#dc2626;'>"+t.d+"</td>"+
       "<td>"+t.gf+"</td><td>"+t.gc+"</td>"+
-      "<td style='font-weight:700;color:"+(saldo>0?"#1a9b7c":saldo<0?"#dc2626":"var(--tx)")+"'>"+(saldo>0?"+":"")+saldo+"</td>"+
+      "<td style='font-weight:700;color:"+saldoColor+";'>"+(saldo>0?"+":"")+saldo+"</td>"+
+      bonusCell+
       "<td>"+sit+"</td>"+
       "</tr>";
   });
@@ -219,17 +244,28 @@ function render(){
   ct.innerHTML=html;
 
   document.getElementById("legenda").innerHTML=
-    "<div style='display:flex;align-items:center;gap:6px;font-size:0.76rem;color:var(--tl);'><div style='width:12px;height:4px;background:#2EBD9A;border-radius:2px;'></div>"+(isGeral?"Top 12 avançam para oitavas":"Top 2 classificam diretamente")+"</div>"+
-    (!isGeral?"<div style='display:flex;align-items:center;gap:6px;font-size:0.76rem;color:var(--tl);'><div style='width:12px;height:4px;background:#F26522;border-radius:2px;'></div>3º disputa vaga como melhor terceiro</div>":"");
+    "<div style='display:flex;align-items:center;gap:6px;font-size:0.76rem;color:var(--tl);'><div style='width:12px;height:4px;background:#2EBD9A;border-radius:2px;'></div>"+(isGeral?"Top 16 avançam para oitavas":"Top 3 classificam (grupos de 3: todos)")+"</div>"+
+    (!isGeral&&!is3?"<div style='display:flex;align-items:center;gap:6px;font-size:0.76rem;color:var(--tl);'><div style='width:12px;height:4px;background:#F26522;border-radius:2px;'></div>4º pode avançar como melhor 4º colocado</div>":"")+
+    "<div style='display:flex;align-items:center;gap:6px;font-size:0.76rem;color:var(--tl);'><div style='width:12px;height:4px;background:#c44e18;border-radius:2px;'></div>🎭 Bônus Fantasia: +1.5 (1º), +1.0 (2º), +0.5 (3º) no saldo</div>";
 
   document.getElementById("upd").textContent="Atualizado às "+new Date().toLocaleTimeString("pt-BR");
 }
 
 async function load(){
   try{
-    var r=await fetch(SB+"/rest/v1/jogos?select=*,resultados(*)&order=data_hora.asc",{headers:h()});
-    ALL_JOGOS=await r.json();
+    var [rj,rb]=await Promise.all([
+      fetch(SB+"/rest/v1/jogos?select=*,resultados(*)&order=data_hora.asc",{headers:h()}),
+      fetch(SB+"/rest/v1/bonus_fantasia?select=*",{headers:h()})
+    ]);
+    ALL_JOGOS=await rj.json();
+    var bonusData=await rb.json();
     if(!Array.isArray(ALL_JOGOS)) ALL_JOGOS=[];
+    BONUS_FANTASIA={};
+    if(Array.isArray(bonusData)){
+      bonusData.forEach(function(b){
+        if(b.equipe) BONUS_FANTASIA[b.equipe]=parseFloat(b.bonus);
+      });
+    }
     ALL_STATS=calcStats(ALL_JOGOS);
     render();
   }catch(e){

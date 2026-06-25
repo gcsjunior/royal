@@ -107,6 +107,7 @@ tr:last-child td{border-bottom:none;}
         <button class="tab" id="tab-sorteio">🎲 Sorteio Grupos</button>
         <button class="tab" id="tab-sorteio-duplas">🎯 Sorteio Duplas</button>
         <button class="tab" id="tab-sorteio-paises">🌍 Sorteio Países</button>
+        <button class="tab" id="tab-fantasia">🎭 Melhor Fantasia</button>
       </div>
     </div>
 
@@ -216,6 +217,54 @@ tr:last-child td{border-bottom:none;}
       </div>
     </div>
 
+<!-- MELHOR FANTASIA -->
+    <div id="tc-fantasia" class="tc">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+        <div>
+          <div class="stitle">🎭 Melhor Fantasia</div>
+          <div style="font-size:0.84rem;color:var(--tl);margin-top:4px;">Os 3 melhores colocados recebem bônus de saldo para o chaveamento</div>
+        </div>
+      </div>
+      <div style="background:rgba(242,101,34,0.06);border:1px solid rgba(242,101,34,0.2);border-radius:12px;padding:16px 20px;margin-bottom:24px;">
+        <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#c44e18;margin-bottom:10px;">Tabela de Bônus</div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap;">
+          <div style="background:#fff;border-radius:10px;padding:12px 20px;text-align:center;min-width:100px;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+            <div style="font-size:1.3rem;">🥇</div>
+            <div style="font-family:'Nunito',sans-serif;font-size:1.4rem;font-weight:900;color:#f59e0b;">+1,5</div>
+            <div style="font-size:0.72rem;color:var(--tl);">no saldo</div>
+          </div>
+          <div style="background:#fff;border-radius:10px;padding:12px 20px;text-align:center;min-width:100px;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+            <div style="font-size:1.3rem;">🥈</div>
+            <div style="font-family:'Nunito',sans-serif;font-size:1.4rem;font-weight:900;color:#6b7280;">+1,0</div>
+            <div style="font-size:0.72rem;color:var(--tl);">no saldo</div>
+          </div>
+          <div style="background:#fff;border-radius:10px;padding:12px 20px;text-align:center;min-width:100px;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+            <div style="font-size:1.3rem;">🥉</div>
+            <div style="font-family:'Nunito',sans-serif;font-size:1.4rem;font-weight:900;color:#b45309;">+0,5</div>
+            <div style="font-size:0.72rem;color:var(--tl);">no saldo</div>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="padding:24px;">
+        <div style="display:flex;flex-direction:column;gap:16px;" id="fantasia-form">
+          <div>
+            <label style="font-size:0.78rem;font-weight:600;color:var(--tl);display:block;margin-bottom:6px;">🥇 1º Colocado <span style="color:#f59e0b;">(+1,5 saldo)</span></label>
+            <input id="f1-equipe" placeholder="Nome da equipe (como cadastrada nos jogos)" style="width:100%;padding:10px 13px;border:1px solid rgba(0,0,0,0.12);border-radius:9px;font-size:0.86rem;outline:none;font-family:'DM Sans',sans-serif;"/>
+          </div>
+          <div>
+            <label style="font-size:0.78rem;font-weight:600;color:var(--tl);display:block;margin-bottom:6px;">🥈 2º Colocado <span style="color:#6b7280;">(+1,0 saldo)</span></label>
+            <input id="f2-equipe" placeholder="Nome da equipe" style="width:100%;padding:10px 13px;border:1px solid rgba(0,0,0,0.12);border-radius:9px;font-size:0.86rem;outline:none;font-family:'DM Sans',sans-serif;"/>
+          </div>
+          <div>
+            <label style="font-size:0.78rem;font-weight:600;color:var(--tl);display:block;margin-bottom:6px;">🥉 3º Colocado <span style="color:#b45309;">(+0,5 saldo)</span></label>
+            <input id="f3-equipe" placeholder="Nome da equipe" style="width:100%;padding:10px 13px;border:1px solid rgba(0,0,0,0.12);border-radius:9px;font-size:0.86rem;outline:none;font-family:'DM Sans',sans-serif;"/>
+          </div>
+          <div id="fantasia-msg" style="display:none;padding:10px 14px;border-radius:8px;font-size:0.84rem;"></div>
+          <button onclick="savFantasia()" class="btn bp" style="padding:11px 24px;font-size:0.9rem;">💾 Salvar Bônus Fantasia</button>
+        </div>
+      </div>
+    </div>
+
     <!-- FOTOS -->
     <div id="tc-sorteio-paises" class="tc">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
@@ -235,13 +284,8 @@ tr:last-child td{border-bottom:none;}
       </div>
 
       <!-- área de animação (slot machine) -->
-      <div id="sp-stage" style="display:none;flex-direction:column;align-items:center;gap:16px;margin-bottom:28px;">
-        <div style="display:flex;align-items:center;gap:14px;">
-          <div id="sp-capitao-foto-wrap" style="display:none;">
-            <img id="sp-capitao-foto" src="" alt="" style="width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid rgba(123,94,167,0.5);"/>
-          </div>
-          <div style="font-size:1rem;font-weight:700;color:var(--r);letter-spacing:0.02em;" id="sp-capitao-nome">—</div>
-        </div>
+      <div id="sp-stage" style="display:none;flex-direction:column;align-items:center;gap:20px;margin-bottom:28px;">
+        <div style="font-size:1rem;font-weight:700;color:var(--r);letter-spacing:0.02em;" id="sp-capitao-nome">—</div>
         <div id="sp-slot" style="width:320px;height:180px;border-radius:22px;overflow:hidden;background:#0f0a1a;border:2px solid rgba(123,94,167,0.4);position:relative;display:flex;align-items:center;justify-content:center;">
           <div id="sp-reel" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:transform 0.08s linear;"></div>
           <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(15,10,26,0.85) 0%,transparent 30%,transparent 70%,rgba(15,10,26,0.85) 100%);pointer-events:none;"></div>
@@ -255,6 +299,54 @@ tr:last-child td{border-bottom:none;}
         <div style="font-size:0.7rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--tl);margin-bottom:10px;">Capitães por Equipe</div>
         <div id="sp-capitaes-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;">
           <div style="color:var(--tl);font-size:0.85rem;padding:12px;">Carregando...</div>
+        </div>
+      </div>
+    </div>
+
+<!-- MELHOR FANTASIA -->
+    <div id="tc-fantasia" class="tc">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+        <div>
+          <div class="stitle">🎭 Melhor Fantasia</div>
+          <div style="font-size:0.84rem;color:var(--tl);margin-top:4px;">Os 3 melhores colocados recebem bônus de saldo para o chaveamento</div>
+        </div>
+      </div>
+      <div style="background:rgba(242,101,34,0.06);border:1px solid rgba(242,101,34,0.2);border-radius:12px;padding:16px 20px;margin-bottom:24px;">
+        <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#c44e18;margin-bottom:10px;">Tabela de Bônus</div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap;">
+          <div style="background:#fff;border-radius:10px;padding:12px 20px;text-align:center;min-width:100px;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+            <div style="font-size:1.3rem;">🥇</div>
+            <div style="font-family:'Nunito',sans-serif;font-size:1.4rem;font-weight:900;color:#f59e0b;">+1,5</div>
+            <div style="font-size:0.72rem;color:var(--tl);">no saldo</div>
+          </div>
+          <div style="background:#fff;border-radius:10px;padding:12px 20px;text-align:center;min-width:100px;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+            <div style="font-size:1.3rem;">🥈</div>
+            <div style="font-family:'Nunito',sans-serif;font-size:1.4rem;font-weight:900;color:#6b7280;">+1,0</div>
+            <div style="font-size:0.72rem;color:var(--tl);">no saldo</div>
+          </div>
+          <div style="background:#fff;border-radius:10px;padding:12px 20px;text-align:center;min-width:100px;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+            <div style="font-size:1.3rem;">🥉</div>
+            <div style="font-family:'Nunito',sans-serif;font-size:1.4rem;font-weight:900;color:#b45309;">+0,5</div>
+            <div style="font-size:0.72rem;color:var(--tl);">no saldo</div>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="padding:24px;">
+        <div style="display:flex;flex-direction:column;gap:16px;" id="fantasia-form">
+          <div>
+            <label style="font-size:0.78rem;font-weight:600;color:var(--tl);display:block;margin-bottom:6px;">🥇 1º Colocado <span style="color:#f59e0b;">(+1,5 saldo)</span></label>
+            <input id="f1-equipe" placeholder="Nome da equipe (como cadastrada nos jogos)" style="width:100%;padding:10px 13px;border:1px solid rgba(0,0,0,0.12);border-radius:9px;font-size:0.86rem;outline:none;font-family:'DM Sans',sans-serif;"/>
+          </div>
+          <div>
+            <label style="font-size:0.78rem;font-weight:600;color:var(--tl);display:block;margin-bottom:6px;">🥈 2º Colocado <span style="color:#6b7280;">(+1,0 saldo)</span></label>
+            <input id="f2-equipe" placeholder="Nome da equipe" style="width:100%;padding:10px 13px;border:1px solid rgba(0,0,0,0.12);border-radius:9px;font-size:0.86rem;outline:none;font-family:'DM Sans',sans-serif;"/>
+          </div>
+          <div>
+            <label style="font-size:0.78rem;font-weight:600;color:var(--tl);display:block;margin-bottom:6px;">🥉 3º Colocado <span style="color:#b45309;">(+0,5 saldo)</span></label>
+            <input id="f3-equipe" placeholder="Nome da equipe" style="width:100%;padding:10px 13px;border:1px solid rgba(0,0,0,0.12);border-radius:9px;font-size:0.86rem;outline:none;font-family:'DM Sans',sans-serif;"/>
+          </div>
+          <div id="fantasia-msg" style="display:none;padding:10px 14px;border-radius:8px;font-size:0.84rem;"></div>
+          <button onclick="savFantasia()" class="btn bp" style="padding:11px 24px;font-size:0.9rem;">💾 Salvar Bônus Fantasia</button>
         </div>
       </div>
     </div>
@@ -366,7 +458,7 @@ tr:last-child td{border-bottom:none;}
 <div id="mj" class="modal"><div class="mc">
   <div class="mt">Jogo</div><input type="hidden" id="jid"/>
   <div class="g2"><div class="fr"><label>Equipe A</label><input id="jea"/></div><div class="fr"><label>Equipe B</label><input id="jeb"/></div></div>
-  <div class="g2"><div class="fr"><label>Fase</label><select id="jfase"><option>Grupo A</option><option>Grupo B</option><option>Grupo C</option><option>Grupo D</option><option>Grupo E</option><option>Grupo F</option><option>Oitavas</option><option>Quartas</option><option>Semi</option><option>Final</option></select></div><div class="fr"><label>Quadra</label><input id="jq"/></div></div>
+  <div class="g2"><div class="fr"><label>Fase</label><select id="jfase"><option>Grupo A</option><option>Grupo B</option><option>Grupo C</option><option>Grupo D</option><option>Grupo E</option><option>Oitavas</option><option>Quartas</option><option>Semi</option><option>Final</option></select></div><div class="fr"><label>Quadra</label><input id="jq"/></div></div>
   <div class="fr"><label>Data/Hora</label><input type="datetime-local" id="jdt"/></div>
   <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px;"><button class="btn bg" id="btnCancJogo">Cancelar</button><button class="btn bp" id="btnSaveJogo">Salvar</button></div>
 </div></div>
@@ -399,7 +491,7 @@ tr:last-child td{border-bottom:none;}
   <div class="fr"><label>Nome</label><input id="ano" placeholder="Nome completo"/></div>
   <div class="g2"><div class="fr"><label>Equipe</label><input id="aeq"/></div><div class="fr"><label>Classe</label><select id="acl"><option value="3ª">3ª</option><option value="4ª">4ª</option><option value="5ª">5ª</option><option value="6ª">6ª</option></select></div></div>
   <div class="fr"><label>Dupla</label><input id="adu" placeholder="Ex: Soma 7, Soma 9 ou Soma 11"/></div>
-  <div class="fr"><label>URL Foto (opcional)</label><input id="afo" placeholder="Cole link direto ou do Google Drive"/></div>
+  <div class="fr"><label>URL Foto (opcional)</label><input id="afo" placeholder="https://..."/></div>
   <div class="fr" style="flex-direction:row;align-items:center;gap:10px;padding:10px 0;">
     <input type="checkbox" id="acap" style="width:18px;height:18px;accent-color:var(--r);cursor:pointer;"/>
     <label for="acap" style="font-weight:600;font-size:0.9rem;cursor:pointer;margin:0;">⭐ Capitão da equipe</label>
@@ -469,7 +561,7 @@ window.addEventListener("click",function(e){ if(e.target.classList.contains("mod
 // TABS - use IDs not class
 var TAB_MAP = {jogos:"mj",resultados:"mr",atletas:"ma",pat:"mp",sorteio:"meq"};
 function showTab(name){
-  ["jogos","resultados","atletas","pat","sorteio","sorteio-duplas","sorteio-paises","fotos","interesse"].forEach(function(t){
+  ["jogos","resultados","atletas","pat","sorteio","sorteio-duplas","sorteio-paises","fantasia","fotos","interesse"].forEach(function(t){
     document.getElementById("tab-"+t).classList.toggle("on", t===name);
     document.getElementById("tc-"+t).classList.toggle("on", t===name);
   });
@@ -478,6 +570,7 @@ function showTab(name){
   if(name==="sorteio") loadEquipes();
   if(name==="sorteio-duplas") loadSorteioDuplas();
   if(name==="sorteio-paises") loadSorteioPaises();
+  if(name==="fantasia") loadFantasia();
   if(name==="resultados") loadR();
   if(name==="fotos") loadPastas();
   if(name==="interesse") loadInteresse();
@@ -527,6 +620,7 @@ document.getElementById("tab-pat").addEventListener("click",function(){ showTab(
 document.getElementById("tab-sorteio").addEventListener("click",function(){ showTab("sorteio"); });
 document.getElementById("tab-sorteio-duplas").addEventListener("click",function(){ showTab("sorteio-duplas"); });
 document.getElementById("tab-sorteio-paises").addEventListener("click",function(){ showTab("sorteio-paises"); });
+document.getElementById("tab-fantasia").addEventListener("click",function(){ showTab("fantasia"); });
 
 // MODAL CANCEL BUTTONS
 document.getElementById("btnCancJogo").addEventListener("click",function(){ closeM("mj"); });
@@ -751,18 +845,6 @@ document.getElementById("btnSaveRes").addEventListener("click",async function(){
 });
 
 // ── ATLETAS ──────────────────────────────────────────
-// Mapa de sorteio: equipe -> {pais, flag}
-var SORTEIO_PAISES = {
-  "01":{pais:"Canadá",flag:"🇨🇦"},"02":{pais:"Alemanha",flag:"🇩🇪"},"03":{pais:"EUA",flag:"🇺🇸"},
-  "04":{pais:"Suíça",flag:"🇨🇭"},"05":{pais:"Colômbia",flag:"🇨🇴"},"06":{pais:"Portugal",flag:"🇵🇹"},
-  "07":{pais:"Austrália",flag:"🇦🇺"},"08":{pais:"Argentina",flag:"🇦🇷"},"09":{pais:"França",flag:"🇫🇷"},
-  "10":{pais:"Holanda",flag:"🇳🇱"},"11":{pais:"Brasil",flag:"🇧🇷"},"12":{pais:"Inglaterra",flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿"},
-  "13":{pais:"Espanha",flag:"🇪🇸"},"14":{pais:"Uruguai",flag:"🇺🇾"},"15":{pais:"Japão",flag:"🇯🇵"},
-  "16":{pais:"África do Sul",flag:"🇿🇦"},"17":{pais:"Bélgica",flag:"🇧🇪"},"18":{pais:"México",flag:"🇲🇽"},
-  "19":{pais:"Marrocos",flag:"🇲🇦"},"20":{pais:"Noruega",flag:"🇳🇴"},"21":{pais:"Escócia",flag:"🏴󠁧󠁢󠁳󠁣󠁴󠁿"},
-  "22":{pais:"Costa de Marfim",flag:"🇨🇮"},"23":{pais:"Irã",flag:"🇮🇷"},"24":{pais:"Egito",flag:"🇪🇬"}
-};
-
 function loadA(){
   fetch(SB+"/rest/v1/atletas?select=*&order=equipe.asc,nome.asc",{headers:h()})
   .then(function(r){return r.json();})
@@ -773,10 +855,7 @@ function loadA(){
     list.forEach(function(a){ATLETAS[a.id]=a;});
     tb.innerHTML=list.map(function(a){
       var cap=a.capitao?"<span style='background:rgba(242,101,34,0.15);color:#b45309;padding:1px 6px;border-radius:4px;font-size:0.68rem;font-weight:700;margin-left:4px;'>⭐CAP</span>":"";
-      var eq=a.equipe||"";
-      var s=SORTEIO_PAISES[eq];
-      var eqCell=s?"<span style='font-size:0.9rem;'>"+s.flag+"</span> <span style='font-size:0.75rem;color:var(--tl);'>"+s.pais+"</span>":eq;
-      return "<tr><td>"+a.nome+cap+"</td><td>"+eqCell+"</td><td>"+a.classe+"</td><td>"+(a.dupla||"—")+"</td><td><button class='btn bg' style='padding:3px 9px;font-size:0.72rem;' data-id='"+a.id+"' data-act='ea'>✏</button> <button class='btn bd' style='padding:3px 9px;font-size:0.72rem;' data-id='"+a.id+"' data-act='da'>✕</button></td></tr>";
+      return "<tr><td>"+a.nome+cap+"</td><td>"+a.equipe+"</td><td>"+a.classe+"</td><td>"+(a.dupla||"—")+"</td><td><button class='btn bg' style='padding:3px 9px;font-size:0.72rem;' data-id='"+a.id+"' data-act='ea'>✏</button> <button class='btn bd' style='padding:3px 9px;font-size:0.72rem;' data-id='"+a.id+"' data-act='da'>✕</button></td></tr>";
     }).join("");
   });
 }
@@ -791,24 +870,9 @@ document.getElementById("tba").addEventListener("click",function(e){
   if(btn.dataset.act==="ea"){ document.getElementById("aid").value=a.id; document.getElementById("ano").value=a.nome; document.getElementById("aeq").value=a.equipe; document.getElementById("acl").value=a.classe; document.getElementById("adu").value=a.dupla||""; document.getElementById("afo").value=a.foto_url||""; document.getElementById("acap").checked=!!a.capitao; openM("ma"); }
   else if(btn.dataset.act==="da"){ if(!confirm("Excluir atleta?")) return; fetch(SB+"/rest/v1/atletas?id=eq."+id,{method:"DELETE",headers:h()}).then(function(){loadA();}); }
 });
-function normalizeFotoUrl(url){
-  if(!url) return null;
-  url=url.trim();
-  // drive.google.com/file/d/FILE_ID/view
-  var m=url.match(/drive\.google\.com\/file\/d\/([^\/\?]+)/);
-  if(m) return "https://lh3.googleusercontent.com/d/"+m[1];
-  // drive.google.com/open?id=FILE_ID
-  var m2=url.match(/drive\.google\.com\/open\?id=([^&]+)/);
-  if(m2) return "https://lh3.googleusercontent.com/d/"+m2[1];
-  // uc?export=view&id=FILE_ID (já convertido antes)
-  var m3=url.match(/[?&]id=([^&]+)/);
-  if(m3&&url.includes("drive.google")) return "https://lh3.googleusercontent.com/d/"+m3[1];
-  return url;
-}
-
 document.getElementById("btnSaveAtleta").addEventListener("click",function(){
   var id=document.getElementById("aid").value;
-  var b={nome:document.getElementById("ano").value,equipe:document.getElementById("aeq").value,classe:document.getElementById("acl").value,dupla:document.getElementById("adu").value||null,foto_url:normalizeFotoUrl(document.getElementById("afo").value),capitao:document.getElementById("acap").checked};
+  var b={nome:document.getElementById("ano").value,equipe:document.getElementById("aeq").value,classe:document.getElementById("acl").value,dupla:document.getElementById("adu").value||null,foto_url:document.getElementById("afo").value||null,capitao:document.getElementById("acap").checked};
   fetch(id?SB+"/rest/v1/atletas?id=eq."+id:SB+"/rest/v1/atletas",{method:id?"PATCH":"POST",headers:h(),body:JSON.stringify(b)}).then(function(){closeM("ma");loadA();});
 });
 
@@ -841,12 +905,14 @@ function loadSorteioPaises(){
   var aviso=document.getElementById("sp-aviso");
   grid.innerHTML="<div style='color:var(--tl);font-size:0.85rem;padding:12px;'>Carregando...</div>";
   document.getElementById("sp-stage").style.display="none";
+  // Busca capitães e também todos os atletas (para encontrar Gilvan)
   Promise.all([
     fetch(SB+"/rest/v1/atletas?select=*&capitao=eq.true&order=equipe.asc",{headers:h()}).then(function(r){return r.json();}),
     fetch(SB+"/rest/v1/atletas?select=id,nome,equipe&order=equipe.asc",{headers:h()}).then(function(r){return r.json();})
   ]).then(function(results){
     SP_CAPITAES=Array.isArray(results[0])?results[0]:[];
     var todosAtletas=Array.isArray(results[1])?results[1]:[];
+    // Encontra a equipe do Gilvan Souza
     var gilvan=todosAtletas.find(function(a){ return a.nome&&a.nome.toLowerCase().includes("gilvan souza"); });
     window._SP_EQUIPE_GILVAN=gilvan?String(gilvan.equipe):null;
     if(!SP_CAPITAES.length){
@@ -855,11 +921,6 @@ function loadSorteioPaises(){
       grid.innerHTML="";
       return;
     }
-    // Carrega resultados já salvos no banco
-    SP_SORTEADOS={};
-    SP_CAPITAES.forEach(function(c){
-      if(c.pais_sorteado) SP_SORTEADOS[c.equipe]={nome:c.pais_sorteado, flag:c.pais_flag||""};
-    });
     aviso.style.display="none";
     renderCapitaesGrid();
   });
@@ -871,16 +932,12 @@ function renderCapitaesGrid(){
     var s=SP_SORTEADOS[c.equipe];
     var cardBg=s?"rgba(46,189,154,0.1)":"rgba(123,94,167,0.06)";
     var border=s?"1px solid rgba(46,189,154,0.3)":"1px solid rgba(123,94,167,0.15)";
-    return "<div style='background:"+cardBg+";border:"+border+";border-radius:14px;padding:20px 14px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;'>"
+    return "<div style='background:"+cardBg+";border:"+border+";border-radius:14px;padding:16px 14px;display:flex;flex-direction:column;gap:6px;'>"
       +"<div style='font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--tl);'>Equipe "+c.equipe+"</div>"
-      +(c.foto_url
-        ?"<img src='"+c.foto_url+"' style='width:72px;height:72px;border-radius:50%;object-fit:cover;border:2px solid rgba(123,94,167,0.5);box-shadow:0 4px 16px rgba(0,0,0,0.3);'/>"
-        :"<div style='width:72px;height:72px;border-radius:50%;background:rgba(123,94,167,0.15);display:flex;align-items:center;justify-content:center;font-size:1.8rem;'>⭐</div>"
-      )
       +"<div style='font-weight:700;font-size:0.95rem;'>"+c.nome+"</div>"
       +(s
-        ?"<div style='font-size:2.6rem;line-height:1;'>"+s.flag+"</div><div style='font-weight:700;font-size:0.9rem;color:#1a9b7c;'>"+s.nome+"</div>"
-        :"<div style='font-size:0.78rem;color:var(--tl);'>Aguardando sorteio…</div>"
+        ?"<div style='margin-top:4px;font-size:2.2rem;line-height:1;'>"+s.flag+"</div><div style='font-weight:600;font-size:0.85rem;color:#1a9b7c;'>"+s.nome+"</div>"
+        :"<div style='font-size:0.78rem;color:var(--tl);margin-top:4px;'>Aguardando sorteio…</div>"
       )
       +"</div>";
   }).join("");
@@ -928,11 +985,6 @@ function spSortearUm(capitao, paises_disp){
     resFlagEl.style.display="none";
     resNomeEl.style.display="none";
     capNome.textContent="⭐ "+capitao.nome+" — Equipe "+capitao.equipe;
-    // Foto do capitão
-    var fotoWrap=document.getElementById("sp-capitao-foto-wrap");
-    var fotoEl=document.getElementById("sp-capitao-foto");
-    if(capitao.foto_url){fotoEl.src=capitao.foto_url;fotoWrap.style.display="block";}
-    else{fotoWrap.style.display="none";}
 
     // Monta reel: ~90 frames aleatórios + escolhido no final
     var items=[];
@@ -954,8 +1006,6 @@ function spSortearUm(capitao, paises_disp){
         resNomeEl.style.display="block";
         SP_SORTEADOS[capitao.equipe]=escolhido;
         paises_disp.splice(idxRemover,1);
-        // Persiste no banco
-        fetch(SB+"/rest/v1/atletas?id=eq."+capitao.id,{method:"PATCH",headers:h(),body:JSON.stringify({pais_sorteado:escolhido.nome,pais_flag:escolhido.flag})});
         renderCapitaesGrid();
         setTimeout(function(){ resolve(); },2500);
         return;
@@ -1013,14 +1063,51 @@ async function iniciarSorteioPaises(){
 
 document.getElementById("btnSortearPaises").addEventListener("click",iniciarSorteioPaises);
 document.getElementById("btnResetSorteio").addEventListener("click",function(){
-  if(!confirm("Resetar o sorteio? Isso apagará todos os países sorteados.")) return;
   if(SP_ANIM_TIMER) clearTimeout(SP_ANIM_TIMER);
   SP_SORTEADOS={};
-  // Limpa no banco
-  fetch(SB+"/rest/v1/atletas?capitao=eq.true",{method:"PATCH",headers:h(),body:JSON.stringify({pais_sorteado:null,pais_flag:null})});
   document.getElementById("sp-stage").style.display="none";
   renderCapitaesGrid();
 });
+
+// ── MELHOR FANTASIA ──────────────────────────────────
+function loadFantasia(){
+  fetch(SB+"/rest/v1/bonus_fantasia?select=*&order=posicao.asc",{headers:h()})
+  .then(function(r){return r.json();})
+  .then(function(list){
+    if(!Array.isArray(list)||!list.length) return;
+    list.forEach(function(b){
+      var el=document.getElementById("f"+b.posicao+"-equipe");
+      if(el&&b.equipe) el.value=b.equipe;
+    });
+  }).catch(function(){});
+}
+async function savFantasia(){
+  var msg=document.getElementById("fantasia-msg");
+  var entries=[
+    {posicao:1,equipe:document.getElementById("f1-equipe").value.trim(),bonus:1.5},
+    {posicao:2,equipe:document.getElementById("f2-equipe").value.trim(),bonus:1.0},
+    {posicao:3,equipe:document.getElementById("f3-equipe").value.trim(),bonus:0.5}
+  ];
+  if(entries.some(function(e){return !e.equipe;})){
+    msg.style.display="block";msg.style.background="rgba(220,38,38,0.08)";msg.style.color="#dc2626";
+    msg.textContent="Preencha os 3 colocados antes de salvar.";return;
+  }
+  msg.style.display="none";
+  try{
+    for(var i=0;i<entries.length;i++){
+      var e=entries[i];
+      await fetch(SB+"/rest/v1/bonus_fantasia?posicao=eq."+e.posicao,{
+        method:"PATCH",headers:Object.assign(h(),{"Content-Type":"application/json","Prefer":"return=minimal"}),
+        body:JSON.stringify({equipe:e.equipe,bonus:e.bonus})
+      });
+    }
+    msg.style.display="block";msg.style.background="rgba(46,189,154,0.08)";msg.style.color="#1a9b7c";
+    msg.textContent="✅ Bônus de fantasia salvos com sucesso!";
+  }catch(err){
+    msg.style.display="block";msg.style.background="rgba(220,38,38,0.08)";msg.style.color="#dc2626";
+    msg.textContent="Erro ao salvar: "+err.message;
+  }
+}
 
 // ── PATROCINADORES ───────────────────────────────────
 function loadP(){
@@ -1118,36 +1205,9 @@ document.getElementById("btnSortear").addEventListener("click",function(){
 });
 
 async function realizarSorteio(equipes){
-  var keys=["A","B","C","D","E","F"];
-
-  // Equipes que NÃO podem estar no mesmo grupo
-  var RESTRITAS=["equipe irã","equipe egito","equipe escócia","equipe costa de marfim"];
-  function eRestrita(nome){ return RESTRITAS.some(function(r){return nome.toLowerCase().indexOf(r.replace("equipe ",""))>-1;}); }
-
-  // Separa restritas das normais
-  var restritas=equipes.filter(function(e){return eRestrita(e.nome);});
-  var normais=equipes.filter(function(e){return !eRestrita(e.nome);});
-
-  // Embaralha cada lista
-  function shuffle(arr){ var a=arr.slice(); for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;} return a; }
-  restritas=shuffle(restritas);
-  normais=shuffle(normais);
-
-  // Monta ordem final: distribui restritas 1 por grupo (grupos aleatórios), depois encaixa normais
-  // Garante que cada restrita vai para um grupo diferente
-  var gruposRestritasIdx=shuffle([0,1,2,3,4,5]).slice(0,restritas.length);
-  var drawState={A:[],B:[],C:[],D:[],E:[],F:[]};
-  var arr=new Array(equipes.length);
-
-  // Posiciona restritas: 1 por grupo, na posição 0 de cada grupo escolhido
-  gruposRestritasIdx.forEach(function(gi,idx){ arr[gi]=restritas[idx]; });
-
-  // Preenche as posições restantes com as normais
-  var ni=0;
-  for(var pos=0;pos<arr.length;pos++){
-    if(!arr[pos]){ arr[pos]=normais[ni++]; }
-  }
-
+  var arr=equipes.slice();
+  for(var i=arr.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=arr[i];arr[i]=arr[j];arr[j]=t;}
+  var keys=["A","B","C","D","E"];
   var overlay=document.getElementById("draw-overlay");
   overlay.classList.add("on");
   var ball=document.getElementById("draw-ball");
@@ -1156,7 +1216,7 @@ async function realizarSorteio(equipes){
   var prog=document.getElementById("draw-prog");
   var info=document.getElementById("draw-info");
   var grpsEl=document.getElementById("draw-grps");
-
+  var drawState={A:[],B:[],C:[],D:[],E:[],F:[]};
   function updateDrawGroups(){
     grpsEl.innerHTML=keys.map(function(g){
       return "<div style='background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:8px;overflow:hidden;'>"+
@@ -1167,7 +1227,6 @@ async function realizarSorteio(equipes){
     }).join("");
   }
   updateDrawGroups();
-
   for(var i=0;i<arr.length;i++){
     var eq=arr[i], g=keys[i%6];
     ball.style.transform="rotate("+Math.random()*360+"deg) scale(1.2)";
@@ -1184,7 +1243,6 @@ async function realizarSorteio(equipes){
     prog.style.width=((i+1)/arr.length*100)+"%";
     await new Promise(function(r){setTimeout(r,600);});
   }
-
   teamEl.textContent="Sorteio concluído!";
   grpEl.textContent="Salvando...";
   grpEl.style.color="#2EBD9A";

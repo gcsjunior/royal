@@ -106,7 +106,638 @@ function calcStats(jogos){
     var r=jogo.resultados&&jogo.resultados[0];
     if(!r||(r.total_a===0&&r.total_b===0)) return;
     var fase=jogo.fase;
-    if(!["Grupo A","Grupo B","Grupo C","Grupo D","Grupo E","Grupo F"].includes(fase)) return;
+    if(!["Grupo A","Grupo B","Grupo C","Grupo D","Grupo E"].includes(fase)) return;
+    var grp=fase.replace("Grupo ","");
+    function ensure(nm){if(!s[nm])s[nm]={nome:nm,grupo:grp,j:0,v:0,gf:0,gc:0};}
+    ensure(jogo.equipe_a); ensure(jogo.equipe_b);
+    s[jogo.equipe_a].j++; s[jogo.equipe_b].j++;
+    s[jogo.equipe_a].gf+=r.total_a; s[jogo.equipe_a].gc+=r.total_b;
+    s[jogo.equipe_b].gf+=r.total_b; s[jogo.equipe_b].gc+=r.total_a;
+    if(r.total_a>r.total_b) s[jogo.equipe_a].v++;
+    else if(r.total_b>r.total_a) s[jogo.equipe_b].v++;
+  });
+  return s;
+}
+
+function sortTeams(list,jogos){
+  return list.sort(function(a,b){
+    if(b.v!==a.v) return b.v-a.v;
+    var sa=a.gf-a.gc,sb=b.gf-b.gc;
+    if(sb!==sa) return sb-sa;
+    if(b.gf!==a.gf) return b.gf-a.gf;
+    return 0;
+  });
+}
+
+function getSeeds(stats,jogos){
+  // Get ranked teams per group
+  var groups={A:[],B:[],C:[],D:[],E:[],F:[]};
+  Object.values(stats).forEach(function(t){ if(groups[t.grupo]) groups[t.grupo].push(t); });
+  var ranked={};
+  ["A","B","C","D","E","F"].forEach(function(g){
+    ranked[g]=sortTeams(groups[g].slice(),jogos);
+  });
+
+  // 16 teams: top 2 from each group (12) + 4 best 3rd place
+  var thirds=[];
+  ["A","B","C","D","E","F"].forEach(function(g){
+    if(ranked[g][2]) thirds.push(ranked[g][2]);
+  });
+  thirds=sortTeams(thirds,jogos).slice(0,4);
+
+  // Seeds 1-16
+  // Left side: 1v16, 5v12, 4v13, 8v9
+  // Right side: 2v15, 6v11, 3v14, 7v10
+  // Seeds: 1=1stA, 2=1stB, 3=1stC, 4=1stD, 5=1stE, 6=1stF
+  //        7=2ndA, 8=2ndB, 9=2ndC, 10=2ndD, 11=2ndE, 12=2ndF
+  //        13-16=best 3rds
+  var seeds=[];
+  ["A","B","C","D","E","F"].forEach(function(g){ seeds.push(ranked[g][0]||null); }); // 0-5 (seeds 1-6)
+  ["A","B","C","D","E","F"].forEach(function(g){ seeds.push(ranked[g][1]||null); }); // 6-11 (seeds 7-12)
+  seeds=seeds.concat(thirds); // 12-15 (seeds 13-16)
+  while(seeds.length<16) seeds.push(null);
+
+  function name(idx){ return seeds[idx]?seeds[idx].nome:null; }
+  // Returns {left: [[t1,t2],[t1,t2]...x4], right: [...x4]}
+  return {
+    left:[
+      [name(0),name(15)],  // 1v16
+      [name(4),name(11)],  // 5v12
+      [name(3),name(12)],  // 4v13
+      [name(7),name(8)],   // 8v9
+    ],
+    right:[
+      [name(1),name(14)],  // 2v15
+      [name(5),name(10)],  // 6v11
+      [name(2),name(13)],  // 3v14
+      [name(6),name(9)],   // 7v10
+    ]
+  };
+}
+
+function teamHtml(name, style){
+  if(!name) return "<div class='team tbd' style='"+style+"'>A definir</div>";
+  return "<div class='team' style='"+style+"'>"+name+"</div>";
+}
+
+function matchHtml(t1, t2, style, result){
+  var st1=style||"",st2=style||"";
+  if(result){
+    if(result[0]>result[1]) st1="background:rgba(46,189,154,0.15);border-color:rgba(46,189,154,0.3);color:#fff;font-weight:600;";
+    else if(result[1]>result[0]) st2="background:rgba(46,189,154,0.15);border-color:rgba(46,189,154,0.3);color:#fff;font-weight:600;";
+  }
+  return "<div class='match'>"+teamHtml(t1,st1)+(result?"<div style='text-align:center;font-size:0.7rem;color:rgba(255,255,255,0.3);padding:2px;'>"+result[0]+" × "+result[1]+"</div>":"")+teamHtml(t2,st2)+"</div>";
+}
+
+function buildBracket(seeds, jogos){
+  var L=seeds.left, R=seeds.right;
+  var oStyle="";
+  var qStyle="background:rgba(123,94,167,0.13);border-color:rgba(123,94,167,0.3);";
+  var sStyle="background:rgba(46,189,154,0.1);border-color:rgba(46,189,154,0.28);";
+
+  // Find results for knockout games by equipe names
+  function findResult(t1,t2){
+    if(!t1||!t2) return null;
+    var j=jogos.find(function(x){return(x.equipe_a===t1&&x.equipe_b===t2)||(x.equipe_a===t2&&x.equipe_b===t1);});
+    if(!j||!j.resultados||!j.resultados[0]) return null;
+    var r=j.resultados[0];
+    if(j.equipe_a===t1) return [r.total_a,r.total_b];
+    return [r.total_b,r.total_a];
+  }
+
+  function winner(t1,t2){
+    var r=findResult(t1,t2);
+    if(!r) return null;
+    return r[0]>r[1]?t1:t2;
+  }
+
+  // Oitavas winners → Quartas
+  var lq1=[winner(L[0][0],L[0][1]),winner(L[1][0],L[1][1])];
+  var lq2=[winner(L[2][0],L[2][1]),winner(L[3][0],L[3][1])];
+  var rq1=[winner(R[0][0],R[0][1]),winner(R[1][0],R[1][1])];
+  var rq2=[winner(R[2][0],R[2][1]),winner(R[3][0],R[3][1])];
+
+  // Quartas → Semi
+  var ls=[winner(lq1[0],lq1[1]),winner(lq2[0],lq2[1])];
+  var rs=[winner(rq1[0],rq1[1]),winner(rq2[0],rq2[1])];
+
+  // Semi → Final
+  var fin=[winner(ls[0],ls[1]),winner(rs[0],rs[1])];
+  var champ=winner(fin[0],fin[1]);
+
+  var html="<div class='bracket-wrap'><div class='bracket'>";
+
+  // OITAVAS LEFT
+  html+="<div class='round'><div class='round-title'>Oitavas</div>";
+  L.forEach(function(m){ html+=matchHtml(m[0],m[1],oStyle,findResult(m[0],m[1])); });
+  html+="</div>";
+
+  // CONNECTOR
+  html+="<svg style='width:24px;min-height:360px;' viewBox='0 0 24 360' preserveAspectRatio='none'><path d='M0,44 L12,44 L12,88 L24,88' stroke='rgba(123,94,167,0.4)' stroke-width='1.5' fill='none'/><path d='M0,132 L12,132 L12,88 L24,88' stroke='rgba(123,94,167,0.4)' stroke-width='1.5' fill='none'/><path d='M0,220 L12,220 L12,264 L24,264' stroke='rgba(123,94,167,0.4)' stroke-width='1.5' fill='none'/><path d='M0,308 L12,308 L12,264 L24,264' stroke='rgba(123,94,167,0.4)' stroke-width='1.5' fill='none'/></svg>";
+
+  // QUARTAS LEFT
+  html+="<div class='round' style='justify-content:space-evenly;padding-top:44px;padding-bottom:44px;'><div class='round-title'>Quartas</div>";
+  html+=matchHtml(lq1[0],lq1[1],qStyle,findResult(lq1[0],lq1[1]));
+  html+=matchHtml(lq2[0],lq2[1],qStyle,findResult(lq2[0],lq2[1]));
+  html+="</div>";
+
+  // CONNECTOR
+  html+="<svg style='width:24px;min-height:360px;' viewBox='0 0 24 360' preserveAspectRatio='none'><path d='M0,88 L12,88 L12,180 L24,180' stroke='rgba(123,94,167,0.4)' stroke-width='1.5' fill='none'/><path d='M0,264 L12,264 L12,180 L24,180' stroke='rgba(123,94,167,0.4)' stroke-width='1.5' fill='none'/></svg>";
+
+  // SEMI LEFT
+  html+="<div class='round' style='justify-content:center;'><div class='round-title'>Semifinal</div>";
+  html+=matchHtml(ls[0],ls[1],sStyle,findResult(ls[0],ls[1]));
+  html+="</div>";
+
+  // CONNECTOR to FINAL
+  html+="<svg style='width:24px;min-height:360px;' viewBox='0 0 24 360' preserveAspectRatio='none'><path d='M0,180 L24,180' stroke='rgba(242,101,34,0.5)' stroke-width='1.5' fill='none'/></svg>";
+
+  // FINAL CENTER
+  html+="<div class='center-col'><div class='round-title' style='color:rgba(255,255,255,0.4);'>Grande Final</div>";
+  html+="<div class='trophy-box'><div style='font-size:1.6rem;margin-bottom:8px;'>🏆</div>";
+  if(champ) html+="<div style='font-size:0.82rem;font-weight:700;color:#fff;margin-bottom:4px;'>"+champ+"</div><div style='font-size:0.68rem;color:rgba(255,255,255,0.4);'>Campeão</div>";
+  else {
+    html+="<div style='font-size:0.76rem;color:rgba(255,255,255,0.35);margin-bottom:4px;'>"+（fin[0]||"Vencedor S1")+"</div>";
+    html+="<div style='font-size:0.7rem;color:rgba(255,255,255,0.2);margin-bottom:4px;'>vs</div>";
+    html+="<div style='font-size:0.76rem;color:rgba(255,255,255,0.35);'>"+（fin[1]||"Vencedor S2")+"</div>";
+  }
+  html+="</div></div>";
+
+  // CONNECTOR from FINAL
+  html+="<svg style='width:24px;min-height:360px;' viewBox='0 0 24 360' preserveAspectRatio='none'><path d='M24,180 L0,180' stroke='rgba(242,101,34,0.5)' stroke-width='1.5' fill='none'/></svg>";
+
+  // SEMI RIGHT
+  html+="<div class='round' style='justify-content:center;'><div class='round-title'>Semifinal</div>";
+  html+=matchHtml(rs[0],rs[1],sStyle,findResult(rs[0],rs[1]));
+  html+="</div>";
+
+  // CONNECTOR
+  html+="<svg style='width:24px;min-height:360px;' viewBox='0 0 24 360' preserveAspectRatio='none'><path d='M24,88 L12,88 L12,180 L0,180' stroke='rgba(123,94,167,0.4)' stroke-width='1.5' fill='none'/><path d='M24,264 L12,264 L12,180 L0,180' stroke='rgba(123,94,167,0.4)' stroke-width='1.5' fill='none'/></svg>";
+
+  // QUARTAS RIGHT
+  html+="<div class='round' style='justify-content:space-evenly;padding-top:44px;padding-bottom:44px;'><div class='round-title'>Quartas</div>";
+  html+=matchHtml(rq1[0],rq1[1],qStyle,findResult(rq1[0],rq1[1]));
+  html+=matchHtml(rq2[0],rq2[1],qStyle,findResult(rq2[0],rq2[1]));
+  html+="</div>";
+
+  // CONNECTOR
+  html+="<svg style='width:24px;min-height:360px;' viewBox='0 0 24 360' preserveAspectRatio='none'><path d='M24,44 L12,44 L12,88 L0,88' stroke='rgba(123,94,167,0.4)' stroke-width='1.5' fill='none'/><path d='M24,132 L12,132 L12,88 L0,88' stroke='rgba(123,94,167,0.4)' stroke-width='1.5' fill='none'/><path d='M24,220 L12,220 L12,264 L0,264' stroke='rgba(123,94,167,0.4)' stroke-width='1.5' fill='none'/><path d='M24,308 L12,308 L12,264 L0,264' stroke='rgba(123,94,167,0.4)' stroke-width='1.5' fill='none'/></svg>";
+
+  // OITAVAS RIGHT
+  html+="<div class='round'><div class='round-title'>Oitavas</div>";
+  R.forEach(function(m){ html+=matchHtml(m[0],m[1],oStyle,findResult(m[0],m[1])); });
+  html+="</div>";
+
+  html+="</div></div>"; // bracket + bracket-wrap
+  return html;
+}
+
+async function load(){
+  try{
+    // Fetch both equipes (sorteio) and jogos (results)
+    var [r1, r2] = await Promise.all([
+      fetch(SB+"/rest/v1/equipes?select=*&order=grupo.asc,created_at.asc", {headers:h()}),
+      fetch(SB+"/rest/v1/jogos?select=*,resultados(*)&order=data_hora.asc", {headers:h()})
+    ]);
+    var equipes = await r1.json();
+    var jogos   = await r2.json();
+    if(!Array.isArray(equipes)) equipes=[];
+    if(!Array.isArray(jogos))   jogos=[];
+
+    var sorteioFeito = equipes.some(function(e){return e.grupo;});
+    var stats = calcStats(jogos);
+    var temResultados = Object.keys(stats).length > 0;
+
+    var container = document.getElementById("bracket-container");
+    var statusMsg = document.getElementById("status-msg");
+
+    if(!sorteioFeito){
+      // Sorteio ainda não realizado
+      container.innerHTML = "<div style='text-align:center;padding:60px;color:rgba(255,255,255,0.3);background:#0d0d18;border-radius:16px;'><div style='font-size:2.5rem;margin-bottom:16px;'>🎲</div>Aguardando o sorteio dos grupos.<br><small style='opacity:0.6;'>Em breve os grupos serão definidos!</small></div>";
+      statusMsg.textContent = "Aguardando sorteio...";
+      return;
+    }
+
+    if(!temResultados){
+      // Sorteio feito mas jogos não começaram — mostra os grupos
+      statusMsg.textContent = "Grupos definidos · Jogos ainda não iniciados";
+      container.innerHTML = buildGruposHtml(equipes);
+      return;
+    }
+
+    // Tem resultados — mostra o bracket
+    var seeds = getSeeds(stats, jogos);
+    container.innerHTML = buildBracket(seeds, jogos);
+
+    var groupJogos = jogos.filter(function(j){return j.fase&&j.fase.startsWith("Grupo");});
+    var done = groupJogos.filter(function(j){return j.resultados&&j.resultados[0]&&(j.resultados[0].total_a>0||j.resultados[0].total_b>0);});
+    if(done.length===groupJogos.length&&groupJogos.length>0){
+      statusMsg.textContent = "Fase de grupos encerrada · Chaveamento automático";
+    } else {
+      statusMsg.textContent = "Em andamento · "+done.length+" de "+groupJogos.length+" jogos encerrados";
+    }
+
+    document.getElementById("upd").textContent = "Atualizado às "+new Date().toLocaleTimeString("pt-BR");
+  }catch(e){
+    document.getElementById("bracket-container").innerHTML = "<div style='text-align:center;padding:40px;color:rgba(255,255,255,0.3);'>Erro: "+e.message+"</div>";
+  }
+}
+
+function buildGruposHtml(equipes){
+  var GC = {A:"#7B5EA7",B:"#1a9b7c",C:"#c44e18",D:"#b45309",E:"#0369a1",F:"#7c2d12"};
+  var grupos = {A:[],B:[],C:[],D:[],E:[],F:[]};
+  equipes.forEach(function(e){ if(e.grupo && grupos[e.grupo]) grupos[e.grupo].push(e.nome); });
+
+  var html = "<div style='margin-bottom:24px;text-align:center;'>";
+  html += "<div style='font-size:0.72rem;text-transform:uppercase;letter-spacing:0.12em;color:rgba(255,255,255,0.35);margin-bottom:6px;'>Sorteio realizado · Grupos definidos</div>";
+  html += "<div style='font-size:0.88rem;color:rgba(255,255,255,0.4);'>O chaveamento será preenchido automaticamente após a fase de grupos.</div>";
+  html += "</div>";
+
+  html += "<div style='display:grid;grid-template-columns:repeat(3,1fr);gap:16px;'>";
+  ["A","B","C","D","E","F"].forEach(function(g){
+    html += "<div style='background:#0d0d18;border:1px solid rgba(255,255,255,0.07);border-radius:14px;overflow:hidden;'>";
+    html += "<div style='background:"+GC[g]+";padding:10px 16px;font-size:0.72rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#fff;'>Grupo "+g+"</div>";
+    html += "<div style='padding:4px 0;'>";
+    if(grupos[g].length){
+      grupos[g].forEach(function(nome,i){
+        html += "<div style='padding:9px 16px;font-size:0.85rem;color:rgba(255,255,255,0.75);border-bottom:1px solid rgba(255,255,255,0.04);display:flex;align-items:center;gap:8px;'>";
+        html += "<span style='font-size:0.72rem;color:rgba(255,255,255,0.25);min-width:16px;'>"+(i+1)+"</span>"+nome;
+        html += "</div>";
+      });
+    } else {
+      html += "<div style='padding:10px 16px;font-size:0.82rem;color:rgba(255,255,255,0.25);font-style:italic;'>Vazio</div>";
+    }
+    html += "</div></div>";
+  });
+  html += "</div>";
+  return "<div style='background:#0a0a14;border-radius:16px;padding:28px;'>"+html+"</div>";
+}
+
+load();
+setInterval(load,60000);
+</script>
+</body>
+</html><script>
+var K="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZmcmpxa3dkeGp2Z2d6a2Z4ZmVuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxODcyNDcsImV4cCI6MjA5Mzc2MzI0N30.PaHe7kQL8DUs8gmt9Wk47qaz6CX5PLfbeuhv3OIdigU";
+var SB="https://vfrjqkwdxjvggzkfxfen.supabase.co";
+function h(){return{"apikey":K,"Authorization":"Bearer "+K};}
+
+var GRUPOS_VALIDOS=["Grupo A","Grupo B","Grupo C","Grupo D","Grupo E"];
+var GRUPOS_3=["B","D"]; // grupos com apenas 3 times
+
+function calcStats(jogos){
+  var s={};
+  jogos.forEach(function(jogo){
+    var r=jogo.resultados&&jogo.resultados[0];
+    if(!r||(r.total_a===0&&r.total_b===0)) return;
+    var fase=jogo.fase;
+    if(!GRUPOS_VALIDOS.includes(fase)) return;
+    var grp=fase.replace("Grupo ","");
+    function ensure(nm){if(!s[nm])s[nm]={nome:nm,grupo:grp,j:0,v:0,gf:0,gc:0,bonus:0};}
+    ensure(jogo.equipe_a); ensure(jogo.equipe_b);
+    s[jogo.equipe_a].j++; s[jogo.equipe_b].j++;
+    s[jogo.equipe_a].gf+=r.total_a; s[jogo.equipe_a].gc+=r.total_b;
+    s[jogo.equipe_b].gf+=r.total_b; s[jogo.equipe_b].gc+=r.total_a;
+    if(r.total_a>r.total_b) s[jogo.equipe_a].v++;
+    else if(r.total_b>r.total_a) s[jogo.equipe_b].v++;
+  });
+  return s;
+}
+
+function applyBonus(stats, bonusData){
+  if(Array.isArray(bonusData)){
+    bonusData.forEach(function(b){
+      if(b.equipe && stats[b.equipe]) stats[b.equipe].bonus=parseFloat(b.bonus);
+    });
+  }
+  return stats;
+}
+
+function saldoEfetivo(t){ return (t.gf-t.gc)+t.bonus; }
+
+function sortTeams(list){
+  return list.sort(function(a,b){
+    if(b.v!==a.v) return b.v-a.v;
+    var sa=saldoEfetivo(a), sb=saldoEfetivo(b);
+    if(sb!==sa) return sb-sa;
+    if(b.gf!==a.gf) return b.gf-a.gf;
+    return 0;
+  });
+}
+
+function getSeeds(stats){
+  // Ranked per group
+  var groups={A:[],B:[],C:[],D:[],E:[]};
+  Object.values(stats).forEach(function(t){ if(groups[t.grupo]) groups[t.grupo].push(t); });
+  var ranked={};
+  ["A","B","C","D","E"].forEach(function(g){
+    ranked[g]=sortTeams(groups[g].slice());
+  });
+
+  // Classificação:
+  // Grupos A,C,E (4 times): 1º,2º,3º classificam + 4º pode ser melhor 4º
+  // Grupos B,D (3 times): todos 3 classificam (sem 4º)
+  // Total garantidos: 5×3=15 + melhor 4º = 16
+
+  // Seeds 1-5:  1ºs de cada grupo (A,B,C,D,E)
+  // Seeds 6-10: 2ºs de cada grupo (A,B,C,D,E)
+  // Seeds 11-15: 3ºs de cada grupo (A,B,C,D,E)
+  //   - Grupos B e D: o 3º é o último colocado do grupo de 3
+  // Seed 16: melhor 4º colocado (apenas de A, C ou E)
+
+  var fourths=[];
+  ["A","C","E"].forEach(function(g){
+    if(ranked[g][3]) fourths.push(ranked[g][3]);
+  });
+  fourths=sortTeams(fourths);
+  var bestFourth=fourths[0]||null;
+
+  var seeds=[];
+  ["A","B","C","D","E"].forEach(function(g){ seeds.push(ranked[g][0]||null); }); // 0-4 (seeds 1-5)
+  ["A","B","C","D","E"].forEach(function(g){ seeds.push(ranked[g][1]||null); }); // 5-9 (seeds 6-10)
+  ["A","B","C","D","E"].forEach(function(g){ seeds.push(ranked[g][2]||null); }); // 10-14 (seeds 11-15)
+  seeds.push(bestFourth); // 15 (seed 16)
+
+  function name(idx){ return seeds[idx]?seeds[idx].nome:null; }
+
+  // Left side:  1v16, 5v12, 4v13, 8v9
+  // Right side: 2v15, 6v11, 3v14, 7v10
+  return {
+    left:[
+      [name(0), name(15)],  // 1v16
+      [name(4), name(11)],  // 5v12
+      [name(3), name(12)],  // 4v13
+      [name(7), name(8)],   // 8v9
+    ],
+    right:[
+      [name(1), name(14)],  // 2v15
+      [name(5), name(10)],  // 6v11
+      [name(2), name(13)],  // 3v14
+      [name(6), name(9)],   // 7v10
+    ]
+  };
+}
+
+function pair(t1,t2,result,style1,style2){
+  var st1=style1||"",st2=style2||"";
+  if(result){
+    if(result[0]>result[1]) st1="background:rgba(46,189,154,0.15);border-color:rgba(46,189,154,0.3);color:#fff;font-weight:600;";
+    else if(result[1]>result[0]) st2="background:rgba(46,189,154,0.15);border-color:rgba(46,189,154,0.3);color:#fff;font-weight:600;";
+  }
+  var te=function(nm,st){return "<div class='team"+(nm?" winner":"")+"' style='"+st+"'>"+(nm||"A definir")+"</div>";};
+  return "<div class='match'>"+te(t1,st1)+te(t2,st2)+"</div>";
+}
+
+function lookup(fase,a,b,jogos){
+  var j=jogos.find(function(x){return x.fase===fase&&((x.equipe_a===a&&x.equipe_b===b)||(x.equipe_a===b&&x.equipe_b===a));});
+  if(!j||!j.resultados||!j.resultados[0]) return null;
+  var r=j.resultados[0];
+  return j.equipe_a===a?[r.total_a,r.total_b]:[r.total_b,r.total_a];
+}
+
+async function load(){
+  try{
+    var [rj,rb]=await Promise.all([
+      fetch(SB+"/rest/v1/jogos?select=*,resultados(*)&order=data_hora.asc",{headers:h()}),
+      fetch(SB+"/rest/v1/bonus_fantasia?select=*",{headers:h()})
+    ]);
+    var jogos=await rj.json();
+    var bonusData=await rb.json();
+    if(!Array.isArray(jogos)) jogos=[];
+
+    var stats=calcStats(jogos);
+    applyBonus(stats,bonusData);
+    var s=getSeeds(stats);
+
+    // Check if group stage is complete
+    var groupJogos=jogos.filter(function(j){return GRUPOS_VALIDOS.includes(j.fase);});
+    var gruposDone=groupJogos.length>0&&groupJogos.every(function(j){
+      var r=j.resultados&&j.resultados[0];
+      return r&&(r.total_a>0||r.total_b>0);
+    });
+
+    document.getElementById("status-msg").textContent=gruposDone?
+      "Fase de grupos concluída — chave das oitavas definida":
+      "Aguardando conclusão da fase de grupos...";
+
+    var qStyle="background:rgba(123,94,167,0.13);border-color:rgba(123,94,167,0.3);";
+    var sStyle="background:rgba(46,189,154,0.1);border-color:rgba(46,189,154,0.28);";
+
+    // Oitavas results
+    var o=s.left.concat(s.right); // 8 matches: L0..L3, R0..R3
+    var oRes=o.map(function(m){return lookup("Oitavas",m[0],m[1],jogos);});
+
+    // Quartas: winners of oitavas
+    // L0w vs L1w, L2w vs L3w | R0w vs R1w, R2w vs R3w
+    function winner(idx){
+      var m=o[idx], r=oRes[idx];
+      if(!r) return null;
+      return r[0]>r[1]?m[0]:(r[1]>r[0]?m[1]:null);
+    }
+    var q=[[winner(0),winner(1)],[winner(2),winner(3)],[winner(4),winner(5)],[winner(6),winner(7)]];
+    var qRes=q.map(function(m){return lookup("Quartas",m[0],m[1],jogos);});
+
+    // Semis: winners of quartas
+    function qwinner(idx){
+      var m=q[idx], r=qRes[idx];
+      if(!r) return null;
+      return r[0]>r[1]?m[0]:(r[1]>r[0]?m[1]:null);
+    }
+    var semi=[[qwinner(0),qwinner(1)],[qwinner(2),qwinner(3)]];
+    var sRes=semi.map(function(m){return lookup("Semi",m[0],m[1],jogos);});
+
+    function swinner(idx){
+      var m=semi[idx], r=sRes[idx];
+      if(!r) return null;
+      return r[0]>r[1]?m[0]:(r[1]>r[0]?m[1]:null);
+    }
+    var final=[swinner(0),swinner(1)];
+    var fRes=lookup("Final",final[0],final[1],jogos);
+
+    var html="<div class='bracket-wrap'><div style='display:flex;align-items:center;gap:0;min-width:900px;'>";
+
+    // LEFT SIDE — Oitavas (4 matches)
+    html+="<div class='round'><div class='round-title'>Oitavas</div>";
+    html+=pair(s.left[0][0],s.left[0][1],oRes[0]);
+    html+=pair(s.left[1][0],s.left[1][1],oRes[1]);
+    html+=pair(s.left[2][0],s.left[2][1],oRes[2]);
+    html+=pair(s.left[3][0],s.left[3][1],oRes[3]);
+    html+="</div>";
+
+    html+="<svg style='width:24px;min-height:360px;' viewBox='0 0 24 360' preserveAspectRatio='none'><path d='M0,44 L12,44 L12,88 L24,88' stroke='rgba(123,94,167,0.4)' stroke-width='1.5' fill='none'/><path d='M0,132 L12,132 L12,88 L24,88' stroke='rgba(123,94,167,0.4)' stroke-width='1.5' fill='none'/><path d='M0,220 L12,220 L12,264 L24,264' stroke='rgba(123,94,167,0.4)' stroke-width='1.5' fill='none'/><path d='M0,308 L12,308 L12,264 L24,264' stroke='rgba(123,94,167,0.4)' stroke-width='1.5' fill='none'/></svg>";
+
+    // LEFT Quartas
+    html+="<div class='round'><div class='round-title'>Quartas</div>";
+    html+=pair(q[0][0],q[0][1],qRes[0],qStyle,qStyle);
+    html+=pair(q[1][0],q[1][1],qRes[1],qStyle,qStyle);
+    html+="</div>";
+
+    html+="<svg style='width:24px;min-height:360px;' viewBox='0 0 24 360' preserveAspectRatio='none'><path d='M0,88 L12,88 L12,180 L24,180' stroke='rgba(123,94,167,0.4)' stroke-width='1.5' fill='none'/><path d='M0,264 L12,264 L12,180 L24,180' stroke='rgba(123,94,167,0.4)' stroke-width='1.5' fill='none'/></svg>";
+
+    // LEFT Semi
+    html+="<div class='round'><div class='round-title'>Semifinal</div>";
+    html+=pair(semi[0][0],semi[0][1],sRes[0],sStyle,sStyle);
+    html+="</div>";
+
+    html+="<svg style='width:24px;min-height:360px;' viewBox='0 0 24 360' preserveAspectRatio='none'><path d='M0,180 L24,180' stroke='rgba(242,101,34,0.5)' stroke-width='1.5' fill='none'/></svg>";
+
+    // FINAL (centro)
+    html+="<div class='round'><div class='round-title'>Final</div>";
+    html+="<div class='trophy-box'><div style='font-size:2rem;margin-bottom:6px;'>🏆</div>";
+    if(fRes&&(fRes[0]>0||fRes[1]>0)){
+      var champ=fRes[0]>fRes[1]?final[0]:final[1];
+      html+="<div style='font-size:0.78rem;font-weight:700;color:#F26522;'>"+champ+"</div>";
+    } else {
+      html+="<div style='font-size:0.7rem;color:rgba(255,255,255,0.4);'>Grande Final</div>";
+      if(final[0]||final[1]){
+        html+="<div style='font-size:0.72rem;color:rgba(255,255,255,0.6);margin-top:6px;'>"+(final[0]||"?")+" vs "+(final[1]||"?")+"</div>";
+      }
+    }
+    html+="</div></div>";
+
+    html+="<svg style='width:24px;min-height:360px;' viewBox='0 0 24 360' preserveAspectRatio='none'><path d='M24,180 L0,180' stroke='rgba(242,101,34,0.5)' stroke-width='1.5' fill='none'/></svg>";
+
+    // RIGHT Semi
+    html+="<div class='round'><div class='round-title'>Semifinal</div>";
+    html+=pair(semi[1][0],semi[1][1],sRes[1],sStyle,sStyle);
+    html+="</div>";
+
+    html+="<svg style='width:24px;min-height:360px;' viewBox='0 0 24 360' preserveAspectRatio='none'><path d='M24,88 L12,88 L12,180 L0,180' stroke='rgba(123,94,167,0.4)' stroke-width='1.5' fill='none'/><path d='M24,264 L12,264 L12,180 L0,180' stroke='rgba(123,94,167,0.4)' stroke-width='1.5' fill='none'/></svg>";
+
+    // RIGHT Quartas
+    html+="<div class='round'><div class='round-title'>Quartas</div>";
+    html+=pair(q[2][0],q[2][1],qRes[2],qStyle,qStyle);
+    html+=pair(q[3][0],q[3][1],qRes[3],qStyle,qStyle);
+    html+="</div>";
+
+    html+="<svg style='width:24px;min-height:360px;' viewBox='0 0 24 360' preserveAspectRatio='none'><path d='M24,44 L12,44 L12,88 L0,88' stroke='rgba(123,94,167,0.4)' stroke-width='1.5' fill='none'/><path d='M24,132 L12,132 L12,88 L0,88' stroke='rgba(123,94,167,0.4)' stroke-width='1.5' fill='none'/><path d='M24,220 L12,220 L12,264 L0,264' stroke='rgba(123,94,167,0.4)' stroke-width='1.5' fill='none'/><path d='M24,308 L12,308 L12,264 L0,264' stroke='rgba(123,94,167,0.4)' stroke-width='1.5' fill='none'/></svg>";
+
+    // RIGHT Oitavas (4 matches)
+    html+="<div class='round'><div class='round-title'>Oitavas</div>";
+    html+=pair(s.right[0][0],s.right[0][1],oRes[4]);
+    html+=pair(s.right[1][0],s.right[1][1],oRes[5]);
+    html+=pair(s.right[2][0],s.right[2][1],oRes[6]);
+    html+=pair(s.right[3][0],s.right[3][1],oRes[7]);
+    html+="</div>";
+
+    html+="</div></div>";
+    document.getElementById("bracket").innerHTML=html;
+
+  }catch(e){
+    document.getElementById("bracket").innerHTML="<div style='padding:40px;color:rgba(255,255,255,0.4);text-align:center;'>Erro ao carregar: "+e.message+"</div>";
+  }
+}
+load();
+setInterval(load,120000);
+</script>E html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Chaveamento — Copa das Nações 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{--r:#7B5EA7;--rd:#5a4080;--rl:#a886d8;--g:#2EBD9A;--o:#F26522;--dk:#1a1220;--tx:#2d2040;--tl:#8a7fa0;--cr:#FAF7F2;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:var(--cr);color:var(--tx);}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:16px 48px;background:rgba(10,10,20,0.96);backdrop-filter:blur(12px);border-bottom:1px solid rgba(123,94,167,0.15);}
+.nlt{font-family:'Nunito',sans-serif;font-size:0.9rem;font-weight:700;color:#fff;line-height:1.1;}
+.nlt span{display:block;font-size:0.6rem;color:rgba(255,255,255,0.4);letter-spacing:0.1em;text-transform:uppercase;}
+.nav-links{display:flex;gap:4px;}
+.nl2{text-decoration:none;color:rgba(255,255,255,0.5);font-size:0.78rem;padding:6px 12px;border-radius:100px;}
+.nl2:hover,.nl2.on{color:#fff;background:rgba(255,255,255,0.08);}
+.nl2.on{color:var(--rl);}
+.hero{padding:100px 48px 40px;background:#0a0a14;}
+.htag{font-size:0.68rem;text-transform:uppercase;letter-spacing:0.15em;color:rgba(255,255,255,0.35);margin-bottom:8px;}
+.htitle{font-family:'Nunito',sans-serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:900;color:#fff;}
+.hsub{font-size:0.88rem;color:rgba(255,255,255,0.4);margin-top:8px;}
+.content{padding:40px 48px 80px;}
+/* BRACKET */
+.bracket-wrap{background:#0d0d18;border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:32px 24px;overflow-x:auto;}
+.bracket{display:flex;align-items:stretch;gap:0;min-width:900px;}
+.round{display:flex;flex-direction:column;justify-content:space-around;min-width:160px;padding:0 4px;}
+.round-title{font-size:0.65rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.3);text-align:center;margin-bottom:16px;}
+.match{display:flex;flex-direction:column;gap:0;position:relative;margin:4px 0;}
+.team{padding:8px 12px;font-size:0.78rem;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:all 0.3s;}
+.team:first-child{border-radius:8px 8px 0 0;border-bottom:1px solid rgba(255,255,255,0.05);}
+.team:last-child{border-radius:0 0 8px 8px;}
+.team.tbd{color:rgba(255,255,255,0.25);font-style:italic;}
+.team.winner{background:rgba(46,189,154,0.15);border-color:rgba(46,189,154,0.3);color:#fff;font-weight:600;}
+.connector{flex:1;display:flex;flex-direction:column;justify-content:space-around;padding:0 2px;}
+.conn-line{border-right:1px solid rgba(123,94,167,0.3);flex:1;}
+.center-col{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:100px;padding:0 8px;}
+.trophy-box{background:linear-gradient(135deg,rgba(242,101,34,0.2),rgba(123,94,167,0.2));border:2px solid rgba(242,101,34,0.4);border-radius:14px;padding:20px 14px;text-align:center;min-width:90px;}
+.phase-label{font-size:0.62rem;text-transform:uppercase;letter-spacing:0.1em;color:rgba(255,255,255,0.35);}
+.score-badge{display:inline-flex;gap:4px;margin-top:3px;font-size:0.7rem;font-weight:700;color:rgba(255,255,255,0.4);}
+/* Legend */
+.legend-item{display:flex;align-items:center;gap:6px;font-size:0.76rem;color:var(--tl);}
+footer{background:var(--dk);color:rgba(255,255,255,0.3);padding:24px 48px;display:flex;align-items:center;justify-content:space-between;font-size:0.76rem;}
+@media(max-width:900px){nav{padding:14px 20px;}.nav-links{display:none;}.hero,.content{padding-left:20px;padding-right:20px;}footer{flex-direction:column;gap:10px;padding:20px;}}
+
+@media(max-width:768px){
+  nav{padding:12px 16px !important;}
+  .navlinks,.nav-links{display:none !important;}
+  .hero,.page-hero{padding:80px 16px 28px !important;}
+  .content{padding:24px 16px 60px !important;}
+  footer{flex-direction:column !important;gap:10px !important;padding:20px !important;text-align:center !important;}
+  .g2,.g3{grid-template-columns:1fr !important;}
+  .card{padding:16px !important;}
+  table{font-size:0.8rem;}
+  th,td{padding:8px 10px !important;}
+}
+</style>
+</head>
+<body>
+<nav>
+  <a href="../copa-das-nacoes.html" style="text-decoration:none;">
+    <div class="nlt">Copa das Nações<span>2026 · Royal Tênis Clube</span></div>
+  </a>
+  <div class="nav-links">
+    <a href="calendario.html" class="nl2">📅 Calendário</a>
+    <a href="resultados.html" class="nl2">🏆 Resultados</a>
+    <a href="classificacao.html" class="nl2">📊 Classificação</a>
+    <a href="chaveamento.html" class="nl2 on">🎯 Chaveamento</a>
+    <a href="atletas.html" class="nl2">👥 Atletas</a>
+  </div>
+  <a href="admin.html" style="background:var(--r);color:#fff;padding:7px 18px;border-radius:100px;text-decoration:none;font-size:0.78rem;font-weight:500;">⚙️ Admin</a>
+</nav>
+
+<div class="hero">
+  <div class="htag">Copa das Nações 2026</div>
+  <h1 class="htitle">🎯 Chaveamento</h1>
+  <p class="hsub" id="status-msg">Aguardando conclusão da fase de grupos...</p>
+</div>
+
+<div class="content">
+  <div id="bracket-container">
+    <div style="text-align:center;padding:60px;color:var(--tl);">⏳ Carregando chaveamento...</div>
+  </div>
+  <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:20px;">
+    <div class="legend-item"><div style="width:12px;height:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:3px;"></div>Oitavas de Final</div>
+    <div class="legend-item"><div style="width:12px;height:12px;background:rgba(123,94,167,0.15);border:1px solid rgba(123,94,167,0.3);border-radius:3px;"></div>Quartas de Final</div>
+    <div class="legend-item"><div style="width:12px;height:12px;background:rgba(46,189,154,0.1);border:1px solid rgba(46,189,154,0.28);border-radius:3px;"></div>Semifinal</div>
+    <div class="legend-item"><div style="width:12px;height:12px;background:linear-gradient(135deg,rgba(242,101,34,0.2),rgba(123,94,167,0.2));border:1px solid rgba(242,101,34,0.4);border-radius:3px;"></div>Grande Final</div>
+  </div>
+</div>
+
+<footer>
+  <div>Royal Tênis Clube · Copa das Nações 2026</div>
+  <div id="upd" style="font-size:0.72rem;opacity:0.6;"></div>
+  <a href="../copa-das-nacoes.html" style="color:rgba(255,255,255,0.3);text-decoration:none;">← Voltar</a>
+</footer>
+
+<script>
+var SB="https://vfrjqkwdxjvggzkfxfen.supabase.co";
+var K="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZmcmpxa3dkeGp2Z2d6a2Z4ZmVuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxODcyNDcsImV4cCI6MjA5Mzc2MzI0N30.PaHe7kQL8DUs8gmt9Wk47qaz6CX5PLfbeuhv3OIdigU";
+function h(){return{"apikey":K,"Authorization":"Bearer "+K};}
+
+function calcStats(jogos){
+  var s={};
+  jogos.forEach(function(jogo){
+    var r=jogo.resultados&&jogo.resultados[0];
+    if(!r||(r.total_a===0&&r.total_b===0)) return;
+    var fase=jogo.fase;
+    if(!["Grupo A","Grupo B","Grupo C","Grupo D","Grupo E"].includes(fase)) return;
     var grp=fase.replace("Grupo ","");
     function ensure(nm){if(!s[nm])s[nm]={nome:nm,grupo:grp,j:0,v:0,gf:0,gc:0};}
     ensure(jogo.equipe_a); ensure(jogo.equipe_b);
