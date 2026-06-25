@@ -313,30 +313,30 @@ async function load(){
 
 function pais(nome){return nome?nome.replace(/^Equipe\s+/i,''):(nome||'');}
 var FLAGS={
-  'méxico':'🇲🇽','mexico':'🇲🇽',
-  'áfrica do sul':'🇿🇦','africa do sul':'🇿🇦',
-  'canadá':'🇨🇦','canada':'🇨🇦',
-  'suíça':'🇨🇭','suica':'🇨🇭',
   'brasil':'🇧🇷',
-  'marrocos':'🇲🇦',
-  'escócia':'🏴󠁧󠁢󠁳󠁣󠁴󠁿','escocia':'🏴󠁧󠁢󠁳󠁣󠁴󠁿',
+  'alemanha':'🇩🇪',
   'eua':'🇺🇸','estados unidos':'🇺🇸',
+  'suíça':'🇨🇭','suica':'🇨🇭','suiça':'🇨🇭',
+  'colômbia':'🇨🇴','colombia':'🇨🇴',
+  'portugal':'🇵🇹',
+  'austrália':'🇦🇺','australia':'🇦🇺',
+  'argentina':'🇦🇷',
+  'frança':'🇫🇷','franca':'🇫🇷',
   'holanda':'🇳🇱',
-  'japão':'🇯🇵','japao':'🇯🇵',
-  'bélgica':'🇧🇪','belgica':'🇧🇪',
-  'egito':'🇪🇬',
-  'irã':'🇮🇷','ira':'🇮🇷',
+  'inglaterra':'🏴󠁧󠁢󠁥󠁮󠁧󠁿',
   'espanha':'🇪🇸',
   'uruguai':'🇺🇾',
-  'frança':'🇫🇷','franca':'🇫🇷',
-  'portugal':'🇵🇹',
-  'colômbia':'🇨🇴','colombia':'🇨🇴',
-  'inglaterra':'🏴󠁧󠁢󠁥󠁮󠁧󠁿',
-  'costa de marfim':'🇨🇮',
-  'argentina':'🇦🇷',
-  'alemanha':'🇩🇪',
+  'japão':'🇯🇵','japao':'🇯🇵',
+  'áfrica do sul':'🇿🇦','africa do sul':'🇿🇦',
+  'bélgica':'🇧🇪','belgica':'🇧🇪',
+  'marrocos':'🇲🇦',
+  'canadá':'🇨🇦','canada':'🇨🇦',
+  'méxico':'🇲🇽','mexico':'🇲🇽',
   'noruega':'🇳🇴',
-  'austrália':'🇦🇺','australia':'🇦🇺'
+  'escócia':'🏴󠁧󠁢󠁳󠁣󠁴󠁿','escocia':'🏴󠁧󠁢󠁳󠁣󠁴󠁿',
+  'costa de marfim':'🇨🇮',
+  'irã':'🇮🇷','ira':'🇮🇷','irão':'🇮🇷',
+  'egito':'🇪🇬'
 };
 function flag(nome){if(!nome)return'';var p=pais(nome).toLowerCase();return FLAGS[p]||'🏳️';}
 function fp(nome){return flag(nome)+' '+pais(nome);}
