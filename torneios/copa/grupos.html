@@ -312,63 +312,34 @@ async function load(){
 }
 
 function pais(nome){return nome?nome.replace(/^Equipe\s+/i,''):(nome||'');}
-var FLAGS={
-  'brasil':'🇧🇷',
-  'alemanha':'🇩🇪',
-  'eua':'🇺🇸','estados unidos':'🇺🇸',
-  'suíça':'🇨🇭','suica':'🇨🇭','suiça':'🇨🇭',
-  'colômbia':'🇨🇴','colombia':'🇨🇴',
-  'portugal':'🇵🇹',
-  'austrália':'🇦🇺','australia':'🇦🇺',
-  'argentina':'🇦🇷',
-  'frança':'🇫🇷','franca':'🇫🇷',
-  'holanda':'🇳🇱',
-  'inglaterra':'🏴󠁧󠁢󠁥󠁮󠁧󠁿',
-  'espanha':'🇪🇸',
-  'uruguai':'🇺🇾',
-  'japão':'🇯🇵','japao':'🇯🇵',
-  'áfrica do sul':'🇿🇦','africa do sul':'🇿🇦',
-  'bélgica':'🇧🇪','belgica':'🇧🇪',
-  'marrocos':'🇲🇦',
-  'canadá':'🇨🇦','canada':'🇨🇦',
-  'méxico':'🇲🇽','mexico':'🇲🇽',
-  'noruega':'🇳🇴',
-  'escócia':'🏴󠁧󠁢󠁳󠁣󠁴󠁿','escocia':'🏴󠁧󠁢󠁳󠁣󠁴󠁿',
-  'costa de marfim':'🇨🇮',
-  'irã':'🇮🇷','ira':'🇮🇷','irão':'🇮🇷',
-  'egito':'🇪🇬'
-};
 function flag(nome){
   if(!nome) return '';
   var p=pais(nome);
-  // Normaliza: remove acentos para comparação
-  var norm=p.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-  // Tenta direto, depois sem acento
-  var r=FLAGS[p.toLowerCase()]||FLAGS[norm]||'🏳️';
-  // Fallback manual para casos problemáticos
-  if(r==='🏳️'){
-    if(/^eua$/i.test(p)) r='🇺🇸';
-    else if(/uruguai/i.test(p)) r='🇺🇾';
-    else if(/marrocos/i.test(p)) r='🇲🇦';
-    else if(/africa|áfrica/i.test(p)) r='🇿🇦';
-    else if(/belg/i.test(p)) r='🇧🇪';
-    else if(/fran[cç]/i.test(p)) r='🇫🇷';
-    else if(/sui[cç]/i.test(p)) r='🇨🇭';
-    else if(/colomb/i.test(p)) r='🇨🇴';
-    else if(/alemanha/i.test(p)) r='🇩🇪';
-    else if(/australia|austr[aá]lia/i.test(p)) r='🇦🇺';
-    else if(/canad/i.test(p)) r='🇨🇦';
-    else if(/portugal/i.test(p)) r='🇵🇹';
-    else if(/holanda/i.test(p)) r='🇳🇱';
-    else if(/espanha/i.test(p)) r='🇪🇸';
-    else if(/brasil/i.test(p)) r='🇧🇷';
-    else if(/argentina/i.test(p)) r='🇦🇷';
-    else if(/japo|japão/i.test(p)) r='🇯🇵';
-    else if(/inglat/i.test(p)) r='🏴󠁧󠁢󠁥󠁮󠁧󠁿';
-    else if(/uruguai/i.test(p)) r='🇺🇾';
-    else if(/espanha/i.test(p)) r='🇪🇸';
-  }
-  return r;
+  if(/^brasil$/i.test(p)) return'🇧🇷';
+  if(/^alemanha$/i.test(p)) return'🇩🇪';
+  if(/^eua$|estados unidos/i.test(p)) return'🇺🇸';
+  if(/sui[cç]/i.test(p)) return'🇨🇭';
+  if(/colomb/i.test(p)) return'🇨🇴';
+  if(/^portugal$/i.test(p)) return'🇵🇹';
+  if(/austral/i.test(p)) return'🇦🇺';
+  if(/^argentina$/i.test(p)) return'🇦🇷';
+  if(/fran[cç]/i.test(p)) return'🇫🇷';
+  if(/^holanda$/i.test(p)) return'🇳🇱';
+  if(/inglat/i.test(p)) return'🏴󠁧󠁢󠁥󠁮󠁧󠁿';
+  if(/^espanha$/i.test(p)) return'🇪🇸';
+  if(/uruguai/i.test(p)) return'🇺🇾';
+  if(/jap[ao]/i.test(p)) return'🇯🇵';
+  if(/frica.do.sul|africa.do.sul/i.test(p)) return'🇿🇦';
+  if(/belg/i.test(p)) return'🇧🇪';
+  if(/marrocos/i.test(p)) return'🇲🇦';
+  if(/canad/i.test(p)) return'🇨🇦';
+  if(/m[eé]xico/i.test(p)) return'🇲🇽';
+  if(/noruega/i.test(p)) return'🇳🇴';
+  if(/esc[oó]cia/i.test(p)) return'🏴󠁧󠁢󠁳󠁣󠁴󠁿';
+  if(/marfim/i.test(p)) return'🇨🇮';
+  if(/ir[aã]/i.test(p)) return'🇮🇷';
+  if(/egito/i.test(p)) return'🇪🇬';
+  return'🏳️';
 }
 function fp(nome){return flag(nome)+' '+pais(nome);}
 function sumPartidas(partidas){
