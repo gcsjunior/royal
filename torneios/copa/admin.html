@@ -1494,18 +1494,16 @@ async function getComboEquilibrado(jogo_id, equipe_a, equipe_b){
       });
     });
   }
-  // Escolhe combo com menor soma de partidas já jogadas
-  var best=null, bestScore=999;
-  COMBOS.forEach(function(combo){
-    var score=["Soma 7","Soma 9","Soma 11"].reduce(function(s,c){
-      return s+(count[equipe_a+":"+c]||0)+(count[equipe_b+":"+c]||0);
-    },0);
-    // Pondera: prefer combos onde as duplas jogaram menos
+  // Pontua cada combo pela soma de vezes que suas 2 categorias já jogaram (nas duas equipes)
+  var scored = COMBOS.map(function(combo){
     var s2=(count[equipe_a+":"+combo[0]]||0)+(count[equipe_a+":"+combo[1]]||0)+
            (count[equipe_b+":"+combo[0]]||0)+(count[equipe_b+":"+combo[1]]||0);
-    if(s2<bestScore){bestScore=s2;best=combo;}
+    return {combo:combo, score:s2};
   });
-  return best||COMBOS[Math.floor(Math.random()*3)];
+  // Menor pontuação = duplas que jogaram menos. Em empate, sorteia entre os melhores (dá variedade).
+  var minScore = Math.min.apply(null, scored.map(function(x){return x.score;}));
+  var melhores = scored.filter(function(x){return x.score===minScore;}).map(function(x){return x.combo;});
+  return melhores[Math.floor(Math.random()*melhores.length)];
 }
 
 async function sortearDuplasJogo(jogo_id, silent){
