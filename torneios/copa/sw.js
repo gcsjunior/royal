@@ -5,9 +5,10 @@
 
    IMPORTANTE: ao publicar uma nova versão das páginas, troque o número da versão
    abaixo (v1 -> v2 ...) para forçar a atualização do cache nas TVs/celulares. */
-const CACHE = 'copa-2026-v1';
+const CACHE = 'copa-2026-v2';
 
 const SHELL = [
+  'copa-das-nacoes.html',
   'calendario.html',
   'resultados.html',
   'grupos.html',
@@ -50,7 +51,7 @@ self.addEventListener('fetch', function (e) {
       return res;
     }).catch(function () {
       return caches.match(req).then(function (hit) {
-        return hit || caches.match('calendario.html');
+        return hit || caches.match('copa-das-nacoes.html');
       });
     })
   );
