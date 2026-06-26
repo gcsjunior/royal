@@ -175,6 +175,7 @@ function render(){
       const cA=ok?(ta>tb?"var(--g)":"var(--tl)"):"var(--tx)";
       const cB=ok?(tb>ta?"var(--g)":"var(--tl)"):"var(--tx)";
       const jenc=encodeURIComponent(JSON.stringify(j));
+      const sd=j.sorteio_duplas&&j.sorteio_duplas[0];
 
       html+=`<div class="card" style="margin-bottom:8px;padding:14px 16px;${ok?'cursor:pointer;':''}" ${ok?`onclick="openDetail('${jenc}')"`:''}>`;
 
@@ -198,7 +199,9 @@ function render(){
       }
       html+=`</div>`;
       html+=`<div style="text-align:left"><div style="font-weight:600;font-size:0.88rem;">${fp(j.equipe_b)}</div></div>`;
-      html+=`</div></div>`;
+      html+=`</div>`;
+      if(sd) html+=`<div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(0,0,0,0.06);text-align:center;font-size:0.74rem;color:var(--tl);">🎯 Duplas sorteadas: <strong style="color:var(--r);">${sd.categoria_1}</strong> · <strong style="color:var(--r);">${sd.categoria_2}</strong></div>`;
+      html+=`</div>`;
     }
   }
   el.innerHTML=html;
