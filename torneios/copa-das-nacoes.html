@@ -169,6 +169,9 @@
     .qa .lbl{font-size:0.82rem;font-weight:600;letter-spacing:0.01em;}
     @media(max-width:600px){.qa-grid{gap:10px;margin-top:28px;}.qa{padding:16px 8px;border-radius:13px;}.qa .ico{font-size:1.6rem;}.qa .lbl{font-size:0.72rem;}}
 
+    /* Esconde o Admin quando o site roda como app instalado (PWA) */
+    @media (display-mode: standalone){ .admin-link{display:none !important;} }
+    @media (display-mode: minimal-ui){ .admin-link{display:none !important;} }
   </style>
 </head>
 <body>
@@ -187,9 +190,12 @@
       <a href="copa/patrocinadores.html" class="snav-link">🤝 Patroc.</a>
       <a href="copa/fotos.html" class="snav-link">📸 Fotos</a>
     </div>
-    <button class="hamburger-copa" onclick="toggleMobileMenu()" aria-label="Menu">
-      <span></span><span></span><span></span>
-    </button>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <a href="copa/admin.html" class="admin-link" style="background:var(--royal,#7B5EA7);color:#fff;padding:8px 16px;border-radius:100px;text-decoration:none;font-size:0.78rem;font-weight:600;white-space:nowrap;">⚙️ Admin</a>
+      <button class="hamburger-copa" onclick="toggleMobileMenu()" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
   </div>
 </nav>
 <div class="mobile-menu" id="mobile-menu-copa">
@@ -376,7 +382,7 @@ function toggleMobileMenu(){
     <span class="fbrand">Royal Tênis Clube</span>
   </div>
   <div>© 2026 Royal Tênis Clube · Copa das Nações</div>
-  <div><a href="copa/admin.html" style="color:rgba(255,255,255,0.3);text-decoration:none;">⚙️ Admin</a></div>
+  <div><a href="copa/admin.html" class="admin-link" style="color:rgba(255,255,255,0.3);text-decoration:none;">⚙️ Admin</a></div>
 </footer>
 
 <!-- Rodapé Axion -->
@@ -394,6 +400,14 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(function (e) { console.log('SW não registrado:', e); });
   });
 }
+// Fallback iOS: esconde o Admin quando aberto como app instalado (navigator.standalone)
+(function(){
+  var isPWA = window.navigator.standalone === true ||
+              (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+  if(isPWA){
+    document.querySelectorAll('.admin-link').forEach(function(el){ el.style.display='none'; });
+  }
+})();
 </script>
 </body>
 </html>
