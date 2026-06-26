@@ -1,0 +1,17 @@
+{
+  "name": "Royal - Copa das Nações",
+  "short_name": "Royal - Copa das Nações",
+  "description": "Acompanhe a Copa das Nações 2026 do Royal Tênis Clube: calendário, equipes, resultados, classificação e fotos.",
+  "start_url": "/torneios/copa-das-nacoes.html",
+  "scope": "/torneios/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a0a14",
+  "theme_color": "#0a0a14",
+  "lang": "pt-BR",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
