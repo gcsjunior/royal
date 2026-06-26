@@ -174,10 +174,7 @@ function fil(){
       html+='</div>';
       html+='<div onclick="showAtletaFoto(this.dataset.nome,this.dataset.foto)" data-nome="'+a.nome.replace(/"/g,'&quot;')+'" data-foto="'+foto.replace(/"/g,'&quot;')+'" style="cursor:pointer;">';
       html+='<div style="font-size:0.88rem;font-weight:500;">'+a.nome+'</div>';
-      var _info='';
-      if(a.classe) _info+=a.classe+' Classe';
-      if(a.dupla){var _d=/^capit[aã]o$/i.test(a.dupla)?a.dupla:'Dupla '+a.dupla; _info+=(_info?' · ':'')+_d;}
-      html+='<div style="font-size:0.72rem;color:'+(cc[a.classe]||'var(--text-light)')+';">'+_info+'</div>';
+      html+='<div style="font-size:0.72rem;color:'+(cc[a.classe]||'var(--text-light)')+';">'+a.classe+' Classe'+(a.dupla?' · Dupla '+a.dupla:'')+'</div>';
       html+='</div></div>';
     });
     html+='</div>';
