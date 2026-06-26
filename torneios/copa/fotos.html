@@ -122,6 +122,12 @@ const API_KEY = "AIzaSyBH2vpObhXzEdqSs-S8oPsx-OGYHoX51AE";
 const DEFAULT_FOLDER_ID = "1DKxVIl4_BwbeCmTXaH5BJDrO2pqV-2QV";
 let PHOTOS = [], LB_IDX = 0;
 
+// Redimensiona o thumbnailLink que a API do Drive retorna (troca o sufixo =sNNN)
+function driveThumb(link, size) {
+  if (!link) return "";
+  return link.replace(/=s\d+(-[a-z0-9]+)?$/i, "=s" + size);
+}
+
 const SB_FOTOS = "https://vfrjqkwdxjvggzkfxfen.supabase.co";
 const K_FOTOS = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZmcmpxa3dkeGp2Z2d6a2Z4ZmVuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxODcyNDcsImV4cCI6MjA5Mzc2MzI0N30.PaHe7kQL8DUs8gmt9Wk47qaz6CX5PLfbeuhv3OIdigU";
 
@@ -141,7 +147,7 @@ async function getFolderIds() {
 }
 
 async function fetchFolderPhotos(folderId) {
-  const url = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+mimeType+contains+'image/'+and+trashed=false&key=${API_KEY}&fields=files(id,name,mimeType)&orderBy=name&pageSize=100`;
+  const url = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+mimeType+contains+'image/'+and+trashed=false&key=${API_KEY}&fields=files(id,name,mimeType,thumbnailLink)&orderBy=name&pageSize=100`;
   const res = await fetch(url);
   const data = await res.json();
   return data.files || [];
@@ -175,7 +181,7 @@ function renderGallery() {
   const el = document.getElementById("gallery");
   el.innerHTML = '<div class="gallery-grid">' +
     PHOTOS.map((f, i) => {
-      const thumb = `https://www.googleapis.com/drive/v3/files/${f.id}?alt=media&key=${API_KEY}`;
+      const thumb = driveThumb(f.thumbnailLink, 400);
       const dl = `https://drive.google.com/uc?export=download&id=${f.id}`;
       const name = f.name.replace(/\.[^.]+$/, '');
       return `<div class="photo-card" onclick="openLb(${i})">
@@ -208,7 +214,7 @@ function lbNav(dir) {
 
 function updateLb() {
   const f = PHOTOS[LB_IDX];
-  const full = `https://www.googleapis.com/drive/v3/files/${f.id}?alt=media&key=${API_KEY}`;
+  const full = driveThumb(f.thumbnailLink, 1600);
   const dl = `https://drive.google.com/uc?export=download&id=${f.id}`;
   document.getElementById("lb-img").src = full;
   document.getElementById("lb-name").textContent = f.name;
