@@ -175,7 +175,7 @@ function renderGallery() {
   const el = document.getElementById("gallery");
   el.innerHTML = '<div class="gallery-grid">' +
     PHOTOS.map((f, i) => {
-      const thumb = `https://drive.google.com/thumbnail?id=${f.id}&sz=w400`;
+      const thumb = `https://lh3.googleusercontent.com/d/${f.id}=w400`;
       const dl = `https://drive.google.com/uc?export=download&id=${f.id}`;
       const name = f.name.replace(/\.[^.]+$/, '');
       return `<div class="photo-card" onclick="openLb(${i})">
@@ -208,7 +208,7 @@ function lbNav(dir) {
 
 function updateLb() {
   const f = PHOTOS[LB_IDX];
-  const full = `https://drive.google.com/thumbnail?id=${f.id}&sz=w1600`;
+  const full = `https://lh3.googleusercontent.com/d/${f.id}=w1600`;
   const dl = `https://drive.google.com/uc?export=download&id=${f.id}`;
   document.getElementById("lb-img").src = full;
   document.getElementById("lb-name").textContent = f.name;
