@@ -5,7 +5,7 @@
 
    IMPORTANTE: ao publicar uma nova versão das páginas, troque o número da versão
    abaixo (v1 -> v2 ...) para forçar a atualização do cache nas TVs/celulares. */
-const CACHE = 'copa-2026-v2';
+const CACHE = 'copa-2026-v3';
 
 const SHELL = [
   'copa-das-nacoes.html',
