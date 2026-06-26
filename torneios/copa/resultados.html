@@ -88,14 +88,21 @@ function sumP(partidas){
   return {ta,tb};
 }
 
+let lastHtml=null;
 async function load(){
-  const r=await fetch(SB+"/rest/v1/jogos?select=*,resultados(*),sorteio_duplas(*)&order=data_hora.asc",{headers:{"apikey":K,"Authorization":"Bearer "+K}});
-  const jogos=await r.json();
+  let jogos;
+  try{
+    const r=await fetch(SB+"/rest/v1/jogos?select=*,resultados(*),sorteio_duplas(*)&order=data_hora.asc",{headers:{"apikey":K,"Authorization":"Bearer "+K}});
+    jogos=await r.json();
+  }catch(e){ markUpdate(false); return; }
+  if(!Array.isArray(jogos)){ markUpdate(false); return; }
   const com=jogos.filter(j=>{const sp=sumP(j.resultados);return sp.ta>0||sp.tb>0;});
   const el=document.getElementById("ct");
-  if(!com.length){el.innerHTML='<div class="empty"><div class="icon">🎾</div>Nenhum resultado ainda. Os jogos ainda não começaram!</div>';return;}
+  let html;
+  if(!com.length){ html='<div class="empty"><div class="icon">🎾</div>Nenhum resultado ainda. Os jogos ainda não começaram!</div>'; }
+  else{
   const g={};com.forEach(j=>{if(!g[j.fase])g[j.fase]=[];g[j.fase].push(j);});
-  el.innerHTML=Object.entries(g).map(([fase,lista])=>
+  html=Object.entries(g).map(([fase,lista])=>
     '<div style="margin-bottom:36px;"><span class="stag">'+fase+'</span>'+
     lista.map(j=>{
       const partidas=(j.resultados||[]).slice().sort((a,b)=>a.numero_partida-b.numero_partida);
@@ -135,6 +142,32 @@ async function load(){
     }).join('')
     +'</div>'
   ).join('');
+  }
+  if(html!==lastHtml){ el.innerHTML=html; lastHtml=html; }
+  markUpdate(true);
 }
+
+function markUpdate(ok){
+  if(!document.getElementById('lastUpdStyle')){
+    const st=document.createElement('style');
+    st.id='lastUpdStyle';
+    st.textContent='@keyframes pulseDot{0%{box-shadow:0 0 0 0 rgba(46,189,154,0.5);}70%{box-shadow:0 0 0 8px rgba(46,189,154,0);}100%{box-shadow:0 0 0 0 rgba(46,189,154,0);}}';
+    document.head.appendChild(st);
+  }
+  let ind=document.getElementById('lastUpd');
+  if(!ind){
+    ind=document.createElement('div');
+    ind.id='lastUpd';
+    ind.style.cssText='position:fixed;bottom:16px;right:18px;z-index:300;font-family:DM Sans,sans-serif;font-size:0.74rem;color:#fff;background:rgba(10,10,20,0.82);padding:7px 14px;border-radius:100px;display:flex;align-items:center;gap:8px;box-shadow:0 3px 12px rgba(0,0,0,0.25);';
+    document.body.appendChild(ind);
+  }
+  const t=new Date().toLocaleTimeString('pt-BR');
+  const cor=ok?'#2EBD9A':'#dc2626';
+  const anim=ok?'animation:pulseDot 1.8s infinite;':'';
+  ind.innerHTML='<span style="width:8px;height:8px;border-radius:50%;background:'+cor+';display:inline-block;'+anim+'"></span><span>'+(ok?'Atualizado':'Sem conexão')+' '+t+'</span>';
+}
+
 load();
+setInterval(load,15000);
+console.log('resultados.html — auto-refresh 15s ✅');
 </script></body></html>
