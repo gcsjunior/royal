@@ -1494,79 +1494,121 @@ async function getComboEquilibrado(jogo_id, equipe_a, equipe_b){
       });
     });
   }
-  // Pontua cada combo pela soma de vezes que suas 2 categorias já jogaram (nas duas equipes)
+  // Uso GLOBAL de cada combo no torneio inteiro (para diversificar e evitar repetições)
+  function chaveCombo(a,b){ return CATS.filter(function(c){return c===a||c===b;}).join("|"); }
+  var usoGlobal={};
+  COMBOS.forEach(function(c){ usoGlobal[c[0]+"|"+c[1]]=0; });
+  if(Array.isArray(all)){
+    all.forEach(function(s){
+      var k=chaveCombo(s.categoria_1,s.categoria_2);
+      if(usoGlobal[k]!==undefined) usoGlobal[k]++;
+    });
+  }
+  // Pontua cada combo: 1) quantas vezes as 2 duplas já jogaram NESSAS equipes  2) uso global do combo
   var scored = COMBOS.map(function(combo){
     var s2=(count[equipe_a+":"+combo[0]]||0)+(count[equipe_a+":"+combo[1]]||0)+
            (count[equipe_b+":"+combo[0]]||0)+(count[equipe_b+":"+combo[1]]||0);
-    return {combo:combo, score:s2};
+    return {combo:combo, score:s2, uso:(usoGlobal[combo[0]+"|"+combo[1]]||0)};
   });
-  // Menor pontuação = duplas que jogaram menos. Em empate, sorteia entre os melhores (dá variedade).
+  // 1º critério: duplas que MENOS jogaram nessas equipes (garante o rodízio dentro do grupo)
   var minScore = Math.min.apply(null, scored.map(function(x){return x.score;}));
-  var melhores = scored.filter(function(x){return x.score===minScore;}).map(function(x){return x.combo;});
-  return melhores[Math.floor(Math.random()*melhores.length)];
+  var nivel1 = scored.filter(function(x){return x.score===minScore;});
+  // 2º critério (desempate): combo MENOS usado no torneio todo (diversifica os sorteios)
+  var minUso = Math.min.apply(null, nivel1.map(function(x){return x.uso;}));
+  var nivel2 = nivel1.filter(function(x){return x.uso===minUso;}).map(function(x){return x.combo;});
+  // 3º critério: se ainda houver empate, sorteia entre os finalistas
+  return nivel2[Math.floor(Math.random()*nivel2.length)];
 }
 
+var sorteioBusy=false; // trava: impede sorteios simultâneos (clique duplo / lote+individual)
+
 async function sortearDuplasJogo(jogo_id, silent){
-  var jg=null;
-  var r=await fetch(SB+"/rest/v1/jogos?select=*&id=eq."+jogo_id,{headers:h()});
-  var arr=await r.json();
-  if(Array.isArray(arr)&&arr.length) jg=arr[0];
-  if(!jg){if(!silent)alert("Jogo não encontrado.");return;}
-
-  var combo=await getComboEquilibrado(jogo_id, jg.equipe_a, jg.equipe_b);
-  var cat3=CATS.filter(function(c){return c!==combo[0]&&c!==combo[1];})[0];
-
   if(!silent){
-    var msg="Sorteio sugerido para "+jg.equipe_a+" vs "+jg.equipe_b+":\n\n"+
-      "✓ "+combo[0]+" joga\n✓ "+combo[1]+" joga\n😴 "+cat3+" descansa\n\nConfirmar?";
-    if(!confirm(msg)) return;
+    if(sorteioBusy) return;   // já tem um sorteio rodando: ignora o clique
+    sorteioBusy=true;
   }
+  try{
+    var jg=null;
+    var r=await fetch(SB+"/rest/v1/jogos?select=*&id=eq."+jogo_id,{headers:h()});
+    var arr=await r.json();
+    if(Array.isArray(arr)&&arr.length) jg=arr[0];
+    if(!jg){if(!silent)alert("Jogo não encontrado.");return;}
 
-  // Verifica se já existe e salva
-  var re=await fetch(SB+"/rest/v1/sorteio_duplas?jogo_id=eq."+jogo_id,{headers:h()});
-  var existing=await re.json();
-  var body={jogo_id:jogo_id,categoria_1:combo[0],categoria_2:combo[1]};
-  if(Array.isArray(existing)&&existing.length){
-    await fetch(SB+"/rest/v1/sorteio_duplas?id=eq."+existing[0].id,{method:"PATCH",headers:h(),body:JSON.stringify(body)});
-  } else {
-    await fetch(SB+"/rest/v1/sorteio_duplas",{method:"POST",headers:h(),body:JSON.stringify(body)});
+    // Verifica se este jogo já tem sorteio
+    var re=await fetch(SB+"/rest/v1/sorteio_duplas?jogo_id=eq."+jogo_id,{headers:h()});
+    var existing=await re.json();
+    var jaTem=(Array.isArray(existing)&&existing.length)?existing[0]:null;
+
+    // Em lote nunca refaz um jogo que já tem sorteio
+    if(jaTem && silent) return;
+
+    var combo=await getComboEquilibrado(jogo_id, jg.equipe_a, jg.equipe_b);
+    var cat3=CATS.filter(function(c){return c!==combo[0]&&c!==combo[1];})[0];
+
+    if(!silent){
+      var msg;
+      if(jaTem){
+        msg="⚠️ Este jogo JÁ TEM duplas sorteadas:\n\n   "+jaTem.categoria_1+" + "+jaTem.categoria_2+"\n\n"+
+          "Novo sorteio sugerido para "+jg.equipe_a+" vs "+jg.equipe_b+":\n"+
+          "✓ "+combo[0]+"\n✓ "+combo[1]+"\n😴 "+cat3+" descansa\n\nSubstituir o sorteio atual?";
+      } else {
+        msg="Sorteio para "+jg.equipe_a+" vs "+jg.equipe_b+":\n\n"+
+          "✓ "+combo[0]+" joga\n✓ "+combo[1]+" joga\n😴 "+cat3+" descansa\n\nConfirmar?";
+      }
+      if(!confirm(msg)) return;
+    }
+
+    var body={jogo_id:jogo_id,categoria_1:combo[0],categoria_2:combo[1]};
+    if(jaTem){
+      await fetch(SB+"/rest/v1/sorteio_duplas?id=eq."+jaTem.id,{method:"PATCH",headers:h(),body:JSON.stringify(body)});
+    } else {
+      await fetch(SB+"/rest/v1/sorteio_duplas",{method:"POST",headers:h(),body:JSON.stringify(body)});
+    }
+    if(!silent){loadSorteioDuplas();loadR();}
+  } finally {
+    if(!silent) sorteioBusy=false;
   }
-  if(!silent){loadSorteioDuplas();loadR();}
 }
 
 document.getElementById("btnSortearDuplas").addEventListener("click",async function(){
-  var r=await fetch(SB+"/rest/v1/jogos?select=*&order=fase.asc,data_hora.asc",{headers:h()});
-  var jogos=await r.json();
-  if(!Array.isArray(jogos)||!jogos.length){alert("Nenhum jogo cadastrado.");return;}
-  var fases=jogos; // sortear duplas para todos os jogos
-  if(!fases.length){alert("Nenhum jogo cadastrado.");return;}
-
-  // Buscar sorteios já existentes
-  var rs=await fetch(SB+"/rest/v1/sorteio_duplas?select=jogo_id",{headers:h()});
-  var jaFeitos=await rs.json();
-  var jaFeitosSet=new Set(Array.isArray(jaFeitos)?jaFeitos.map(function(s){return s.jogo_id;}):[]);
-  var pendentes=fases.filter(function(j){return !jaFeitosSet.has(j.id);});
-
-  if(!pendentes.length){
-    alert("✅ Todos os jogos já têm duplas sorteadas!\nUse o botão 🔄 Ressortear em cada jogo individualmente se quiser refazer algum.");
-    return;
-  }
-
-  var msg="Sortear duplas para os "+pendentes.length+" jogo(s) ainda pendentes?";
-  if(jaFeitosSet.size>0) msg+="\n\n("+jaFeitosSet.size+" jogo(s) já sorteados serão mantidos)";
-  msg+="\n\nO sistema vai distribuir automaticamente as categorias.";
-  if(!confirm(msg)) return;
-
+  if(sorteioBusy) return;            // trava: não roda se já houver sorteio em andamento
+  sorteioBusy=true;
   var btn=document.getElementById("btnSortearDuplas");
-  btn.disabled=true; btn.textContent="⏳ Sorteando...";
-  for(var i=0;i<pendentes.length;i++){
-    await sortearDuplasJogo(pendentes[i].id, true);
-    await new Promise(function(r){setTimeout(r,150);});
+  try{
+    var r=await fetch(SB+"/rest/v1/jogos?select=*&order=fase.asc,data_hora.asc",{headers:h()});
+    var jogos=await r.json();
+    if(!Array.isArray(jogos)||!jogos.length){alert("Nenhum jogo cadastrado.");return;}
+    var fases=jogos; // sortear duplas para todos os jogos
+    if(!fases.length){alert("Nenhum jogo cadastrado.");return;}
+
+    // Buscar sorteios já existentes
+    var rs=await fetch(SB+"/rest/v1/sorteio_duplas?select=jogo_id",{headers:h()});
+    var jaFeitos=await rs.json();
+    var jaFeitosSet=new Set(Array.isArray(jaFeitos)?jaFeitos.map(function(s){return s.jogo_id;}):[]);
+    var pendentes=fases.filter(function(j){return !jaFeitosSet.has(j.id);});
+
+    if(!pendentes.length){
+      alert("✅ Todos os jogos já têm duplas sorteadas!\nUse o botão 🔄 Ressortear em cada jogo individualmente se quiser refazer algum.");
+      return;
+    }
+
+    var msg="Sortear duplas para os "+pendentes.length+" jogo(s) ainda pendentes?";
+    if(jaFeitosSet.size>0) msg+="\n\n("+jaFeitosSet.size+" jogo(s) já sorteados serão mantidos)";
+    msg+="\n\nO sistema vai distribuir automaticamente as categorias.";
+    if(!confirm(msg)) return;
+
+    btn.disabled=true; btn.textContent="⏳ Sorteando...";
+    for(var i=0;i<pendentes.length;i++){
+      await sortearDuplasJogo(pendentes[i].id, true);
+      await new Promise(function(r){setTimeout(r,150);});
+    }
+    alert("✅ Sorteio concluído! "+pendentes.length+" jogos sorteados.");
+    loadSorteioDuplas();
+    loadR();
+  } finally {
+    sorteioBusy=false;
+    btn.disabled=false; btn.textContent="🎯 Sortear Todas";
   }
-  btn.disabled=false; btn.textContent="🎯 Sortear Todas";
-  alert("✅ Sorteio concluído! "+pendentes.length+" jogos sorteados.");
-  loadSorteioDuplas();
-  loadR();
 });
 
 
