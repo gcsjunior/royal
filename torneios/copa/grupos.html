@@ -561,7 +561,28 @@ function getRankingGeral(stats, jogos, equipes){
 
 function getSeeds(stats,jogos,equipes){
   var rankingGeral=getRankingGeral(stats,jogos,equipes);
-  var all16=rankingGeral.filter(function(t){return t.j>=3;}).slice(0,16);
+  var jogosGrupos=(jogos||[]).filter(function(j){return j.fase&&j.fase.startsWith('Grupo');});
+
+  // Agrupa por grupo e ordena cada grupo pelos critérios de desempate
+  var porGrupo={};
+  rankingGeral.forEach(function(t){ if(t.grupo){(porGrupo[t.grupo]=porGrupo[t.grupo]||[]).push(t);} });
+  var grupos=Object.keys(porGrupo).sort();
+  grupos.forEach(function(g){ porGrupo[g]=sortRows(porGrupo[g],jogosGrupos); });
+
+  // Colocados por posição (0=1º, 1=2º, 2=3º, 3=4º). Grupos de 3 times não têm 4º.
+  function colocados(pos){ return grupos.map(function(g){return porGrupo[g][pos]||null;}).filter(Boolean); }
+
+  // Seeds em camadas: 1ºs colocados (1-5) → 2ºs (6-10) → 3ºs (11-15) → melhor 4º (16)
+  var primeiros=sortRows(colocados(0),jogosGrupos);
+  var segundos =sortRows(colocados(1),jogosGrupos);
+  var terceiros=sortRows(colocados(2),jogosGrupos);
+  var quartos  =sortRows(colocados(3),jogosGrupos); // só grupos de 4 entram aqui
+  var melhor4  =quartos.length?quartos[0]:null;
+
+  var ordenados=primeiros.concat(segundos,terceiros);
+  if(melhor4) ordenados.push(melhor4);
+
+  var all16=ordenados.slice(0,16);
   while(all16.length<16) all16.push(null);
   function nm(i){return all16[i]?all16[i].nome:null;}
   return{
