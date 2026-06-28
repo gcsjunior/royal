@@ -1729,80 +1729,48 @@ async function loadMata(){
     rr.forEach(function(r){ if(!resMap[r.jogo_id]) resMap[r.jogo_id]=[]; resMap[r.jogo_id].push(r); });
     rj.forEach(function(j){ j.resultados = resMap[j.id]||[]; });
 
-    // OITAVAS: vêm diretamente do banco (pares já fixos)
-    // OITAVAS: direto do banco, ordenadas por data_hora e quadra
-    var oitavasBD = rj.filter(function(j){ return j.fase==='Oitavas'; })
-      .sort(function(a,b){
-        var da=new Date(a.data_hora), db=new Date(b.data_hora);
-        if(da-db!==0) return da-db;
-        return parseInt(a.quadra||0)-parseInt(b.quadra||0);
-      });
-    var oitavas = oitavasBD.map(function(j){ return [j.equipe_a, j.equipe_b]; });
+    // Confrontos vêm SEMPRE do banco (fonte da verdade), ordenados por data/quadra.
+    // Cada fase do mata-mata é cadastrada manualmente, então a tela nunca embaralha a chave.
+    function jogosDaFase(fase){
+      return rj.filter(function(j){ return j.fase===fase; })
+        .sort(function(a,b){
+          var da=new Date(a.data_hora), db=new Date(b.data_hora);
+          if(da-db!==0) return da-db;
+          return parseInt(a.quadra||0)-parseInt(b.quadra||0);
+        });
+    }
 
-    function w(t1,t2){ return winnerOf(rj,t1,t2); }
-
-    // VENCEDORES das oitavas em ordem
-    var v = oitavasBD.map(function(j){ return w(j.equipe_a, j.equipe_b); });
-    // v[0]..v[7] = vencedores das 8 oitavas em ordem de data/quadra
-
-    // QUARTAS: mesmo pareamento do bracket
-    // oitava[0]×oitava[1] → QF1, oitava[2]×oitava[3] → QF2
-    // oitava[4]×oitava[5] → QF3, oitava[6]×oitava[7] → QF4
-    var quartas=[[v[0],v[1]],[v[2],v[3]],[v[4],v[5]],[v[6],v[7]]];
-    var wq=quartas.map(function(p){ return w(p[0],p[1]); });
-
-    // SEMIS: QF1 vs QF2, QF3 vs QF4
-    var semis=[[wq[0],wq[1]],[wq[2],wq[3]]];
-    var ws=semis.map(function(p){ return w(p[0],p[1]); });
-
-    // FINAL
-    var final_=[[ws[0],ws[1]]];
-
-    var fasesPares = [
-      {fase:'Oitavas', pares:oitavas},
-      {fase:'Quartas', pares:quartas},
-      {fase:'Semi', pares:semis},
-      {fase:'Final', pares:final_}
-    ];
+    var oitavasBD = jogosDaFase('Oitavas');
 
     var html='';
-    fasesPares.forEach(function(fp){
-      var todosPares = fp.pares.filter(function(p){return p[0]&&p[1];});
-      if(!todosPares.length) return;
+    FASES_ORDEM.forEach(function(fase){
+      var jogosFase = jogosDaFase(fase);
+      if(!jogosFase.length) return;
 
       html+='<div style="margin-bottom:28px;">';
-      html+='<div style="font-size:0.7rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--tl);margin-bottom:10px;">'+FASES_LABEL[fp.fase]+'</div>';
+      html+='<div style="font-size:0.7rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--tl);margin-bottom:10px;">'+FASES_LABEL[fase]+'</div>';
 
-      fp.pares.forEach(function(par,idx){
-        var t1=par[0], t2=par[1];
-        if(!t1&&!t2) return;
+      jogosFase.forEach(function(jogo){
+        var t1=jogo.equipe_a, t2=jogo.equipe_b;
+        var res=sumP(jogo.resultados||[]);
+        var hasRes=res&&(res.ta>0||res.tb>0);
+        var winner=hasRes?(res.ta>res.tb?t1:t2):null;
 
-        // Buscar jogo existente
-        var jogo = rj.find(function(x){
-          return x.fase===fp.fase&&((x.equipe_a===t1&&x.equipe_b===t2)||(x.equipe_a===t2&&x.equipe_b===t1));
-        });
-        var res = jogo ? sumP(jogo.resultados||[]) : null;
-        var hasRes = res&&(res.ta>0||res.tb>0);
-        var winner = hasRes ? (res.ta>res.tb?t1:t2) : null;
-
-        var t1disp = t1?t1.replace('Equipe ',''):'A definir';
-        var t2disp = t2?t2.replace('Equipe ',''):'A definir';
+        var t1disp=t1?t1.replace('Equipe ',''):'A definir';
+        var t2disp=t2?t2.replace('Equipe ',''):'A definir';
 
         html+='<div class="card" style="margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">';
         html+='<div style="flex:1;">';
         html+='<div style="font-weight:600;">'+t1disp+' vs '+t2disp+'</div>';
         if(hasRes){
           html+='<div style="font-size:0.78rem;color:#1a9b7c;margin-top:2px;">✓ '+res.ta+' × '+res.tb+' — Vencedor: '+(winner?winner.replace('Equipe ',''):'—')+'</div>';
-        } else if(t1&&t2) {
+        } else {
           html+='<div style="font-size:0.76rem;color:var(--tl);margin-top:2px;">Aguardando resultado</div>';
         }
         html+='</div>';
 
-        if(t1&&t2){
-          var jid = jogo?jogo.id:'';
-          html+='<button class="btn bp" style="padding:5px 12px;font-size:0.76rem;" '+
-            'onclick="openMataModal(\''+fp.fase+'\',\''+t1+'\',\''+t2+'\',\''+jid+'\')">'+(hasRes?'✏ Editar':'+ Lançar')+'</button>';
-        }
+        html+='<button class="btn bp" style="padding:5px 12px;font-size:0.76rem;" '+
+          'onclick="openMataModal(\''+fase+'\',\''+t1+'\',\''+t2+'\',\''+jogo.id+'\')">'+(hasRes?'✏ Editar':'+ Lançar')+'</button>';
         html+='</div>';
       });
       html+='</div>';
@@ -1818,7 +1786,7 @@ async function loadMata(){
       btnWrap.style.display = (gruposOk && !temOitavas) ? '' : 'none';
     }
 
-    el.innerHTML = html || '<div style="text-align:center;padding:40px;color:var(--tl);">Aguardando oitavas para calcular próximas fases...</div>';
+    el.innerHTML = html || '<div style="text-align:center;padding:40px;color:var(--tl);">Aguardando cadastro dos confrontos do mata-mata...</div>';
   }catch(e){
     el.innerHTML='<div style="color:#dc2626;padding:20px;">Erro: '+e.message+'</div>';
   }
@@ -1867,10 +1835,10 @@ async function gerarOitavas(){
     var list=Object.keys(s).map(function(nome){
       var e=s[nome];
       return{nome:nome,v:e.v,gf:e.gf,gc:e.gc,gm:e.gm,gs:e.gs};
-    }).filter(function(t){return t.j>=3||s[t.nome].j>=3;});
+    }).filter(function(t){return t.j>=2||s[t.nome].j>=2;});
 
     // Remontar com j correto
-    list=Object.keys(s).filter(function(n){return s[n].j>=3;}).map(function(n){
+    list=Object.keys(s).filter(function(n){return s[n].j>=2;}).map(function(n){
       return{nome:n,v:s[n].v,gf:s[n].gf,gc:s[n].gc,gm:s[n].gm,gs:s[n].gs,j:s[n].j};
     });
 
@@ -1896,14 +1864,14 @@ async function gerarOitavas(){
 
     // Chaveamento: L=[0×15, 7×8, 4×11, 3×12] R=[2×13, 5×10, 6×9, 1×14]
     var oitavasParas=[
-      {a:nm(0), b:nm(15), q:'1', h:'2026-06-20T18:30:00-03:00'},
-      {a:nm(7), b:nm(8),  q:'2', h:'2026-06-20T18:30:00-03:00'},
-      {a:nm(4), b:nm(11), q:'3', h:'2026-06-20T18:30:00-03:00'},
-      {a:nm(3), b:nm(12), q:'4', h:'2026-06-20T18:30:00-03:00'},
-      {a:nm(2), b:nm(13), q:'5', h:'2026-06-20T18:30:00-03:00'},
-      {a:nm(5), b:nm(10), q:'1', h:'2026-06-20T20:35:00-03:00'},
-      {a:nm(6), b:nm(9),  q:'2', h:'2026-06-20T20:35:00-03:00'},
-      {a:nm(1), b:nm(14), q:'3', h:'2026-06-20T20:35:00-03:00'},
+      {a:nm(0), b:nm(15), q:'1', h:'2026-06-27T18:40:00-03:00'},
+      {a:nm(7), b:nm(8),  q:'2', h:'2026-06-27T18:40:00-03:00'},
+      {a:nm(4), b:nm(11), q:'3', h:'2026-06-27T18:40:00-03:00'},
+      {a:nm(3), b:nm(12), q:'4', h:'2026-06-27T18:40:00-03:00'},
+      {a:nm(2), b:nm(13), q:'5', h:'2026-06-27T18:40:00-03:00'},
+      {a:nm(5), b:nm(10), q:'1', h:'2026-06-27T20:40:00-03:00'},
+      {a:nm(6), b:nm(9),  q:'2', h:'2026-06-27T20:40:00-03:00'},
+      {a:nm(1), b:nm(14), q:'3', h:'2026-06-27T20:40:00-03:00'},
     ];
 
     // Confirmar com o usuário
