@@ -107,6 +107,7 @@ tr.possivel td{background:rgba(242,101,34,0.03);}
   <a href="../copa-das-nacoes.html" style="color:rgba(255,255,255,0.3);text-decoration:none;">← Voltar</a>
 </footer>
 
+<script src="/torneios/copa/dados/copa-estatico.js"></script>
 <script>
 var SB="https://vfrjqkwdxjvggzkfxfen.supabase.co";
 var K="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZmcmpxa3dkeGp2Z2d6a2Z4ZmVuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxODcyNDcsImV4cCI6MjA5Mzc2MzI0N30.PaHe7kQL8DUs8gmt9Wk47qaz6CX5PLfbeuhv3OIdigU";
@@ -130,7 +131,7 @@ document.querySelectorAll(".gtab").forEach(function(b){
 function calcStats(jogos){
   var s={};
   jogos.forEach(function(jogo){
-    var r=jogo.resultados&&jogo.resultados[0];
+    var r=jogo.resultados&&__agg(jogo);
     if(!r||(r.total_a===0&&r.total_b===0)) return;
     var fase=jogo.fase;
     if(!GRUPOS_VALIDOS.includes(fase)) return;
@@ -163,8 +164,8 @@ function sortTeams(list,jogos){
     if(b.gf!==a.gf) return b.gf-a.gf;
     // confronto direto
     var jogo=jogos.find(function(j){return(j.equipe_a===a.nome&&j.equipe_b===b.nome)||(j.equipe_a===b.nome&&j.equipe_b===a.nome);});
-    if(jogo&&jogo.resultados&&jogo.resultados[0]){
-      var r=jogo.resultados[0];
+    if(jogo&&jogo.resultados&&__agg(jogo)){
+      var r=__agg(jogo);
       var ga=jogo.equipe_a===a.nome?r.total_a:r.total_b;
       var gb=jogo.equipe_a===b.nome?r.total_a:r.total_b;
       if(ga!==gb) return gb-ga;
